@@ -1,5 +1,16 @@
-* @nir-gitgoat-dev/JustABusiness
-* 
+##############################################################
+#
+# List of approvers/reviewers for Keptn examples
+#
+##############################################################
+#
+# Get in touch with us via the Keptn Community
+#  https://github.com/keptn/community
+# 
+#
+# Learn about CODEOWNERS file format: 
+#  https://help.github.com/en/articles/about-code-owners
+#
 
-* @nir-gitgoat-dev/KhangPynamo
-*
+# These owners will be the default owners for everything in the repo.
+* @KhangLeonardo
