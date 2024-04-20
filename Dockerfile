@@ -8,8 +8,6 @@ COPY --chown=node:node package*.json ./
 
 RUN npm ci
 
-# USER node
-
 ###################
 # 'BUILD' FOR PRODUCTION
 ###################
@@ -20,5 +18,3 @@ COPY --chown=node:node --from=development ./node_modules ./node_modules
 COPY --chown=node:node . .
 
 CMD ["npm", "run", "start:dev"]
-
-# USER node

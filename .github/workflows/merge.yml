@@ -1,0 +1,22 @@
+name: Enforce Merge Rule
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  enforce-merge-rule:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && github.actor != github.event.pull_request.user.login
+    steps:
+      - name: Check if merger is not a reviewer
+        run: |
+          MERGER="${{ github.actor }}"
+          REVIEWERS=$(jq -r '.review.reviewers[].login' "${{ github.event_path }}")
+          if echo "$REVIEWERS" | grep -q "$MERGER"; then
+            echo "Allowed to merge"
+          else
+            echo "Not allowed to merge"
+            exit 1
+          fi
