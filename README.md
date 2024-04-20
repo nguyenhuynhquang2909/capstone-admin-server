@@ -1,2 +1,1 @@
-# capstone-app-server
-The "MyKids" app's App API Server
+The "MyKids" app's App Server API
