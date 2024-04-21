@@ -3,8 +3,12 @@ version: '3.9'
 services:
   db:
     image: postgres
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     container_name: nest-db
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -16,8 +20,11 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     container_name: nest-pgadmin
     volumes:
       - pgadmin_data:/var/lib/pgadmin
@@ -29,23 +36,23 @@ services:
       - app-network
     restart: unless-stopped
 
-  server:
-    build:
-      context: .
-      dockerfile: Dockerfile
-     # image: khangtgr/nestjs-server
-    env_file:
-      - .env
-    container_name: nest-server
-    ports:
-      - '3000:3000'
-    depends_on:
-      - db
-    volumes:
-      - ./src:/app/src
-    networks:
-      - app-network
-    restart: unless-stopped
+  # server:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   # image: khangtgr/nestjs-server
+  #   # env_file:
+  #   #   - .env
+  #   container_name: nest-server
+  #   ports:
+  #     - '3000:3000'
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - ./src:/app/src
+  #   networks:
+  #     - app-network
+  #   restart: unless-stopped
 
   # nginx:
   #   image: nginx:latest
