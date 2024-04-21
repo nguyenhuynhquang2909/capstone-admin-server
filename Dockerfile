@@ -9,7 +9,7 @@ COPY --chown=node:node package*.json ./
 RUN npm ci
 
 ###################
-# 'BUILD' FOR PRODUCTION
+# 'BUILD'
 ###################
 
 FROM node:21.7.3-alpine AS build
