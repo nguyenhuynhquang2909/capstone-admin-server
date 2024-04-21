@@ -6,6 +6,9 @@ on:
       - opened
       - edited
       - synchronize
+  pull_request_review:
+    types:
+      - submitted
 
 jobs:
   check-role:
@@ -61,6 +64,7 @@ jobs:
           exit 1
         fi
 
+    # Optional: Uncomment to enforce that only assignees can commit
     # - name: Check if only assignees can commit
     #   if: github.event_name == 'pull_request'
     #   run: |
