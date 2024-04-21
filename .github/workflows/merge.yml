@@ -1,22 +1,41 @@
-name: Enforce Merge Rule
+name: Merge Restriction
 
 on:
   pull_request:
     types:
-      - closed
+      - labeled
+      - unlabeled
+      - synchronize
+      - opened
+      - edited
+      - ready_for_review
+      - reopened
 
 jobs:
-  enforce-merge-rule:
+  check-merge-ability:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true && github.actor != github.event.pull_request.user.login
+
     steps:
-      - name: Check if merger is not a reviewer
-        run: |
-          MERGER="${{ github.actor }}"
-          REVIEWERS=$(jq -r '.review.reviewers[].login' "${{ github.event_path }}")
-          if echo "$REVIEWERS" | grep -q "$MERGER"; then
-            echo "Allowed to merge"
-          else
-            echo "Not allowed to merge"
-            exit 1
-          fi
+    - name: Check if PR is mergeable
+      run: echo "Checking if the PR is mergeable"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Restrict merge for non-reviewers
+      run: |
+        labels=$(jq -r '.pull_request.labels[].name' $GITHUB_EVENT_PATH)
+        echo "PR labels: $labels"
+        
+        if [[ ! "$labels" =~ "approved" ]]; then
+          echo "Only reviewers can merge this PR."
+          exit 1
+        fi
+
+        if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.action }}" == "ready_for_review" ]]; then
+          echo "PR is ready for review."
+        else
+          echo "PR is not ready for review."
+          exit 1
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
