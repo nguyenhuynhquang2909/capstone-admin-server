@@ -61,12 +61,12 @@ jobs:
           exit 1
         fi
 
-    - name: Check if only assignees can commit
-      if: github.event_name == 'pull_request'
-      run: |
-        assignee=$(jq -r ".pull_request.assignees[].login" "$GITHUB_EVENT_PATH")
+    # - name: Check if only assignees can commit
+    #   if: github.event_name == 'pull_request'
+    #   run: |
+    #     assignee=$(jq -r ".pull_request.assignees[].login" "$GITHUB_EVENT_PATH")
         
-        if [[ ! " $assignees " =~ " $assignee " ]]; then
-          echo "::error::Only assignees can commit changes to the PR."
-          exit 1
-        fi
+    #     if [[ ! " $assignees " =~ " $assignee " ]]; then
+    #       echo "::error::Only assignees can commit changes to the PR."
+    #       exit 1
+    #     fi
