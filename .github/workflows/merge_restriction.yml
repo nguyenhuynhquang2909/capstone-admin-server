@@ -1,41 +1,50 @@
-name: Merge Restriction
+name: PR Merge Control
 
 on:
   pull_request:
     types:
-      - labeled
-      - unlabeled
-      - synchronize
       - opened
-      - edited
-      - ready_for_review
+      - synchronize
       - reopened
 
 jobs:
-  check-merge-ability:
+  enforce-merge-control:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Check if PR is mergeable
-      run: echo "Checking if the PR is mergeable"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Restrict merge for non-reviewers
-      run: |
-        labels=$(jq -r '.pull_request.labels[].name' $GITHUB_EVENT_PATH)
-        echo "PR labels: $labels"
-        
-        if [[ ! "$labels" =~ "approved" ]]; then
-          echo "Only reviewers can merge this PR."
-          exit 1
-        fi
+      - name: Set reviewer as assignee
+        run: |
+          REVIEWER=$(jq -r '.pull_request.requested_reviewers[0].login' "$GITHUB_EVENT_PATH")
+          echo "Reviewer: $REVIEWER"
+          if [[ "$REVIEWER" != "null" ]]; then
+            echo "Assigning $REVIEWER as the reviewer"
+            curl -X POST \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/assignees \
+              -d "{\"assignees\": [\"$REVIEWER\"]}"
+          fi
 
-        if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.action }}" == "ready_for_review" ]]; then
-          echo "PR is ready for review."
-        else
-          echo "PR is not ready for review."
-          exit 1
-        fi
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check if the PR author is the same as the assignee (reviewer)
+        id: check-pr-author
+        run: |
+          PR_AUTHOR=$(jq -r '.pull_request.user.login' "$GITHUB_EVENT_PATH")
+          PR_ASSIGNEE=$(jq -r '.pull_request.assignee.login' "$GITHUB_EVENT_PATH")
+
+          if [[ "$PR_AUTHOR" == "$PR_ASSIGNEE" ]]; then
+            echo "::error::PR author and assignee cannot be the same."
+            exit 1
+          fi
+
+      - name: Check if the PR is merged by the assignee (reviewer)
+        if: steps.check-pr-author.outcome == 'success'
+        run: |
+          PR_MERGED_BY=$(jq -r '.pull_request.merged_by.login' "$GITHUB_EVENT_PATH")
+          PR_ASSIGNEE=$(jq -r '.pull_request.assignee.login' "$GITHUB_EVENT_PATH")
+
+          if [[ "$PR_MERGED_BY" != "$PR_ASSIGNEE" ]]; then
+            echo "::error::Only the assigned reviewer can merge this PR."
+            exit 1
+          fi
