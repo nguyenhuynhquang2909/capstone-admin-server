@@ -3,8 +3,6 @@ version: '3.9'
 services:
   db:
     image: postgres
-    # env_file:
-    #   - .env
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -12,6 +10,7 @@ services:
     container_name: nest-db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - '5432:5432'
     networks:
@@ -20,8 +19,6 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    # env_file:
-    #   - .env
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
@@ -35,37 +32,37 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+    
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # image: khangtgr/nestjs-server
+    env_file:
+      - .env
+    container_name: nest-server
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src
+    networks:
+      - app-network
+    restart: unless-stopped
 
-  # server:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   # image: khangtgr/nestjs-server
-  #   # env_file:
-  #   #   - .env
-  #   container_name: nest-server
-  #   ports:
-  #     - '3000:3000'
-  #   depends_on:
-  #     - db
-  #   volumes:
-  #     - ./src:/app/src
-  #   networks:
-  #     - app-network
-  #   restart: unless-stopped
-
-  # nginx:
-  #   image: nginx:latest
-  #   container_name: nest-nginx
-  #   ports:
-  #     - '8080:8080'
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
-  #   depends_on:
-  #     - server
-  #   networks:
-  #     - app-network
-  #   restart: unless-stopped
+  nginx:
+    image: nginx:latest
+    container_name: nest-nginx
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - server
+    networks:
+      - app-network
+    restart: unless-stopped
 
 networks:
   app-network:
