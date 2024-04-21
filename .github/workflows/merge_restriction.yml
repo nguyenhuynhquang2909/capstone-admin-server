@@ -1,49 +1,72 @@
-name: PR Merge Control
+name: PR Role Enforcement
 
 on:
   pull_request:
     types:
       - opened
+      - edited
       - synchronize
-      - reopened
 
 jobs:
-  enforce-merge-control:
+  check-role:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set first requested reviewer as assignee
-        run: |
-          REVIEWER=$(jq -r '.pull_request.requested_reviewers[0].login' "$GITHUB_EVENT_PATH")
-          echo "Reviewer: $REVIEWER"
-          if [[ "$REVIEWER" != "null" ]]; then
-            echo "Assigning $REVIEWER as the reviewer"
-            curl -X POST \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/assignees \
-              -d "{\"assignees\": [\"$REVIEWER\"]}"
-          fi
-
-      - name: Check if the PR has a second reviewer
-        id: check-second-reviewer
-        run: |
-          SECOND_REVIEWER=$(jq -r '.pull_request.requested_reviewers[1].login' "$GITHUB_EVENT_PATH")
-
-          if [[ "$SECOND_REVIEWER" == "null" ]]; then
-            echo "::error::A second reviewer is required to merge this PR."
+    - name: Check PR roles
+      id: check_roles
+      run: |
+        assignees=$(jq -r ".pull_request.assignees[].login" "$GITHUB_EVENT_PATH")
+        reviewers=$(jq -r ".pull_request.requested_reviewers[].login" "$GITHUB_EVENT_PATH")
+        
+        # Check if there are any assignees
+        if [[ -z "$assignees" ]]; then
+          echo "::error::No assignees found. Please assign someone to the PR."
+          exit 1
+        fi
+        
+        # Check if there are any reviewers
+        if [[ -z "$reviewers" ]]; then
+          echo "::error::No reviewers found. Please request a review for the PR."
+          exit 1
+        fi
+        
+        # Check if assignees are reviewers
+        for assignee in $assignees; do
+          if [[ " $reviewers " =~ " $assignee " ]]; then
+            echo "::error::Assignee '$assignee' is also a reviewer. Assignees and reviewers should be different roles."
             exit 1
           fi
+        done
 
-      - name: Check if the PR is merged by the assignee (reviewer)
-        if: steps.check-second-reviewer.outcome == 'success'
-        run: |
-          PR_MERGED_BY=$(jq -r '.pull_request.merged_by.login' "$GITHUB_EVENT_PATH")
-          PR_ASSIGNEE=$(jq -r '.pull_request.assignee.login' "$GITHUB_EVENT_PATH")
+    - name: Check if only reviewers can approve
+      if: github.event_name == 'pull_request_review'
+      run: |
+        reviewer=$(jq -r ".review.user.login" "$GITHUB_EVENT_PATH")
+        
+        if [[ ! " $reviewers " =~ " $reviewer " ]]; then
+          echo "::error::Only reviewers can approve the PR."
+          exit 1
+        fi
 
-          if [[ "$PR_MERGED_BY" != "$PR_ASSIGNEE" ]]; then
-            echo "::error::Only the assigned reviewer can merge this PR."
-            exit 1
-          fi
+    - name: Check if only reviewers can merge
+      if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved'
+      run: |
+        reviewer=$(jq -r ".review.user.login" "$GITHUB_EVENT_PATH")
+        
+        if [[ ! " $reviewers " =~ " $reviewer " ]]; then
+          echo "::error::Only reviewers can merge the PR."
+          exit 1
+        fi
+
+    - name: Check if only assignees can commit
+      if: github.event_name == 'pull_request'
+      run: |
+        assignee=$(jq -r ".pull_request.assignees[].login" "$GITHUB_EVENT_PATH")
+        
+        if [[ ! " $assignees " =~ " $assignee " ]]; then
+          echo "::error::Only assignees can commit changes to the PR."
+          exit 1
+        fi
