@@ -14,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set reviewer as assignee
+      - name: Set first requested reviewer as assignee
         run: |
           REVIEWER=$(jq -r '.pull_request.requested_reviewers[0].login' "$GITHUB_EVENT_PATH")
           echo "Reviewer: $REVIEWER"
@@ -27,19 +27,18 @@ jobs:
               -d "{\"assignees\": [\"$REVIEWER\"]}"
           fi
 
-      - name: Check if the PR author is the same as the assignee (reviewer)
-        id: check-pr-author
+      - name: Check if the PR has a second reviewer
+        id: check-second-reviewer
         run: |
-          PR_AUTHOR=$(jq -r '.pull_request.user.login' "$GITHUB_EVENT_PATH")
-          PR_ASSIGNEE=$(jq -r '.pull_request.assignee.login' "$GITHUB_EVENT_PATH")
+          SECOND_REVIEWER=$(jq -r '.pull_request.requested_reviewers[1].login' "$GITHUB_EVENT_PATH")
 
-          if [[ "$PR_AUTHOR" == "$PR_ASSIGNEE" ]]; then
-            echo "::error::PR author and assignee cannot be the same."
+          if [[ "$SECOND_REVIEWER" == "null" ]]; then
+            echo "::error::A second reviewer is required to merge this PR."
             exit 1
           fi
 
       - name: Check if the PR is merged by the assignee (reviewer)
-        if: steps.check-pr-author.outcome == 'success'
+        if: steps.check-second-reviewer.outcome == 'success'
         run: |
           PR_MERGED_BY=$(jq -r '.pull_request.merged_by.login' "$GITHUB_EVENT_PATH")
           PR_ASSIGNEE=$(jq -r '.pull_request.assignee.login' "$GITHUB_EVENT_PATH")
