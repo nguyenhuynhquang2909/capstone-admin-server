@@ -9,9 +9,10 @@ import { randomInt } from 'crypto';
 import { User } from '../user/entities/user.entity';
 // import { UserSession } from './entities/user-session.entity';
 import { CreateAuthDto } from './dto/create-auth.dto';
-// import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 // import * as bcrypt from 'bcrypt';
-// import { JwtService } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
+import { Cache } from '@nestjs/cache-manager';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +20,8 @@ export class AuthService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     // @InjectRepository(UserSession)
     // private readonly userSessionRepository: Repository<UserSession>,
-    // private readonly jwtService: JwtService,
+    private readonly jwtService: JwtService,
+    private readonly cacheService: Cache,
   ) {}
 
   async sendOtp(
@@ -38,43 +40,52 @@ export class AuthService {
     }
 
     const otp = randomInt(100000, 999999).toString();
-    // Here you can send the OTP via SMS or any other method
+
+    await this.cacheService.set(createAuthDto.phone, otp);
+
     console.log(`OTP for ${createAuthDto.phone}: ${otp}`);
 
     return { status: 'success', message: `OTP code: ${otp}` };
   }
 
-  // async verifyOtp(
-  //   verifyOtpDto: VerifyOtpDto,
-  // ): Promise<{
-  //   status: string;
-  //   message: string;
-  //   accessToken?: string;
-  //   expiresIn?: string;
-  // }> {
-  //   const user = await this.userRepository.findOne({
-  //     phone: verifyOtpDto.phone,
-  //   });
-  //   if (!user) {
-  //     throw new BadRequestException('Invalid OTP');
-  //   }
+  async verifyOtp(verifyOtpDto: VerifyOtpDto): Promise<{
+    status: string;
+    message: string;
+    accessToken?: string;
+    expiresIn?: string;
+  }> {
+    if (!verifyOtpDto.phone) {
+      throw new BadRequestException('Phone number is required');
+    }
 
-  //   // You can check if the OTP is valid here
-  //   const isValidOtp = true; // Replace this with actual OTP validation
-  //   if (!isValidOtp) {
-  //     throw new BadRequestException('Invalid OTP');
-  //   }
+    if (!verifyOtpDto.otp) {
+      throw new BadRequestException('OTP code is required');
+    }
 
-  //   const accessToken = this.jwtService.sign({ userId: user.id });
-  //   const expiresIn = '13608000';
+    const user = await this.userRepository.findOne({
+      where: { phone: verifyOtpDto.phone },
+    });
 
-  //   return {
-  //     status: 'success',
-  //     message: 'OTP is valid',
-  //     accessToken,
-  //     expiresIn,
-  //   };
-  // }
+    if (!user) {
+      throw new BadRequestException('Invalid phone number');
+    }
+
+    const storedOtp = await this.cacheService.get<string>(verifyOtpDto.phone);
+
+    if (storedOtp !== verifyOtpDto.otp) {
+      throw new BadRequestException('Invalid OTP');
+    }
+
+    const accessToken = this.jwtService.sign({ userId: user.id });
+    const expiresIn = '13608000';
+
+    return {
+      status: 'success',
+      message: 'OTP is valid',
+      accessToken,
+      expiresIn,
+    };
+  }
 
   // async getProfile(userId: number): Promise<{ status: string; data?: any }> {
   //   const user = await this.userRepository.findOne({ id: userId });
