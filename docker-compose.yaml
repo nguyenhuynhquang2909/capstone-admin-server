@@ -3,15 +3,15 @@ version: '3.9'
 services:
   db:
     image: postgres
-    # env_file:
-    #   - .env
     environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     container_name: nest-db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - '5432:5432'
     networks:
@@ -20,52 +20,56 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    # env_file:
-    #   - .env
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT}
     container_name: nest-pgadmin
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     ports:
-      - "${PGADMIN_PORT}:80"
+      - "${PGADMIN_PORT}:${PGADMIN_LISTEN_PORT}"
     depends_on:
       - db
     networks:
       - app-network
     restart: unless-stopped
+    
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Select stage from Dockerfile
+      target: ${SERVER_STAGE}
+    env_file:
+      - .env
+    # Run a command against the development stage of the image
+    # command: npm run start:dev
+    ports:
+      - '3000'
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src
+    networks:
+      - app-network
+    deploy:
+      replicas: 5
+      restart_policy:
+        condition: on-failure
 
-  # server:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   # image: khangtgr/nestjs-server
-  #   # env_file:
-  #   #   - .env
-  #   container_name: nest-server
-  #   ports:
-  #     - '3000:3000'
-  #   depends_on:
-  #     - db
-  #   volumes:
-  #     - ./src:/app/src
-  #   networks:
-  #     - app-network
-  #   restart: unless-stopped
-
-  # nginx:
-  #   image: nginx:latest
-  #   container_name: nest-nginx
-  #   ports:
-  #     - '8080:8080'
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
-  #   depends_on:
-  #     - server
-  #   networks:
-  #     - app-network
-  #   restart: unless-stopped
+  nginx:
+    image: nginx:latest
+    container_name: nest-nginx
+    ports:
+      - '9090:80'
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - server
+    networks:
+      - app-network
+    restart: unless-stopped
 
 networks:
   app-network:
