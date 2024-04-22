@@ -1,34 +1,74 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpException,
+  HttpStatus,
+  // Get,
+  // Headers,
+  // UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+// import { VerifyOtpDto } from './dto/verify-otp.dto';
+// import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Post('login')
+  async sendOtp(
+    @Body() createAuthDto: CreateAuthDto,
+  ): Promise<{ status: string; message: string }> {
+    return this.authService.sendOtp(createAuthDto).catch(error => {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    });
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
+  // @Post('verify')
+  // async verifyOtp(
+  //   @Body() verifyOtpDto: VerifyOtpDto,
+  // ): Promise<{
+  //   status: string;
+  //   message: string;
+  //   accessToken?: string;
+  //   expiresIn?: string;
+  // }> {
+  //   return this.authService.verifyOtp(verifyOtpDto);
+  // }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
+  // @Get('profile')
+  // @UseGuards(AuthGuard())
+  // async getProfile(
+  //   @Headers('authorization') authHeader: string,
+  // ): Promise<{ status: string; data?: any }> {
+  //   const accessToken = authHeader.split(' ')[1];
+  //   const decodedToken = this.authService.jwtService.decode(accessToken) as {
+  //     userId: number;
+  //   };
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
+  //   if (!decodedToken || !decodedToken.userId) {
+  //     throw new UnauthorizedException('Invalid or expired token');
+  //   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
-  }
+  //   return this.authService.getProfile(decodedToken.userId);
+  // }
+
+  // @Post('logout')
+  // @UseGuards(AuthGuard())
+  // async logout(
+  //   @Headers('authorization') authHeader: string,
+  // ): Promise<{ status: string; message: string }> {
+  //   const accessToken = authHeader.split(' ')[1];
+  //   const decodedToken = this.authService.jwtService.decode(accessToken) as {
+  //     userId: number;
+  //   };
+
+  //   if (!decodedToken || !decodedToken.userId) {
+  //     throw new UnauthorizedException('Invalid or expired token');
+  //   }
+
+  //   return this.authService.logout(decodedToken.userId);
+  // }
 }
