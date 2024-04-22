@@ -21,6 +21,13 @@ docker images -a
 docker compose up --build -d
 docker ps -a
 
+# Re-init DB
+docker compose down
+docker volume rm capstone-app-server_postgres_data
+docker compose up -d
+sleep 3
+docker logs nest-db
+
 # Cleanning up docker compose
 docker compose down
 docker compose down --rmi all --volumes --remove-orphans

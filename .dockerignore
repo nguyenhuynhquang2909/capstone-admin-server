@@ -1,12 +1,14 @@
 .git*
 CODEOWNER
+docker-compose.yaml
 node_modules/
 dist/
+database/
+test/
+scripts/
 *.log
 *.pid
 *.lock
-docker-compose.yaml
-scripts/*
 *.sqlite
 *.db
 *.sqlite3
