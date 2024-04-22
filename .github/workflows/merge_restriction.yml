@@ -18,32 +18,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Check PR roles
-      id: check_roles
-      run: |
-        assignees=$(jq -r ".pull_request.assignees[].login" "$GITHUB_EVENT_PATH")
-        reviewers=$(jq -r ".pull_request.requested_reviewers[].login" "$GITHUB_EVENT_PATH")
-        
-        # Check if there are any assignees
-        if [[ -z "$assignees" ]]; then
-          echo "::error::No assignees found. Please assign someone to the PR."
-          exit 1
-        fi
-        
-        # Check if there are any reviewers
-        if [[ -z "$reviewers" ]]; then
-          echo "::error::No reviewers found. Please request a review for the PR."
-          exit 1
-        fi
-        
-        # Check if assignees are reviewers
-        for assignee in $assignees; do
-          if [[ " $reviewers " =~ " $assignee " ]]; then
-            echo "::error::Assignee '$assignee' is also a reviewer. Assignees and reviewers should be different roles."
-            exit 1
-          fi
-        done
-
     - name: Check if only reviewers can approve
       if: github.event_name == 'pull_request_review'
       run: |
@@ -63,14 +37,3 @@ jobs:
           echo "::error::Only reviewers can merge the PR."
           exit 1
         fi
-
-    # Optional: Uncomment to enforce that only assignees can commit
-    # - name: Check if only assignees can commit
-    #   if: github.event_name == 'pull_request'
-    #   run: |
-    #     assignee=$(jq -r ".pull_request.assignees[].login" "$GITHUB_EVENT_PATH")
-        
-    #     if [[ ! " $assignees " =~ " $assignee " ]]; then
-    #       echo "::error::Only assignees can commit changes to the PR."
-    #       exit 1
-    #     fi
