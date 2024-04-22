@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
-// import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 // import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
@@ -21,22 +21,22 @@ export class AuthController {
   async sendOtp(
     @Body() createAuthDto: CreateAuthDto,
   ): Promise<{ status: string; message: string }> {
-    return this.authService.sendOtp(createAuthDto).catch(error => {
+    return this.authService.sendOtp(createAuthDto).catch((error) => {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     });
   }
 
-  // @Post('verify')
-  // async verifyOtp(
-  //   @Body() verifyOtpDto: VerifyOtpDto,
-  // ): Promise<{
-  //   status: string;
-  //   message: string;
-  //   accessToken?: string;
-  //   expiresIn?: string;
-  // }> {
-  //   return this.authService.verifyOtp(verifyOtpDto);
-  // }
+  @Post('verify')
+  async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto): Promise<{
+    status: string;
+    message: string;
+    accessToken?: string;
+    expiresIn?: string;
+  }> {
+    return this.authService.verifyOtp(verifyOtpDto).catch((error) => {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    });
+  }
 
   // @Get('profile')
   // @UseGuards(AuthGuard())
