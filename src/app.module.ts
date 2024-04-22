@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { ServerController } from './server/server.controller';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { UserModule } from './user/user.module';
     CacheModule.register({ isGlobal: true }),
     DatabaseModule,
     UserModule,
+    AuthModule,
   ],
   controllers: [ServerController],
   providers: [],
