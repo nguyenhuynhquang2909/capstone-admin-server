@@ -19,7 +19,9 @@ docker images -a
 
 # Starting up docker compose
 docker compose up --build -d
-docker ps -a
+sleep 3
+docker compose ps -a
+docker compose logs
 
 # Re-init DB
 docker compose down

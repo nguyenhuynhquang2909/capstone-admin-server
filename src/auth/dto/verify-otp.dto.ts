@@ -1,7 +1,11 @@
 import { IsNotEmpty, IsNumberString } from 'class-validator';
 
-export class CreateAuthDto {
+export class VerifyOtpDto {
   @IsNotEmpty()
   @IsNumberString()
   phone: string;
+
+  @IsNotEmpty()
+  @IsNumberString()
+  otp: string;
 }

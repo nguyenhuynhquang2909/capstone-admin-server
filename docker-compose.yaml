@@ -11,29 +11,44 @@ services:
     container_name: nest-db
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./schema/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - '5432:5432'
     networks:
       - app-network
     restart: unless-stopped
 
-  pgadmin:
-    image: dpage/pgadmin4
+  redis:
+    image: redis
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-      PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT}
-    container_name: nest-pgadmin
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_USERNAME: ${REDIS_USERNAME}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    container_name: nest-redis
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      - redis_data:/data
     ports:
-      - "${PGADMIN_PORT}:${PGADMIN_LISTEN_PORT}"
-    depends_on:
-      - db
+      - '${REDIS_PORT}:6379'
     networks:
       - app-network
     restart: unless-stopped
+
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+  #     PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT}
+  #   container_name: nest-pgadmin
+  #   volumes:
+  #     - pgadmin_data:/var/lib/pgadmin
+  #   ports:
+  #     - "${PGADMIN_PORT}:${PGADMIN_LISTEN_PORT}"
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - app-network
+  #   restart: unless-stopped
     
   server:
     build:
@@ -54,7 +69,7 @@ services:
     networks:
       - app-network
     deploy:
-      replicas: 5
+      replicas: 3
       restart_policy:
         condition: on-failure
 
@@ -78,3 +93,4 @@ networks:
 volumes:
   postgres_data:
   pgadmin_data:
+  redis_data:
