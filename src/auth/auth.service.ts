@@ -4,7 +4,7 @@ import {
   // UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { randomInt } from 'crypto';
 import { User } from '../user/entities/user.entity';
 // import { UserSession } from './entities/user-session.entity';
@@ -16,6 +16,17 @@ import { Cache } from '@nestjs/cache-manager';
 
 @Injectable()
 export class AuthService {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async getProfile(userId: number): Promise<User | null> {
+    const options: FindOneOptions<User> = {
+      where: { id: userId },
+    };
+    const user = await this.userRepository.findOne(options);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    return user;
+  }
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     // @InjectRepository(UserSession)
@@ -85,6 +96,13 @@ export class AuthService {
       accessToken,
       expiresIn,
     };
+  }
+  public decodeToken(token: string): { userId: number } | null {
+    try {
+      return this.jwtService.decode(token) as { userId: number };
+    } catch (error) {
+      return null;
+    }
   }
 
   // async getProfile(userId: number): Promise<{ status: string; data?: any }> {

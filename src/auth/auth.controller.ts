@@ -4,6 +4,11 @@ import {
   Body,
   HttpException,
   HttpStatus,
+  Res,
+  UseGuards,
+  Headers,
+  Get,
+  UnauthorizedException,
   // Get,
   // Headers,
   // UnauthorizedException,
@@ -11,7 +16,8 @@ import {
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
-// import { AuthGuard } from '@nestjs/passport';
+import { Response } from 'express';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -38,6 +44,36 @@ export class AuthController {
     });
   }
 
+  @Post('logout')
+  async logout(@Res() response: Response): Promise<void> {
+    // Set the JWT token in the cookie to expire immediately
+    response
+      .cookie('jwt', '', { httpOnly: true, maxAge: 0 })
+      .json({ message: 'Successfully logged out' })
+      .status(HttpStatus.OK);
+  }
+
+  @Get('profile')
+  @UseGuards(AuthGuard('jwt'))
+  async getProfile(
+    @Headers('authorization') authHeader: string,
+  ): Promise<{ status: string; data?: any }> {
+    if (!authHeader) {
+      throw new UnauthorizedException('No authorization header provided');
+    }
+
+    const accessToken = authHeader.split(' ')[1];
+    const decodedToken = this.authService.decodeToken(accessToken);
+    if (!decodedToken || !decodedToken.userId) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+
+    const profile = await this.authService.getProfile(decodedToken.userId);
+    if (!profile) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return { status: 'success', data: profile };
+  }
   // @Get('profile')
   // @UseGuards(AuthGuard())
   // async getProfile(
