@@ -2,16 +2,13 @@ import {
   Controller,
   Post,
   Body,
+  Get,
+  UseGuards,
+  UnauthorizedException,
   HttpException,
   HttpStatus,
   Res,
-  UseGuards,
   Headers,
-  Get,
-  UnauthorizedException,
-  // Get,
-  // Headers,
-  // UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -27,32 +24,41 @@ export class AuthController {
   async sendOtp(
     @Body() createAuthDto: CreateAuthDto,
   ): Promise<{ status: string; message: string }> {
-    return this.authService.sendOtp(createAuthDto).catch((error) => {
+    try {
+      return await this.authService.sendOtp(createAuthDto);
+    } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    });
+    }
   }
 
   @Post('verify')
-  async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto): Promise<{
-    status: string;
-    message: string;
-    accessToken?: string;
-    expiresIn?: string;
-  }> {
-    return this.authService.verifyOtp(verifyOtpDto).catch((error) => {
+  async verifyOtp(
+    @Body() verifyOtpDto: VerifyOtpDto,
+    @Res() response: Response,
+  ): Promise<void> {
+    try {
+      const result = await this.authService.verifyOtp(verifyOtpDto);
+      response.setHeader('Authorization', `Bearer ${result.accessToken}`);
+      response.status(HttpStatus.OK).json(result);
+    } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    });
+    }
   }
 
   @Post('logout')
-  async logout(@Res() response: Response): Promise<void> {
-    // Set the JWT token in the cookie to expire immediately
-    response
-      .cookie('jwt', '', { httpOnly: true, maxAge: 0 })
-      .json({ message: 'Successfully logged out' })
-      .status(HttpStatus.OK);
+  async logout(
+    @Headers('authorization') authHeader: string,
+    @Res() response: Response,
+  ): Promise<void> {
+    try {
+      const result = await this.authService.logout(authHeader);
+      response.setHeader('Authorization', '');
+      response.status(HttpStatus.OK).json(result);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
-
+  
   @Get('profile')
   @UseGuards(AuthGuard('jwt'))
   async getProfile(
@@ -74,37 +80,4 @@ export class AuthController {
     }
     return { status: 'success', data: profile };
   }
-  // @Get('profile')
-  // @UseGuards(AuthGuard())
-  // async getProfile(
-  //   @Headers('authorization') authHeader: string,
-  // ): Promise<{ status: string; data?: any }> {
-  //   const accessToken = authHeader.split(' ')[1];
-  //   const decodedToken = this.authService.jwtService.decode(accessToken) as {
-  //     userId: number;
-  //   };
-
-  //   if (!decodedToken || !decodedToken.userId) {
-  //     throw new UnauthorizedException('Invalid or expired token');
-  //   }
-
-  //   return this.authService.getProfile(decodedToken.userId);
-  // }
-
-  // @Post('logout')
-  // @UseGuards(AuthGuard())
-  // async logout(
-  //   @Headers('authorization') authHeader: string,
-  // ): Promise<{ status: string; message: string }> {
-  //   const accessToken = authHeader.split(' ')[1];
-  //   const decodedToken = this.authService.jwtService.decode(accessToken) as {
-  //     userId: number;
-  //   };
-
-  //   if (!decodedToken || !decodedToken.userId) {
-  //     throw new UnauthorizedException('Invalid or expired token');
-  //   }
-
-  //   return this.authService.logout(decodedToken.userId);
-  // }
 }
