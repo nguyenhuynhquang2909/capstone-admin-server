@@ -5,10 +5,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # waiting for status check to play well with path filters
-  # https://github.community/t/status-check-with-path-filter/18049/2
   pre_job:
-    # continue-on-error: true # Uncomment once integration is finished
     runs-on: ubuntu-latest
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
@@ -18,7 +15,7 @@ jobs:
         with:
           concurrent_skipping: 'never'
           skip_after_successful_duplicate: 'true'
-          paths: '["src/**"]'
+          paths: '["src/**", "libs/**", "apps/**", "test/**"]'
           do_not_skip: '["workflow_dispatch", "schedule"]'
 
   eslint:
@@ -27,42 +24,40 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./src/
+        working-directory: ./
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: 'src'
-      - name: lint with reporting
-        run: |
-          npm install
-          npm lint:report
-        continue-on-error: true
+      - name: Install dependencies
+        run: npm install
+      - name: Lint with reporting
+        run: npm run lint:report
       - name: Annotate Code Linting Results
         uses: ataylorme/eslint-annotate-action@1.2.0
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          report-json: "src/eslint_report.json"
+          report-json: "eslint_report.json"
       - name: Upload ESLint report
         uses: actions/upload-artifact@v2
         with:
           name: eslint_report.json
-          path: src/eslint_report.json
+          path: eslint_report.json
+
   compile:
     needs: pre_job
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./src/
+        working-directory: ./
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: 'src'
       - run: npm install
       - run: npm run type-check
