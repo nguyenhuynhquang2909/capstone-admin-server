@@ -16,17 +16,11 @@ export class UserSession {
   @Column()
   accessToken: string;
 
-  @Column()
-  refreshToken: string;
-
   @ManyToOne(() => User)
   user: User;
 
   @Column({ type: 'timestamptz' })
   accessTokenExpirationTime: Date;
-
-  @Column({ type: 'timestamptz' })
-  refreshTokenExpirationTime: Date;
 
   @CreateDateColumn()
   created_at: Date;
