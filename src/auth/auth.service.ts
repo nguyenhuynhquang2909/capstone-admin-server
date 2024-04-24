@@ -13,12 +13,15 @@ import { Cache } from '@nestjs/cache-manager';
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    @InjectRepository(UserSession) private readonly userSessionRepository: Repository<UserSession>,
+    @InjectRepository(UserSession)
+    private readonly userSessionRepository: Repository<UserSession>,
     private readonly jwtService: JwtService,
     private readonly cacheService: Cache,
   ) {}
 
-  async sendOtp(createAuthDto: CreateAuthDto): Promise<{ status: string; message: string }> {
+  async sendOtp(
+    createAuthDto: CreateAuthDto,
+  ): Promise<{ status: string; message: string }> {
     const { phone } = createAuthDto;
     if (!phone) {
       throw new BadRequestException('Phone number is required');
@@ -64,7 +67,9 @@ export class AuthService {
     const userSession = new UserSession();
     userSession.accessToken = accessToken;
     userSession.user = user;
-    userSession.accessTokenExpirationTime = new Date(Date.now() + parseInt(expiresIn) * 1000);
+    userSession.accessTokenExpirationTime = new Date(
+      Date.now() + parseInt(expiresIn) * 1000,
+    );
 
     await this.userSessionRepository.save(userSession);
 
@@ -76,7 +81,9 @@ export class AuthService {
     };
   }
 
-  async logout(authHeader: string): Promise<{ status: string; message: string }> {
+  async logout(
+    authHeader: string,
+  ): Promise<{ status: string; message: string }> {
     const accessToken = authHeader?.split(' ')[1];
     const decodedToken = this.jwtService.decode(accessToken) as {
       userId: number;
@@ -88,7 +95,7 @@ export class AuthService {
 
     return { status: 'success', message: 'User logged out successfully' };
   }
-  
+
   async getProfile(userId: number): Promise<User | null> {
     const options: FindOneOptions<User> = {
       where: { id: userId },
@@ -99,7 +106,7 @@ export class AuthService {
     }
     return user;
   }
-  
+
   public decodeToken(token: string): { userId: number } | null {
     try {
       return this.jwtService.decode(token) as { userId: number };

@@ -58,7 +58,7 @@ export class AuthController {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
-  
+
   @Get('profile')
   @UseGuards(AuthGuard('jwt'))
   async getProfile(
