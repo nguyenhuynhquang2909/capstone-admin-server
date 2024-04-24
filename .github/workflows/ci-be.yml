@@ -1,4 +1,4 @@
-name: 💄 CI Frontend
+name: 💄 CI Backend
 
 on:
   pull_request:
