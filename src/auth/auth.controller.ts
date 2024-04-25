@@ -63,21 +63,27 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   async getProfile(
     @Headers('authorization') authHeader: string,
-  ): Promise<{ status: string; data?: any }> {
-    if (!authHeader) {
-      throw new UnauthorizedException('No authorization header provided');
-    }
+    @Res() response: Response,
+  ): Promise<void> {
+    try {
+      if (!authHeader) {
+        throw new UnauthorizedException('No authorization header provided');
+      }
 
-    const accessToken = authHeader.split(' ')[1];
-    const decodedToken = this.authService.decodeToken(accessToken);
-    if (!decodedToken || !decodedToken.userId) {
-      throw new UnauthorizedException('Invalid or expired token');
-    }
+      const accessToken = authHeader.split(' ')[1];
+      const decodedToken = this.authService.decodeToken(accessToken);
+      if (!decodedToken || !decodedToken.userId) {
+        throw new UnauthorizedException('Invalid or expired token');
+      }
 
-    const profile = await this.authService.getProfile(decodedToken.userId);
-    if (!profile) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      const profile = await this.authService.getProfile(decodedToken.userId);
+      if (!profile) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+
+      response.status(HttpStatus.OK).json({ status: 'success', data: profile });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
-    return { status: 'success', data: profile };
   }
 }
