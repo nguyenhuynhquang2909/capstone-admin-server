@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOneOptions } from 'typeorm';
 import { randomInt } from 'crypto';
@@ -8,6 +12,7 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from '@nestjs/cache-manager';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +38,9 @@ export class AuthService {
     }
 
     const otp = randomInt(100000, 999999).toString();
-    await this.cacheService.set(phone, otp);
+
+    // Set the OTP to last only 30 seconds
+    await this.cacheService.set(phone, otp, 30);
 
     return { status: 'success', message: `OTP code: ${otp}` };
   }
@@ -42,7 +49,6 @@ export class AuthService {
     status: string;
     message: string;
     accessToken?: string;
-    expiresIn?: string;
   }> {
     const { phone, otp } = verifyOtpDto;
     if (!phone || !otp) {
@@ -56,19 +62,29 @@ export class AuthService {
 
     const storedOtp = await this.cacheService.get<string>(phone);
     if (storedOtp !== otp) {
+      // If the OTP is incorrect, remove the stored OTP
+      await this.cacheService.del(phone);
       throw new BadRequestException('Invalid OTP');
     }
 
     await this.cacheService.del(phone);
 
-    const accessToken = this.jwtService.sign({ userId: user.id });
-    const expiresIn = '13608000'; // 4 months
+    const accessTokenPayload = {
+      userId: user.id,
+      issuedAt: new Date().toISOString(),
+      expiresAt: new Date(
+        Date.now() + 4 * 30 * 24 * 60 * 60 * 1000,
+      ).toISOString(), // 4 months
+    };
+
+    const accessToken = this.jwtService.sign(accessTokenPayload);
+    const expiresIn = 4 * 30 * 24 * 60 * 60; // 4 months
 
     const userSession = new UserSession();
     userSession.accessToken = accessToken;
     userSession.user = user;
     userSession.accessTokenExpirationTime = new Date(
-      Date.now() + parseInt(expiresIn) * 1000,
+      Date.now() + expiresIn * 1000,
     );
 
     await this.userSessionRepository.save(userSession);
@@ -77,7 +93,6 @@ export class AuthService {
       status: 'success',
       message: 'OTP is valid',
       accessToken,
-      expiresIn,
     };
   }
 
@@ -113,5 +128,16 @@ export class AuthService {
     } catch (error) {
       return null;
     }
+  }
+
+  async validateUser(payload: JwtPayload): Promise<any> {
+    const options: FindOneOptions<User> = {
+      where: { id: payload.userId },
+    };
+    const user = await this.userRepository.findOne(options);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return user;
   }
 }
