@@ -39,12 +39,6 @@ export class AuthService {
       throw new BadRequestException('Invalid phone number');
     }
 
-    // Check if OTP exists in cache
-    // const cachedOtp = await this.cacheService.get<string>(phone);
-    // if (cachedOtp) {
-    //   throw new BadRequestException('An OTP has already been sent');
-    // }
-
     // Generate OTP
     const otp = randomInt(100000, 999999).toString();
 
