@@ -6,10 +6,7 @@ export class TwilioService {
   private readonly twilioClient: twilio.Twilio;
 
   constructor() {
-    this.twilioClient = twilio(
-      '',
-      '',
-    );
+    this.twilioClient = twilio('', '');
   }
 
   async sendOTP(phone: string, otp: string): Promise<void> {
