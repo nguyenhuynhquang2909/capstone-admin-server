@@ -7,8 +7,8 @@ export class TwilioService {
 
   constructor() {
     this.twilioClient = twilio(
-      'AC9c2aa4377c682a6376d66a4cf82ab357',
-      '886a2298e67f15747d323ed0371c7b12',
+      '',
+      '',
     );
   }
 
@@ -16,7 +16,7 @@ export class TwilioService {
     try {
       await this.twilioClient.messages.create({
         body: `Your OTP code is: ${otp}`,
-        from: '+12679150254',
+        from: '+...',
         to: '+84' + phone,
       });
     } catch (error) {
