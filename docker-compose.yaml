@@ -17,6 +17,16 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   redis:
     image: redis
@@ -32,6 +42,16 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   pgadmin:
     image: dpage/pgadmin4
@@ -49,29 +69,33 @@ services:
     networks:
       - app-network
     restart: unless-stopped
-    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
   server:
     build:
       context: .
       dockerfile: Dockerfile
-      # Select stage from Dockerfile
       target: ${SERVER_STAGE}
     env_file:
       - .env
-    # Run a command against the development stage of the image
-    # command: npm run start:dev
     ports:
       - '3000'
     depends_on:
       - db
-    volumes:
-      - ./src:/app/src
     networks:
       - app-network
     deploy:
       replicas: 3
       restart_policy:
         condition: on-failure
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
 
   nginx:
     image: nginx:latest
@@ -85,6 +109,11 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
 
 networks:
   app-network:
