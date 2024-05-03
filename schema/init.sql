@@ -23,4 +23,4 @@ INSERT INTO users (name, phone, last_login) VALUES
 ('John Doe', '1234567890', '2024-04-20 12:00:00'),
 ('Jane Smith', '0987654321', '2024-04-19 15:30:00'),
 ('Alice Brown', '1122334455', NULL),
-('Bob White', '5544332211', '2024-04-20 10:45:00');
+('Khang Nguyen', '0903999938', '2024-04-20 10:45:00');
