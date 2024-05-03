@@ -7,7 +7,9 @@ import { UserSession } from './entities/user-session.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
-import { TwilioService } from './twilio.service';
+// import { TwilioService } from './twilio.service';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -17,8 +19,21 @@ import { TwilioService } from './twilio.service';
       signOptions: { expiresIn: '10368000s' },
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
   ],
-  providers: [AuthService, JwtStrategy, TwilioService],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
   controllers: [AuthController],
 })
 export class AuthModule {}

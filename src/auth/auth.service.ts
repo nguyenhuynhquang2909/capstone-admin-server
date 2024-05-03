@@ -13,7 +13,7 @@ import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from '@nestjs/cache-manager';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
-import { TwilioService } from './twilio.service';
+// import { TwilioService } from './twilio.service';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +23,7 @@ export class AuthService {
     private readonly userSessionRepository: Repository<UserSession>,
     private readonly jwtService: JwtService,
     private readonly cacheService: Cache,
-    private readonly twilioService: TwilioService,
+    // private readonly twilioService: TwilioService,
   ) {}
 
   async sendOtp(
@@ -39,12 +39,6 @@ export class AuthService {
       throw new BadRequestException('Invalid phone number');
     }
 
-    // Check if OTP exists in cache
-    // const cachedOtp = await this.cacheService.get<string>(phone);
-    // if (cachedOtp) {
-    //   throw new BadRequestException('An OTP has already been sent');
-    // }
-
     // Generate OTP
     const otp = randomInt(100000, 999999).toString();
 
@@ -52,12 +46,12 @@ export class AuthService {
     await this.cacheService.set(phone, otp, 30);
 
     // Send OTP via Twilio
-    try {
-      await this.twilioService.sendOTP(phone, otp);
-    } catch (error) {
-      console.error('Error sending OTP:', error);
-      throw new BadRequestException('Failed to send OTP');
-    }
+    // try {
+    //   await this.twilioService.sendOTP(phone, otp);
+    // } catch (error) {
+    //   console.error('Error sending OTP:', error);
+    //   throw new BadRequestException('Failed to send OTP');
+    // }
 
     return { status: 'success', message: `OTP code: ${otp}` };
   }
