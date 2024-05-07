@@ -7,24 +7,9 @@ on:
       - main
 
 jobs:
-  compile:
-    needs: ci-lint
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-      - run: npm install
-      - run: npm run type-check
-
   build_and_push_appserver:
     name: Build and push Appserver image
+    needs: ci-lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -39,13 +24,14 @@ jobs:
       - name: Build and push Appserver image to Docker Hub
         uses: docker/build-push-action@v5
         with:
-          context: dockerfiles/
-          dockerfile: Dockerfile.mykidz-appserver
+          context: .
+          file: dockerfiles/mykidz-appserver.Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-appserver:latest
 
   build_and_push_nginx:
     name: Build and push Nginx image
+    needs: ci-lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -60,13 +46,14 @@ jobs:
       - name: Build and push Nginx image to Docker Hub
         uses: docker/build-push-action@v5
         with:
-          context: dockerfiles/
-          dockerfile: Dockerfile.mykidz-nginx
+          context: .
+          file: dockerfiles/mykidz-nginx.Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-nginx:latest
 
   build_and_push_postgres:
     name: Build and push Postgres image
+    needs: ci-lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -81,13 +68,14 @@ jobs:
       - name: Build and push Postgres image to Docker Hub
         uses: docker/build-push-action@v5
         with:
-          context: dockerfiles/
-          dockerfile: Dockerfile.mykidz-postgres
+          context: .
+          file: dockerfiles/mykidz-postgres.Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-postgres:latest
 
   build_and_push_redis:
     name: Build and push Redis image
+    needs: ci-lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -102,13 +90,14 @@ jobs:
       - name: Build and push Redis image to Docker Hub
         uses: docker/build-push-action@v5
         with:
-          context: dockerfiles/
-          dockerfile: Dockerfile.mykidz-redis
+          context: .
+          file: dockerfiles/mykidz-redis.Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-redis:latest
 
   build_and_push_pgadmin4:
     name: Build and push PGAdmin4 image
+    needs: ci-lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -123,7 +112,7 @@ jobs:
       - name: Build and push PGAdmin4 image to Docker Hub
         uses: docker/build-push-action@v5
         with:
-          context: dockerfiles/
-          dockerfile: Dockerfile.mykidz-pgadmin4
+          context: .
+          file: dockerfiles/mykidz-pgadmin4.Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-pgadmin4:latest
