@@ -7,6 +7,13 @@ on:
       - main
 
 jobs:
+  lint_and_push_placeholder:
+    name: Placeholder job for linting and pushing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder step
+        run: echo "This is a placeholder job."
+
   build_and_push_appserver:
     name: Build and push Appserver image
     needs: ci-lint
