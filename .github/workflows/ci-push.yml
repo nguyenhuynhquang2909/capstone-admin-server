@@ -23,7 +23,7 @@ jobs:
       - name: Build and push Appserver image to Docker Hub
         uses: docker/build-push-action@v5
         with:
-          context: dockerfiles/
+          context: .
           file: Dockerfile.mykidz-appserver
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-appserver:latest
@@ -44,7 +44,7 @@ jobs:
       - name: Build and push Nginx image to Docker Hub
         uses: docker/build-push-action@v5
         with:
-          context: dockerfiles/
+          context: .
           file: Dockerfile.mykidz-nginx
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-nginx:latest
@@ -65,7 +65,7 @@ jobs:
       - name: Build and push Postgres image to Docker Hub
         uses: docker/build-push-action@v5
         with:
-          context: dockerfiles/
+          context: .
           file: Dockerfile.mykidz-postgres
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-postgres:latest
@@ -86,7 +86,7 @@ jobs:
       - name: Build and push Redis image to Docker Hub
         uses: docker/build-push-action@v5
         with:
-          context: dockerfiles/
+          context: .
           file: Dockerfile.mykidz-redis
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-redis:latest
@@ -107,7 +107,7 @@ jobs:
       - name: Build and push PGAdmin4 image to Docker Hub
         uses: docker/build-push-action@v5
         with:
-          context: dockerfiles/
+          context: .
           file: Dockerfile.mykidz-pgadmin4
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-pgadmin4:latest
