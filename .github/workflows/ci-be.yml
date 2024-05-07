@@ -1,0 +1,170 @@
+name: 💎 CI Backend
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+
+jobs:
+  pre_job:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          concurrent_skipping: 'never'
+          skip_after_successful_duplicate: 'true'
+          paths: '["src/**", "libs/**", "apps/**", "test/**"]'
+          do_not_skip: '["workflow_dispatch", "schedule"]'
+
+  eslint:
+    needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm install
+      - name: Lint with reporting
+        run: npm run lint:report
+      # - name: Annotate Code Linting Results
+      #   uses: ataylorme/eslint-annotate-action@1.2.0
+      #   with:
+      #     repo-token: "${{ secrets.GITHUB_TOKEN }}"
+      #     report-json: "eslint_report.json"
+      #     fail-on-warning: false
+      - name: Upload ESLint report
+        uses: actions/upload-artifact@v2
+        with:
+          name: eslint_report.json
+          path: eslint_report.json
+
+  compile:
+    needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      - run: npm install
+      - run: npm run type-check
+
+  build_and_push_appserver:
+    name: Build and push Appserver image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+
+      - name: Build and push Appserver image to Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: dockerfiles/
+          dockerfile: Dockerfile.mykidz-appserver
+          push: true
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-appserver:latest
+
+  build_and_push_nginx:
+    name: Build and push Nginx image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+
+      - name: Build and push Nginx image to Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: dockerfiles/
+          dockerfile: Dockerfile.mykidz-nginx
+          push: true
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-nginx:latest
+
+  build_and_push_postgres:
+    name: Build and push Postgres image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+
+      - name: Build and push Postgres image to Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: dockerfiles/
+          dockerfile: Dockerfile.mykidz-postgres
+          push: true
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-postgres:latest
+
+  build_and_push_redis:
+    name: Build and push Redis image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+
+      - name: Build and push Redis image to Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: dockerfiles/
+          dockerfile: Dockerfile.mykidz-redis
+          push: true
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-redis:latest
+
+  build_and_push_pgadmin4:
+    name: Build and push PGAdmin4 image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+
+      - name: Build and push PGAdmin4 image to Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: dockerfiles/
+          dockerfile: Dockerfile.mykidz-pgadmin4
+          push: true
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-pgadmin4:latest
