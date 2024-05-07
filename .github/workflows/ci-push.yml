@@ -7,25 +7,23 @@ on:
       - main
 
 jobs:
-  compile:
-    needs: ci-lint
-    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+  build_and_push_image:
+    name: Build and push Docker images
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-      - run: npm install
-      - run: npm run type-check
+    strategy:
+      matrix:
+        image:
+          - name: appserver
+            dockerfile: Dockerfile.mykidz-appserver
+          - name: nginx
+            dockerfile: Dockerfile.mykidz-nginx
+          - name: postgres
+            dockerfile: Dockerfile.mykidz-postgres
+          - name: redis
+            dockerfile: Dockerfile.mykidz-redis
+          - name: pgadmin4
+            dockerfile: Dockerfile.mykidz-pgadmin4
 
-  build_and_push_appserver:
-    name: Build and push Appserver image
-    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,94 +34,10 @@ jobs:
           username: ${{secrets.DOCKERHUB_USERNAME}}
           password: ${{secrets.DOCKERHUB_TOKEN}}
 
-      - name: Build and push Appserver image to Docker Hub
+      - name: Build and push ${{ matrix.image }} image to Docker Hub
         uses: docker/build-push-action@v5
         with:
           context: dockerfiles/
-          dockerfile: Dockerfile.mykidz-appserver
+          dockerfile: ${{ matrix.dockerfile }}
           push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-appserver:latest
-
-  build_and_push_nginx:
-    name: Build and push Nginx image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{secrets.DOCKERHUB_USERNAME}}
-          password: ${{secrets.DOCKERHUB_TOKEN}}
-
-      - name: Build and push Nginx image to Docker Hub
-        uses: docker/build-push-action@v5
-        with:
-          context: dockerfiles/
-          dockerfile: Dockerfile.mykidz-nginx
-          push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-nginx:latest
-
-  build_and_push_postgres:
-    name: Build and push Postgres image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{secrets.DOCKERHUB_USERNAME}}
-          password: ${{secrets.DOCKERHUB_TOKEN}}
-
-      - name: Build and push Postgres image to Docker Hub
-        uses: docker/build-push-action@v5
-        with:
-          context: dockerfiles/
-          dockerfile: Dockerfile.mykidz-postgres
-          push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-postgres:latest
-
-  build_and_push_redis:
-    name: Build and push Redis image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{secrets.DOCKERHUB_USERNAME}}
-          password: ${{secrets.DOCKERHUB_TOKEN}}
-
-      - name: Build and push Redis image to Docker Hub
-        uses: docker/build-push-action@v5
-        with:
-          context: dockerfiles/
-          dockerfile: Dockerfile.mykidz-redis
-          push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-redis:latest
-
-  build_and_push_pgadmin4:
-    name: Build and push PGAdmin4 image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{secrets.DOCKERHUB_USERNAME}}
-          password: ${{secrets.DOCKERHUB_TOKEN}}
-
-      - name: Build and push PGAdmin4 image to Docker Hub
-        uses: docker/build-push-action@v5
-        with:
-          context: dockerfiles/
-          dockerfile: Dockerfile.mykidz-pgadmin4
-          push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-pgadmin4:latest
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-${{ matrix.image }}:latest
