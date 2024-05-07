@@ -16,7 +16,7 @@ jobs:
 
   build_and_push_appserver:
     name: Build and push Appserver image
-    needs: ci-lint
+    needs: lint_and_push_placeholder
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -38,7 +38,7 @@ jobs:
 
   build_and_push_nginx:
     name: Build and push Nginx image
-    needs: ci-lint
+    needs: lint_and_push_placeholder
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -60,7 +60,7 @@ jobs:
 
   build_and_push_postgres:
     name: Build and push Postgres image
-    needs: ci-lint
+    needs: lint_and_push_placeholder
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -82,7 +82,7 @@ jobs:
 
   build_and_push_redis:
     name: Build and push Redis image
-    needs: ci-lint
+    needs: lint_and_push_placeholder
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -104,7 +104,7 @@ jobs:
 
   build_and_push_pgadmin4:
     name: Build and push PGAdmin4 image
-    needs: ci-lint
+    needs: lint_and_push_placeholder
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
