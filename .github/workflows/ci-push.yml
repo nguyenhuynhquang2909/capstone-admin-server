@@ -24,7 +24,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: dockerfiles/Dockerfile.mykidz-appserver
+          file: dockerfiles/mykidz-appserver.Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-appserver:latest
 
@@ -45,7 +45,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: dockerfiles/Dockerfile.mykidz-nginx
+          file: dockerfiles/mykidz-nginx.Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-nginx:latest
 
@@ -66,7 +66,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: dockerfiles/Dockerfile.mykidz-postgres
+          file: dockerfiles/mykidz-postgres.Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-postgres:latest
 
@@ -87,7 +87,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: dockerfiles/Dockerfile.mykidz-redis
+          file: dockerfiles/mykidz-redis.Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-redis:latest
 
@@ -108,6 +108,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: dockerfiles/Dockerfile.mykidz-pgadmin4
+          file: dockerfiles/mykidz-pgadmin4.Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-pgadmin4:latest
