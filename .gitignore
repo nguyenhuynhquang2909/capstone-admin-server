@@ -823,9 +823,4 @@ $RECYCLE.BIN/
 
 ### Gradle Patch ###
 # Java heap dump
-<<<<<<< HEAD
-
 # End of https://www.toptal.com/developers/gitignore/api/node,macos,android,terraform,nextjs,yarn,windows,powershell,helm,dotenv,gradle,intellij,visualstudiocode,firebase,database,reactnative,flutter,microsoftoffice,laravel,fastlane,vue,nativescript,ansible
-=======
-# End of https://www.toptal.com/developers/gitignore/api/node,macos,android,terraform,nextjs,yarn,windows,powershell,helm,dotenv,gradle,intellij,visualstudiocode,firebase,database,reactnative,flutter,microsoftoffice,laravel,fastlane,vue,nativescript,ansible
->>>>>>> master
