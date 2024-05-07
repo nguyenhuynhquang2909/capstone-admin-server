@@ -2,7 +2,8 @@ version: '3.9'
 
 services:
   db:
-    image: postgres
+    image: khangtgr/mykidz-postgres
+    container_name: mykidz-postgres
     environment:
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_DB: ${POSTGRES_DB}
@@ -54,6 +55,16 @@ services:
           memory: 512M
 
   pgadmin:
+    image: khangtgr/mykidz-pgadmin4
+    container_name: mykidz-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_LISTEN_PORT: ${PGADMIN_PORT}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "${PGADMIN_PORT}:${PGADMIN_PORT}"
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
