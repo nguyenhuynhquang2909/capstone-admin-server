@@ -48,7 +48,3 @@ As thousands of parents are concerned about their child's early childhood educat
 - Agile/Scrum Tools: 
 
 
-The "MyKids" app's App Server API
-
-# API link
-https://app.apiary.io/mykidz
