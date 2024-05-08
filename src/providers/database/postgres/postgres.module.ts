@@ -11,11 +11,11 @@ import { join } from 'path';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.getOrThrow('POSTGRESQL_HOST'),
-        port: +configService.getOrThrow('POSTGRESQL_PORT'),
-        username: configService.getOrThrow('POSTGRESQL_USERNAME'),
-        password: configService.getOrThrow('POSTGRESQL_PASSWORD'),
-        database: configService.getOrThrow('POSTGRESQL_DATABASE'),
+        host: configService.getOrThrow('POSTGRES_HOST'),
+        port: 5432,
+        username: configService.getOrThrow('POSTGRES_USER'),
+        password: configService.getOrThrow('POSTGRES_PASSWORD'),
+        database: configService.getOrThrow('POSTGRES_DB'),
         autoLoadEntities: true,
         entities: [join(process.cwd(), 'dist/**/*.entity.js')],
         // do NOT use synchronize: true in real projects
