@@ -44,6 +44,7 @@ CREATE TABLE posts (
     content TEXT NOT NULL,
     school_id INTEGER NOT NULL REFERENCES schools(id),
     created_by INTEGER NOT NULL REFERENCES users(id),
+    published_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
@@ -91,6 +92,13 @@ CREATE TABLE school_admins (
     user_id INTEGER NOT NULL REFERENCES users(id),
     school_id INTEGER NOT NULL REFERENCES schools(id),
     PRIMARY KEY (user_id, school_id)
+);
+
+-- Create user_tags table (many-to-many relationship between users and comments)
+CREATE TABLE user_tags (
+    comment_id INTEGER NOT NULL REFERENCES comments(id),
+    tagged_user_id INTEGER NOT NULL REFERENCES users(id),
+    PRIMARY KEY (comment_id, tagged_user_id)
 );
 
 -- Insert default roles
@@ -153,3 +161,8 @@ INSERT INTO toggle_likes (user_id, post_id) VALUES
 (1, 1), -- Parent 1 likes Post 1
 (2, 1), -- Parent 2 likes Post 1
 (3, 2); -- Parent 3 likes Post 2
+
+-- Insert dummy user tags data (tagging users in comments)
+INSERT INTO user_tags (comment_id, tagged_user_id) VALUES
+(1, 3), -- Tagging Khang Nguyen in Comment 1
+(2, 3); -- Tagging Khang Nguyen in Comment 2
