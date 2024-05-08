@@ -7,16 +7,8 @@ on:
       - main
 
 jobs:
-  lint_and_push_placeholder:
-    name: Placeholder job for linting and pushing
-    runs-on: ubuntu-latest
-    steps:
-      - name: Placeholder step
-        run: echo "This is a placeholder job."
-
   build_and_push_appserver:
     name: Build and push Appserver image
-    needs: lint_and_push_placeholder
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -38,7 +30,6 @@ jobs:
 
   build_and_push_nginx:
     name: Build and push Nginx image
-    needs: lint_and_push_placeholder
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -60,7 +51,6 @@ jobs:
 
   build_and_push_postgres:
     name: Build and push Postgres image
-    needs: lint_and_push_placeholder
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -82,7 +72,6 @@ jobs:
 
   build_and_push_redis:
     name: Build and push Redis image
-    needs: lint_and_push_placeholder
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -104,7 +93,6 @@ jobs:
 
   build_and_push_pgadmin4:
     name: Build and push PGAdmin4 image
-    needs: lint_and_push_placeholder
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
