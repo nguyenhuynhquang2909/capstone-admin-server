@@ -1,42 +1,28 @@
 import {
   Controller,
   Get,
-  // Post,
-  // Body,
-  // Patch,
+  UseGuards,
+  Req,
   Param,
-  // Delete,
 } from '@nestjs/common';
 import { PostService } from './post.service';
-// import { CreatePostDto } from './dto/create-post.dto';
-// import { UpdatePostDto } from './dto/update-post.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
-  // @Post()
-  // create(@Body() createPostDto: CreatePostDto) {
-  //   return this.postService.create(createPostDto);
-  // }
-
   @Get()
-  findAll() {
-    return this.postService.findAll();
+  @UseGuards(AuthGuard('jwt'))
+  findAll(@Req() request: any) {
+    const { id } = request.user;
+    return this.postService.findAll(id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postService.findOne(+id);
+  @UseGuards(AuthGuard('jwt'))
+  findOne(@Req() request: any, @Param('id') id: string) {
+    const { id: userId } = request.user;
+    return this.postService.findOne(userId, +id);
   }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-  //   return this.postService.update(+id, updatePostDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.postService.remove(+id);
-  // }
 }
