@@ -156,8 +156,20 @@ INSERT INTO students (name, school_id, user_id) VALUES
 
 -- Insert dummy posts data
 INSERT INTO posts (title, content, school_id, user_id) VALUES
-('Post 1', 'Content of post 1', 1, 4),
-('Post 2', 'Content of post 2', 2, 5);
+('News Bulletin: Field Trip to the Zoo', 'Our students had an amazing time exploring the zoo and learning about various animals!', 1, 4),
+('Science Fair Success!', 'Congratulations to all the young scientists who participated in our school science fair. We're proud of your hard work and creativity!', 1, 4),
+('Math Challenge: Who Will Be the Champion?', 'Get ready for an exciting math challenge! Sharpen your pencils and put on your thinking caps. Let the competition begin!', 1, 4),
+('Art Showcase: Unleash Your Creativity', 'Calling all budding artists! Showcase your talent in our school art exhibit. Let your imagination run wild!', 1, 4),
+('Community Service Day: Making a Difference Together', 'Join us for a day of giving back to our community. Together, we can make a positive impact!', 1, 4),
+('Parent-Teacher Conference Reminder', 'Dont forget to schedule your parent-teacher conference. Its a valuable opportunity to discuss your childs progress and goals.', 1, 4),
+('Healthy Eating Habits: Fueling Young Minds', 'Learn about the importance of nutrition for growing children and discover delicious and nutritious snack ideas.', 1, 4),
+('Outdoor Adventure Day: Exploring Nature', 'Get ready for a day of outdoor exploration! From nature walks to scavenger hunts, adventure awaits!', 1, 4),
+('Book Fair Bonanza: Dive into a World of Stories', 'Browse through a wide selection of books at our annual book fair. Discover new adventures and fuel your love for reading!', 2, 5),
+('Safety First: Tips for Staying Safe at School', 'Review essential safety tips with your child, from crossing the street to stranger danger. Together, we can create a safe environment for everyone.', 2, 5),
+('Cultural Diversity Celebration: Embracing Differences', 'Celebrate the rich tapestry of cultures within our school community. Join us for a day of cultural performances, food, and fun!', 2, 5),
+('Music Mania: Finding Your Rhythm', 'Explore the world of music through hands-on activities and interactive workshops. Discover your passion for rhythm and melody!', 2, 5),
+('Gardening Club: Growing Green Thumbs', 'Join our gardening club and cultivate a love for nature. Learn about plants, sustainability, and the joy of growing your own food!', 2, 5),
+('Fitness Fun Day: Get Moving and Stay Active', 'Get ready to jump, run, and play! Join us for a day of fitness activities designed to promote health and wellness.', 2, 5);
 
 -- Insert dummy hashtags data
 INSERT INTO hashtags (tag) VALUES

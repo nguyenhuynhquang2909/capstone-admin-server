@@ -6,7 +6,7 @@ export class TwilioService {
   private readonly twilioClient: twilio.Twilio;
 
   constructor() {
-    this.twilioClient = twilio('', '');
+    this.twilioClient = twilio('token1', 'token2');
   }
 
   async sendOTP(phone: string, otp: string): Promise<void> {
