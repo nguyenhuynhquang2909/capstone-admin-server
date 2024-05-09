@@ -1,8 +1,21 @@
-import { Controller, Post, Body, Get, UseGuards, UnauthorizedException, HttpException, HttpStatus, Res, Headers } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  UseGuards,
+  UnauthorizedException,
+  HttpException,
+  HttpStatus,
+  Res,
+  Headers,
+} from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
+
 import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -12,19 +25,27 @@ export class AuthController {
 
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('login')
-  async sendOtp(@Body() createAuthDto: CreateAuthDto): Promise<{ status: string; message: string }> {
+  async sendOtp(
+    @Body() createAuthDto: CreateAuthDto,
+  ): Promise<{ status: string; message: string }> {
     return await this.authService.sendOtp(createAuthDto);
   }
 
   @Post('verify')
-  async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto, @Res() response: Response): Promise<void> {
+  async verifyOtp(
+    @Body() verifyOtpDto: VerifyOtpDto,
+    @Res() response: Response,
+  ): Promise<void> {
     const result = await this.authService.verifyOtp(verifyOtpDto);
     this.setAuthorizationHeader(response, result.accessToken);
     response.status(HttpStatus.OK).json(result);
   }
 
   @Post('logout')
-  async logout(@Headers('authorization') authHeader: string, @Res() response: Response): Promise<void> {
+  async logout(
+    @Headers('authorization') authHeader: string,
+    @Res() response: Response,
+  ): Promise<void> {
     const result = await this.authService.logout(authHeader);
     this.clearAuthorizationHeader(response);
     response.status(HttpStatus.OK).json(result);
@@ -32,7 +53,10 @@ export class AuthController {
 
   @Get('profile')
   @UseGuards(AuthGuard('jwt'))
-  async getProfile(@Headers('authorization') authHeader: string, @Res() response: Response): Promise<void> {
+  async getProfile(
+    @Headers('authorization') authHeader: string,
+    @Res() response: Response,
+  ): Promise<void> {
     this.checkAuthorizationHeader(authHeader);
 
     const accessToken = authHeader.split(' ')[1];
@@ -45,7 +69,10 @@ export class AuthController {
     response.status(HttpStatus.OK).json({ status: 'success', data: profile });
   }
 
-  private setAuthorizationHeader(response: Response, accessToken: string): void {
+  private setAuthorizationHeader(
+    response: Response,
+    accessToken: string,
+  ): void {
     response.setHeader('Authorization', `Bearer ${accessToken}`);
   }
 
@@ -67,7 +94,10 @@ export class AuthController {
 
   private checkUserProfile(profile: any): void {
     if (!profile) {
-      throw new HttpException('Người dùng không được tìm thấy', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        'Người dùng không được tìm thấy',
+        HttpStatus.NOT_FOUND,
+      );
     }
   }
 }
