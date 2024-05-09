@@ -75,6 +75,8 @@ CREATE TABLE images (
 CREATE TABLE hashtags (
     id SERIAL PRIMARY KEY,
     tag VARCHAR(50) UNIQUE NOT NULL
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create posts_hashtags junction table (many-to-many relationship between posts and hashtags)
