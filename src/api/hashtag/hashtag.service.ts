@@ -30,8 +30,11 @@ export class HashtagService {
     return hashtag;
   }
 
-  async remove(id: number) {
-    const hashtag = await this.findOne(id);
-    return await this.hashtagRepository.remove(hashtag);
+async remove(id: number) {
+  const hashtag = await this.findOne(id);
+  if (!hashtag) {
+    throw new NotFoundException(`Thẻ không tồn tại`);
   }
+  return await this.hashtagRepository.remove(hashtag);
+}
 }
