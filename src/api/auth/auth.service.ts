@@ -7,12 +7,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOneOptions } from 'typeorm';
 import { randomInt } from 'crypto';
 import { User } from '../../common/entities/user.entity';
+import { Role } from '../../common/entities/role.entity';
 import { UserSession } from '../../common/entities/user-session.entity';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from '@nestjs/cache-manager';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { JwtPayload } from '../../common/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(UserSession)
     private readonly userSessionRepository: Repository<UserSession>,
+    @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
     private readonly jwtService: JwtService,
     private readonly cacheService: Cache,
   ) {}
@@ -58,7 +60,10 @@ export class AuthService {
       throw new BadRequestException('Số điện thoại và mã OTP là bắt buộc');
     }
 
-    const user = await this.userRepository.findOne({ where: { phone } });
+    const user = await this.userRepository.findOne({
+      where: { phone },
+      relations: ['role'],
+    });
     if (!user) {
       throw new BadRequestException('Số điện thoại không hợp lệ');
     }
@@ -74,6 +79,7 @@ export class AuthService {
 
     const accessTokenPayload = {
       userId: user.id,
+      roleId: user.role.id,
       issuedAt: new Date().toISOString(),
       expiresAt: new Date(
         Date.now() + 4 * 30 * 24 * 60 * 60 * 1000,
@@ -117,6 +123,7 @@ export class AuthService {
   async getProfile(userId: number): Promise<User | null> {
     const options: FindOneOptions<User> = {
       where: { id: userId },
+      relations: ['students'],
     };
     const user = await this.userRepository.findOne(options);
     if (!user) {
@@ -142,5 +149,10 @@ export class AuthService {
       throw new UnauthorizedException('Người dùng không được tìm thấy');
     }
     return user;
+  }
+
+  async findRoleNameById(id: number): Promise<string | null> {
+    const role = await this.roleRepository.findOne({ where: { id: id } });
+    return role ? role.name : null;
   }
 }
