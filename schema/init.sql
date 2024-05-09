@@ -36,6 +36,18 @@ CREATE TABLE schools (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create students table
+CREATE TABLE students (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    school_id INTEGER NOT NULL REFERENCES schools(id),
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_school_id FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Create posts table
 CREATE TABLE posts (
     id SERIAL PRIMARY KEY,
@@ -94,7 +106,7 @@ CREATE TABLE toggle_likes (
     PRIMARY KEY (user_id, post_id)
 );
 
--- Create school_admins junction table (many-to-many relationship between users and schools)
+-- Create school_admins junction table (many-to-many relationship between users (schoolAdmins) and schools)
 CREATE TABLE school_admins (
     user_id INTEGER NOT NULL REFERENCES users(id),
     school_id INTEGER NOT NULL REFERENCES schools(id),
@@ -121,16 +133,22 @@ INSERT INTO roles (name) VALUES
 
 -- Insert dummy users data (parents and schoolAdmins)
 INSERT INTO users (name, phone, role_id) VALUES
-('Parent 1', '901234888', 1),
-('Parent 2', '901234889', 1),
-('Khang Nguyen', '903999938', 1),
-('SchoolAdmin 1', '901234891', 2),
-('SchoolAdmin 2', '901234892', 2);
+('Parent 1', '0901234888', 1),
+('Parent 2', '0901234889', 1),
+('Khang Nguyen', '0903999938', 1),
+('SchoolAdmin 1', '0901234891', 2),
+('SchoolAdmin 2', '0901234892', 2);
 
 -- Insert dummy schools data
 INSERT INTO schools (name) VALUES
 ('School 1'),
 ('School 2');
+
+-- Insert dummy students data
+INSERT INTO students (name, school_id, user_id) VALUES
+('Student 1', 1, 1),
+('Student 2', 1, 2),
+('Student 3', 2, 3);
 
 -- Insert dummy posts data
 INSERT INTO posts (title, content, school_id, user_id) VALUES

@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -17,6 +18,7 @@ export class Role {
   name: string;
 
   @OneToMany(() => User, (user) => user.role)
+  @JoinColumn({ name: 'user_id' })
   users: User[];
 
   @CreateDateColumn()
