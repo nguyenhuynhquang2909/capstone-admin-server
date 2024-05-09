@@ -23,7 +23,6 @@ export class UserService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { role_id, ...userData } = createUserDto;
 
-    // Find the role by roleId
     const role = await this.roleRepository.findOne({
       where: { id: role_id },
     });
@@ -31,16 +30,22 @@ export class UserService {
       throw new NotFoundException(`Không tìm thấy vai trò với ID ${role_id}`);
     }
 
-    // Check if a user with the provided phone number or email already exists
-    const existingUser = await this.userRepository.findOne({
-      where: [{ phone: userData.phone }],
-    });
-    if (existingUser) {
-      if (existingUser.phone === userData.phone) {
+    // Check if the user with the provided phone number or email already exists
+    if (userData.phone) {
+      const existingUser = await this.userRepository.findOne({
+        where: { phone: userData.phone },
+      });
+      if (existingUser) {
         throw new BadRequestException(
           'Người dùng với số điện thoại này đã tồn tại',
         );
-      } else {
+      }
+    }
+    if (userData.email) {
+      const existingUser = await this.userRepository.findOne({
+        where: { email: userData.email },
+      });
+      if (existingUser) {
         throw new BadRequestException('Người dùng với email này đã tồn tại');
       }
     }

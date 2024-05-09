@@ -1,20 +1,20 @@
-import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryColumn, OneToOne, JoinColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Post } from './post.entity';
 
 @Entity('toggle_likes')
 export class ToggleLike {
   @PrimaryColumn()
-  userId: number;
+  user_id: number;
 
   @PrimaryColumn()
-  postId: number;
+  post_id: number;
 
-  @ManyToOne(() => User, (user) => user.toggleLikes)
+  @OneToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Post, (post) => post.toggleLikes)
+  @OneToOne(() => Post, (post) => post.id)
   @JoinColumn({ name: 'post_id' })
   post: Post;
 }

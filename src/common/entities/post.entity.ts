@@ -12,8 +12,6 @@ import { School } from './school.entity';
 import { Image } from './image.entity';
 import { Comment } from './comment.entity';
 import { User } from './user.entity';
-import { Hashtag } from './hashtag.entity';
-import { ToggleLike } from './toggle_like.entity';
 
 @Entity('posts')
 export class Post {
@@ -26,34 +24,28 @@ export class Post {
   @Column({ type: 'text', nullable: false })
   content: string;
 
-  @ManyToOne(() => School, (school) => school.posts, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
+  @Column({ nullable: false })
+  school_id: string;
+
+  @ManyToOne(() => School, (school) => school.posts)
   @JoinColumn({ name: 'school_id' })
   school: School;
 
-  @ManyToOne(() => User, (user) => user.posts, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
+  @Column({ nullable: false })
+  user_id: string;
+
+  @ManyToOne(() => User, (user) => user.posts)
   @JoinColumn({ name: 'user_id' })
   user: User;
 
   @OneToMany(() => Image, (image) => image.post)
-  @JoinColumn({ name: 'image_id' })
   images: Image[];
 
   @OneToMany(() => Comment, (comment) => comment.post)
-  @JoinColumn({ name: 'comment_id' })
   comments: Comment[];
 
-  @OneToMany(() => Hashtag, (hashtag) => hashtag.posts)
-  @JoinColumn({ name: 'hashtag_id' })
-  hashtags: Hashtag[];
-
-  @OneToMany(() => ToggleLike, (toggleLike) => toggleLike.post)
-  toggleLikes: ToggleLike[];
+  @CreateDateColumn({ type: 'timestamptz' })
+  published_at: Date;
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

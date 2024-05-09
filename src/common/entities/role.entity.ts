@@ -5,7 +5,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-  JoinColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -14,16 +13,15 @@ export class Role {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, nullable: false })
+  @Column({ unique: true, nullable: false, length: 50 })
   name: string;
 
   @OneToMany(() => User, (user) => user.role)
-  @JoinColumn({ name: 'user_id' })
   users: User[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 }
