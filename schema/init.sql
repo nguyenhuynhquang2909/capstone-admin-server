@@ -157,7 +157,7 @@ INSERT INTO students (name, school_id, user_id) VALUES
 -- Insert dummy posts data
 INSERT INTO posts (title, content, school_id, user_id) VALUES
 ('News Bulletin: Field Trip to the Zoo', 'Our students had an amazing time exploring the zoo and learning about various animals!', 1, 4),
-('Science Fair Success!', 'Congratulations to all the young scientists who participated in our school science fair. We're proud of your hard work and creativity!', 1, 4),
+('Science Fair Success!', 'Congratulations to all the young scientists who participated in our school science fair. Were proud of your hard work and creativity!', 1, 4),
 ('Math Challenge: Who Will Be the Champion?', 'Get ready for an exciting math challenge! Sharpen your pencils and put on your thinking caps. Let the competition begin!', 1, 4),
 ('Art Showcase: Unleash Your Creativity', 'Calling all budding artists! Showcase your talent in our school art exhibit. Let your imagination run wild!', 1, 4),
 ('Community Service Day: Making a Difference Together', 'Join us for a day of giving back to our community. Together, we can make a positive impact!', 1, 4),
