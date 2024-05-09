@@ -11,9 +11,11 @@ import {
   Headers,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
+
 import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -26,11 +28,7 @@ export class AuthController {
   async sendOtp(
     @Body() createAuthDto: CreateAuthDto,
   ): Promise<{ status: string; message: string }> {
-    try {
-      return await this.authService.sendOtp(createAuthDto);
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
+    return await this.authService.sendOtp(createAuthDto);
   }
 
   @Post('verify')
@@ -38,13 +36,9 @@ export class AuthController {
     @Body() verifyOtpDto: VerifyOtpDto,
     @Res() response: Response,
   ): Promise<void> {
-    try {
-      const result = await this.authService.verifyOtp(verifyOtpDto);
-      response.setHeader('Authorization', `Bearer ${result.accessToken}`);
-      response.status(HttpStatus.OK).json(result);
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
+    const result = await this.authService.verifyOtp(verifyOtpDto);
+    this.setAuthorizationHeader(response, result.accessToken);
+    response.status(HttpStatus.OK).json(result);
   }
 
   @Post('logout')
@@ -52,13 +46,9 @@ export class AuthController {
     @Headers('authorization') authHeader: string,
     @Res() response: Response,
   ): Promise<void> {
-    try {
-      const result = await this.authService.logout(authHeader);
-      response.setHeader('Authorization', '');
-      response.status(HttpStatus.OK).json(result);
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
+    const result = await this.authService.logout(authHeader);
+    this.clearAuthorizationHeader(response);
+    response.status(HttpStatus.OK).json(result);
   }
 
   @Get('profile')
@@ -67,25 +57,47 @@ export class AuthController {
     @Headers('authorization') authHeader: string,
     @Res() response: Response,
   ): Promise<void> {
-    try {
-      if (!authHeader) {
-        throw new UnauthorizedException('No authorization header provided');
-      }
+    this.checkAuthorizationHeader(authHeader);
 
-      const accessToken = authHeader.split(' ')[1];
-      const decodedToken = this.authService.decodeToken(accessToken);
-      if (!decodedToken || !decodedToken.userId) {
-        throw new UnauthorizedException('Invalid or expired token');
-      }
+    const accessToken = authHeader.split(' ')[1];
+    const decodedToken = this.authService.decodeToken(accessToken);
+    this.checkDecodedToken(decodedToken);
 
-      const profile = await this.authService.getProfile(decodedToken.userId);
-      if (!profile) {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-      }
+    const profile = await this.authService.getProfile(decodedToken.userId);
+    this.checkUserProfile(profile);
 
-      response.status(HttpStatus.OK).json({ status: 'success', data: profile });
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    response.status(HttpStatus.OK).json({ status: 'success', data: profile });
+  }
+
+  private setAuthorizationHeader(
+    response: Response,
+    accessToken: string,
+  ): void {
+    response.setHeader('Authorization', `Bearer ${accessToken}`);
+  }
+
+  private clearAuthorizationHeader(response: Response): void {
+    response.setHeader('Authorization', '');
+  }
+
+  private checkAuthorizationHeader(authHeader: string): void {
+    if (!authHeader) {
+      throw new UnauthorizedException('Không có Header ủy quyền được cung cấp');
+    }
+  }
+
+  private checkDecodedToken(decodedToken: any): void {
+    if (!decodedToken || !decodedToken.userId) {
+      throw new UnauthorizedException('Token không hợp lệ hoặc đã hết hạn');
+    }
+  }
+
+  private checkUserProfile(profile: any): void {
+    if (!profile) {
+      throw new HttpException(
+        'Người dùng không được tìm thấy',
+        HttpStatus.NOT_FOUND,
+      );
     }
   }
 }

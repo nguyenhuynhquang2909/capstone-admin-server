@@ -1,28 +1,36 @@
 import {
   Entity,
   PrimaryGeneratedColumn,
+  Column,
   CreateDateColumn,
   UpdateDateColumn,
-  Column,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { School } from './school.entity';
 
-@Entity('user_sessions')
-export class UserSession {
+@Entity('students')
+export class Student {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'text', nullable: false })
-  access_token: string;
+  @Column({ length: 255, nullable: false })
+  name: string;
 
-  @ManyToOne(() => User, { nullable: false })
+  @Column({ nullable: false })
+  school_id: string;
+
+  @ManyToOne(() => School, (school) => school.students)
+  @JoinColumn({ name: 'school_id' })
+  school: School;
+
+  @Column({ nullable: false })
+  user_id: string;
+
+  @ManyToOne(() => User, (user) => user.students)
   @JoinColumn({ name: 'user_id' })
   user: User;
-
-  @Column({ type: 'timestamptz', nullable: false })
-  access_token_expiration_time: Date;
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
