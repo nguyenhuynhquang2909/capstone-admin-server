@@ -7,8 +7,9 @@ import {
   Post,
   Body,
 } from '@nestjs/common';
-import { PostService } from './post.service';
 import { AuthGuard } from '@nestjs/passport';
+
+import { PostService } from './post.service';
 
 @Controller('post')
 export class PostController {
@@ -16,14 +17,14 @@ export class PostController {
 
   @Get()
   @UseGuards(AuthGuard('jwt'))
-  findAll(@Req() request: any) {
+  async findAll(@Req() request: any) {
     const { id } = request.user;
     return this.postService.findAll(id);
   }
 
   @Get(':id')
   @UseGuards(AuthGuard('jwt'))
-  findOne(@Req() request: any, @Param('id') id: string) {
+  async findOne(@Req() request: any, @Param('id') id: string) {
     const { id: userId } = request.user;
     return this.postService.findOne(userId, +id);
   }
