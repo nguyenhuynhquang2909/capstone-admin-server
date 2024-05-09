@@ -3,5 +3,4 @@ export interface JwtPayload {
   issuedAt: string;
   expiresAt: string;
   roleId?: number;
-  roleName?: string;
 }

@@ -1,18 +1,21 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { User } from '../../common/entities/user.entity';
-import { UserSession } from '../../common/entities/user-session.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
+
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
+
+import { User } from '../../common/entities/user.entity';
+import { Role } from '../../common/entities/role.entity';
+import { UserSession } from '../../common/entities/user-session.entity';
+
+import { JwtStrategy } from '../../common/guards/jwt.strategy';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, UserSession]),
+    TypeOrmModule.forFeature([User, UserSession, Role]),
     JwtModule.register({
       secret: '123456',
       signOptions: { expiresIn: '10368000s' },
@@ -25,14 +28,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
       },
     ]),
   ],
-  providers: [
-    AuthService,
-    JwtStrategy,
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
-  ],
   controllers: [AuthController],
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}

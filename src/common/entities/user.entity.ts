@@ -5,9 +5,14 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToMany,
   JoinColumn,
 } from 'typeorm';
 import { Role } from './role.entity';
+import { Post } from './post.entity';
+import { Student } from './student.entity';
+import { Comment } from './comment.entity';
+import { ToggleLike } from './toggle-like.entity';
 
 @Entity('users')
 export class User {
@@ -17,8 +22,14 @@ export class User {
   @Column({ length: 255, nullable: false })
   name: string;
 
-  @Column({ length: 20, unique: true, nullable: false })
+  @Column({ length: 20, unique: true })
   phone: string;
+
+  @Column({ length: 255, unique: true })
+  email: string;
+
+  @Column({ length: 255 })
+  password: string;
 
   @Column({ nullable: false })
   role_id: number;
@@ -27,9 +38,21 @@ export class User {
   @JoinColumn({ name: 'role_id' })
   role: Role;
 
-  @CreateDateColumn()
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comments: Comment[];
+
+  @OneToMany(() => Post, (post) => post.user)
+  posts: Post[];
+
+  @OneToMany(() => Student, (student) => student.user)
+  students: Student[];
+
+  @OneToMany(() => ToggleLike, (toggleLike) => toggleLike.user)
+  likes: ToggleLike[];
+
+  @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 }

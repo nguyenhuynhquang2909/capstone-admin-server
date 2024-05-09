@@ -6,18 +6,22 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { User } from './user.entity';
+import { Post } from './post.entity';
+import { Student } from './student.entity';
 
-@Entity('roles')
-export class Role {
+@Entity('schools')
+export class School {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, nullable: false, length: 50 })
+  @Column({ length: 255, nullable: false })
   name: string;
 
-  @OneToMany(() => User, (user) => user.role)
-  users: User[];
+  @OneToMany(() => Student, (student) => student.user)
+  students: Student[];
+
+  @OneToMany(() => Post, (post) => post.school)
+  posts: Post[];
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
