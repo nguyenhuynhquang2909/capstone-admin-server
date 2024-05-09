@@ -9,11 +9,19 @@ import { Role } from '../../common/entities/role.entity';
 import { UserSession } from '../../common/entities/user-session.entity';
 import { AuthService } from '../auth/auth.service';
 import { JwtStrategy } from '../../common/guards/jwt.strategy';
+import { ToggleLike } from '../../common/entities/toggle-like.entity';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Post, School, User, UserSession, Role]),
+    TypeOrmModule.forFeature([
+      Post,
+      School,
+      User,
+      UserSession,
+      Role,
+      ToggleLike,
+    ]),
     JwtModule.register({
       secret: '123456',
       signOptions: { expiresIn: '10368000s' },

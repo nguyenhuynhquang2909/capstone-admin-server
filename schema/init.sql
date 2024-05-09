@@ -177,34 +177,7 @@ INSERT INTO hashtags (tag) VALUES
 ('tag2'),
 ('tag3');
 
--- Insert dummy posts_hashtags data
-INSERT INTO posts_hashtags (post_id, hashtag_id, placeholder_number) VALUES
-(1, 1, 1),
-(1, 2, 2),
-(2, 2, 1),
-(2, 3, 2);
-
--- Insert dummy images data
-INSERT INTO images (url, post_id) VALUES
-('image1.jpg', 1),
-('image2.jpg', 2);
-
--- Insert dummy comments data
-INSERT INTO comments (content, post_id, user_id) VALUES
-('Comment 1', 1, 1),
-('Comment 2', 2, 2);
-
--- Insert dummy toggle_likes data
-INSERT INTO toggle_likes (user_id, post_id) VALUES
-(1, 1),
-(2, 1);
-
 -- Insert dummy school_admins data
 INSERT INTO school_admins (user_id, school_id) VALUES
 (4, 1),
 (5, 2);
-
--- Insert dummy user_tags data
-INSERT INTO user_tags (comment_id, user_id, placeholder_number) VALUES
-(1, 3, 1),
-(2, 3, 1);
