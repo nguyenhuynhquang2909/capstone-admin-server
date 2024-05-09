@@ -83,7 +83,7 @@ CREATE TABLE hashtags (
 CREATE TABLE posts_hashtags (
     post_id INTEGER NOT NULL REFERENCES posts(id),
     hashtag_id INTEGER NOT NULL REFERENCES hashtags(id),
-    placeholder_number INTEGER NOT NULL
+    placeholder_number INTEGER NOT NULL,
     -- CONSTRAINT fk_post_id FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
     -- CONSTRAINT fk_hashtag_id FOREIGN KEY (hashtag_id) REFERENCES hashtags(id) ON DELETE CASCADE,
     PRIMARY KEY (post_id, hashtag_id, placeholder_number)
@@ -102,7 +102,7 @@ CREATE TABLE comments (
 -- Create toggle_likes junction table (many-to-many relationship between users and posts)
 CREATE TABLE toggle_likes (
     user_id INTEGER NOT NULL REFERENCES users(id),
-    post_id INTEGER NOT NULL REFERENCES posts(id)
+    post_id INTEGER NOT NULL REFERENCES posts(id),
     -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     -- CONSTRAINT fk_post_id FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, post_id)
@@ -111,7 +111,7 @@ CREATE TABLE toggle_likes (
 -- Create school_admins junction table (many-to-many relationship between users (schoolAdmins) and schools)
 CREATE TABLE school_admins (
     user_id INTEGER NOT NULL REFERENCES users(id),
-    school_id INTEGER NOT NULL REFERENCES schools(id)
+    school_id INTEGER NOT NULL REFERENCES schools(id),
     -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     -- CONSTRAINT fk_school_id FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, school_id)
@@ -121,7 +121,7 @@ CREATE TABLE school_admins (
 CREATE TABLE user_tags (
     comment_id INTEGER NOT NULL REFERENCES comments(id),
     user_id INTEGER NOT NULL REFERENCES users(id),
-    placeholder_number INTEGER NOT NULL
+    placeholder_number INTEGER NOT NULL,
     -- CONSTRAINT fk_comment_id FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
     -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     PRIMARY KEY (comment_id, user_id, placeholder_number)
