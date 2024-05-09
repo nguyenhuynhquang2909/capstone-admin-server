@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { CacheModule } from '@nestjs/cache-manager';
+import * as redisStore from 'cache-manager-redis-store';
 import { PostgresModule } from './providers/database/postgres/postgres.module';
+import { RedisModule } from './providers/cache/redis/redis.module';
 import { ServerController } from './api/server/server.controller';
 import { UserModule } from './api/user/user.module';
-import { CacheModule } from '@nestjs/cache-manager';
 import { AuthModule } from './api/auth/auth.module';
-import { RedisModule } from './providers/cache/redis/redis.module';
-// import { PostModule } from './api/post/post.module';
-import * as redisStore from 'cache-manager-redis-store';
+import { PostModule } from './api/post/post.module';
+import { HashtagModule } from './api/hashtag/hashtag.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import * as redisStore from 'cache-manager-redis-store';
     UserModule,
     AuthModule,
     RedisModule,
-    // PostModule,
+    HashtagModule,
+    PostModule,
   ],
   controllers: [ServerController],
   providers: [],
