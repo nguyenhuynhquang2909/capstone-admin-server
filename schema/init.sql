@@ -14,7 +14,7 @@ CREATE TABLE users (
     role_id INTEGER NOT NULL REFERENCES roles(id),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_role_id FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+    -- CONSTRAINT fk_role_id FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 
 -- Create user_sessions table
@@ -25,7 +25,7 @@ CREATE TABLE user_sessions (
     access_token_expiration_time TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Create schools table
@@ -44,8 +44,8 @@ CREATE TABLE students (
     user_id INTEGER NOT NULL REFERENCES users(id),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_school_id FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    -- CONSTRAINT fk_school_id FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
+    -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Create posts table
@@ -58,8 +58,8 @@ CREATE TABLE posts (
     published_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_school_id FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    -- CONSTRAINT fk_school_id FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
+    -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Create images table
@@ -68,7 +68,7 @@ CREATE TABLE images (
     url VARCHAR(255) NOT NULL,
     post_id INTEGER NOT NULL REFERENCES posts(id),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_post_id FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+    -- CONSTRAINT fk_post_id FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 );
 
 -- Create hashtags table
@@ -84,8 +84,8 @@ CREATE TABLE posts_hashtags (
     post_id INTEGER NOT NULL REFERENCES posts(id),
     hashtag_id INTEGER NOT NULL REFERENCES hashtags(id),
     placeholder_number INTEGER NOT NULL,
-    CONSTRAINT fk_post_id FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    CONSTRAINT fk_hashtag_id FOREIGN KEY (hashtag_id) REFERENCES hashtags(id) ON DELETE CASCADE,
+    -- CONSTRAINT fk_post_id FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    -- CONSTRAINT fk_hashtag_id FOREIGN KEY (hashtag_id) REFERENCES hashtags(id) ON DELETE CASCADE,
     PRIMARY KEY (post_id, hashtag_id, placeholder_number)
 );
 
@@ -103,8 +103,8 @@ CREATE TABLE comments (
 CREATE TABLE toggle_likes (
     user_id INTEGER NOT NULL REFERENCES users(id),
     post_id INTEGER NOT NULL REFERENCES posts(id),
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    CONSTRAINT fk_post_id FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    -- CONSTRAINT fk_post_id FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, post_id)
 );
 
@@ -112,8 +112,8 @@ CREATE TABLE toggle_likes (
 CREATE TABLE school_admins (
     user_id INTEGER NOT NULL REFERENCES users(id),
     school_id INTEGER NOT NULL REFERENCES schools(id),
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    CONSTRAINT fk_school_id FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
+    -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    -- CONSTRAINT fk_school_id FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, school_id)
 );
 
@@ -122,8 +122,8 @@ CREATE TABLE user_tags (
     comment_id INTEGER NOT NULL REFERENCES comments(id),
     user_id INTEGER NOT NULL REFERENCES users(id),
     placeholder_number INTEGER NOT NULL,
-    CONSTRAINT fk_comment_id FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    -- CONSTRAINT fk_comment_id FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+    -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     PRIMARY KEY (comment_id, user_id, placeholder_number)
 );
 
