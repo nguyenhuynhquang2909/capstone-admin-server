@@ -7,8 +7,7 @@ import { UserSession } from '../../common/entities/user-session.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -27,11 +26,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
   ],
   providers: [
     AuthService,
-    JwtStrategy,
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    JwtStrategy
   ],
   controllers: [AuthController],
 })
