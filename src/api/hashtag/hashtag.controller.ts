@@ -7,22 +7,22 @@ export class HashtagController {
   constructor(private readonly hashtagService: HashtagService) {}
 
   @Post()
-  create(@Body() createHashtagDto: CreateHashtagDto) {
-    return this.hashtagService.create(createHashtagDto);
+  async create(@Body() createHashtagDto: CreateHashtagDto) {
+    return await this.hashtagService.create(createHashtagDto);
   }
 
   @Get()
-  findAll() {
-    return this.hashtagService.findAll();
+  async findAll() {
+    return await this.hashtagService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.hashtagService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.hashtagService.findOne(+id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.hashtagService.remove(+id);
+  async remove(@Param('id') id: string) {
+    await this.hashtagService.remove(+id);
   }
 }

@@ -16,10 +16,10 @@ export class Image {
   @Column({ length: 255, nullable: false })
   url: string;
 
-  @ManyToOne(() => Post, (post) => post.images, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
+  @Column({ nullable: false })
+  post_id: string;
+
+  @ManyToOne(() => Post, (post) => post.images)
   @JoinColumn({ name: 'post_id' })
   post: Post;
 

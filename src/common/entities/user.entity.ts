@@ -12,9 +12,6 @@ import { Role } from './role.entity';
 import { Post } from './post.entity';
 import { Student } from './student.entity';
 import { Comment } from './comment.entity';
-import { UserTag } from './user_tag.entity';
-import { ToggleLike } from './toggle_like.entity';
-import { SchoolAdmin } from './school_admin.entity';
 
 @Entity('users')
 export class User {
@@ -24,8 +21,14 @@ export class User {
   @Column({ length: 255, nullable: false })
   name: string;
 
-  @Column({ length: 20, unique: true, nullable: false })
+  @Column({ length: 20, unique: true })
   phone: string;
+
+  @Column({ length: 255, unique: true })
+  email: string;
+
+  @Column({ length: 255 })
+  password: string;
 
   @Column({ nullable: false })
   role_id: number;
@@ -35,29 +38,17 @@ export class User {
   role: Role;
 
   @OneToMany(() => Comment, (comment) => comment.user)
-  @JoinColumn({ name: 'comment_id' })
   comments: Comment[];
 
   @OneToMany(() => Post, (post) => post.user)
-  @JoinColumn({ name: 'post_id' })
   posts: Post[];
 
   @OneToMany(() => Student, (student) => student.user)
-  @JoinColumn({ name: 'student_id' })
   students: Student[];
 
-  @OneToMany(() => UserTag, (userTag) => userTag.user)
-  userTags: UserTag[];
-
-  @OneToMany(() => ToggleLike, (toggleLike) => toggleLike.user)
-  toggleLikes: ToggleLike[];
-
-  @OneToMany(() => SchoolAdmin, (schoolAdmin) => schoolAdmin.user)
-  schoolAdmins: SchoolAdmin[];
-
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 }

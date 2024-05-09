@@ -10,7 +10,9 @@ CREATE TABLE roles (
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    phone VARCHAR(20) UNIQUE NOT NULL,
+    phone VARCHAR(20) UNIQUE,
+    email VARCHAR(255) UNIQUE,
+    password VARCHAR(255),
     role_id INTEGER NOT NULL REFERENCES roles(id),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
@@ -134,12 +136,12 @@ INSERT INTO roles (name) VALUES
 ('superAdmin');
 
 -- Insert dummy users data (parents and schoolAdmins)
-INSERT INTO users (name, phone, role_id) VALUES
-('Parent 1', '0901234888', 1),
-('Parent 2', '0901234889', 1),
-('Khang Nguyen', '0903999938', 1),
-('SchoolAdmin 1', '0901234891', 2),
-('SchoolAdmin 2', '0901234892', 2);
+INSERT INTO users (name, phone, email, password, role_id) VALUES
+('Parent 1', '0901234888', NULL, NULL, 1),
+('Parent 2', '0901234889', NULL, NULL, 1),
+('Khang Nguyen', '0903999938', NULL, NULL, 1),
+('SchoolAdmin 1', NULL, "admin1@gmail.com", "123", 2),
+('SchoolAdmin 2', NULL, "admin2@gmail.com", "456", 2);
 
 -- Insert dummy schools data
 INSERT INTO schools (name) VALUES

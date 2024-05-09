@@ -29,12 +29,14 @@ export class AuthService {
   ): Promise<{ status: string; message: string }> {
     const { phone } = createAuthDto;
     if (!phone) {
-      throw new BadRequestException('Phone number is required');
+      throw new BadRequestException('Số điện thoại là bắt buộc');
     }
 
     const user = await this.userRepository.findOne({ where: { phone } });
     if (!user) {
-      throw new BadRequestException('Invalid phone number');
+      throw new BadRequestException(
+        'Số điện thoại không hợp lệ hoặc người dùng không tồn tại',
+      );
     }
 
     // Generate OTP
@@ -43,7 +45,7 @@ export class AuthService {
     // Set the OTP to last only 30 seconds
     await this.cacheService.set(phone, otp, 30);
 
-    return { status: 'success', message: `OTP code: ${otp}` };
+    return { status: 'success', message: `OTP: ${otp}` };
   }
 
   async verifyOtp(verifyOtpDto: VerifyOtpDto): Promise<{
@@ -53,19 +55,19 @@ export class AuthService {
   }> {
     const { phone, otp } = verifyOtpDto;
     if (!phone || !otp) {
-      throw new BadRequestException('Phone number and OTP code are required');
+      throw new BadRequestException('Số điện thoại và mã OTP là bắt buộc');
     }
 
     const user = await this.userRepository.findOne({ where: { phone } });
     if (!user) {
-      throw new BadRequestException('Invalid phone number');
+      throw new BadRequestException('Số điện thoại không hợp lệ');
     }
 
     const storedOtp = await this.cacheService.get<string>(phone);
     if (storedOtp !== otp) {
       // If the OTP is incorrect, remove the stored OTP
       await this.cacheService.del(phone);
-      throw new BadRequestException('Invalid OTP');
+      throw new BadRequestException('Mã OTP không hợp lệ');
     }
 
     await this.cacheService.del(phone);
@@ -92,7 +94,7 @@ export class AuthService {
 
     return {
       status: 'success',
-      message: 'OTP is valid',
+      message: 'Mã OTP hợp lệ',
       accessToken,
     };
   }
@@ -106,10 +108,10 @@ export class AuthService {
     };
 
     if (!decodedToken?.userId) {
-      throw new BadRequestException('Invalid or expired token');
+      throw new BadRequestException('Token không hợp lệ hoặc đã hết hạn');
     }
 
-    return { status: 'success', message: 'User logged out successfully' };
+    return { status: 'success', message: 'Người dùng đã đăng xuất thành công' };
   }
 
   async getProfile(userId: number): Promise<User | null> {
@@ -118,7 +120,7 @@ export class AuthService {
     };
     const user = await this.userRepository.findOne(options);
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new BadRequestException('Người dùng không được tìm thấy');
     }
     return user;
   }
@@ -137,7 +139,7 @@ export class AuthService {
     };
     const user = await this.userRepository.findOne(options);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException('Người dùng không được tìm thấy');
     }
     return user;
   }

@@ -5,12 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
-  OneToMany,
   JoinColumn,
 } from 'typeorm';
 import { Post } from './post.entity';
 import { User } from './user.entity';
-import { UserTag } from './user_tag.entity';
 
 @Entity('comments')
 export class Comment {
@@ -20,22 +18,19 @@ export class Comment {
   @Column({ type: 'text', nullable: false })
   content: string;
 
-  @ManyToOne(() => Post, (post) => post.comments, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
+  @Column({ nullable: false })
+  post_id: string;
+
+  @ManyToOne(() => Post, (post) => post.comments)
   @JoinColumn({ name: 'post_id' })
   post: Post;
 
-  @ManyToOne(() => User, (user) => user.comments, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
+  @Column({ nullable: false })
+  user_id: number;
+
+  @ManyToOne(() => User, (user) => user.comments)
   @JoinColumn({ name: 'user_id' })
   user: User;
-
-  @OneToMany(() => UserTag, (userTag) => userTag.comment)
-  userTags: UserTag[];
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

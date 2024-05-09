@@ -15,12 +15,18 @@ export class Student {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 255 })
+  @Column({ length: 255, nullable: false })
   name: string;
+
+  @Column({ nullable: false })
+  school_id: string;
 
   @ManyToOne(() => School, (school) => school.students)
   @JoinColumn({ name: 'school_id' })
   school: School;
+
+  @Column({ nullable: false })
+  user_id: string;
 
   @ManyToOne(() => User, (user) => user.students)
   @JoinColumn({ name: 'user_id' })

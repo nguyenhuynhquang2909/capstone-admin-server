@@ -1,20 +1,20 @@
-import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryColumn, JoinColumn, OneToOne } from 'typeorm';
 import { User } from './user.entity';
 import { School } from './school.entity';
 
 @Entity('school_admins')
 export class SchoolAdmin {
   @PrimaryColumn()
-  userId: number;
+  user_id: number;
 
   @PrimaryColumn()
-  schoolId: number;
+  school_id: number;
 
-  @ManyToOne(() => User, (user) => user.schoolAdmins)
+  @OneToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => School, (school) => school.schoolAdmins)
+  @OneToOne(() => School, (school) => school.id)
   @JoinColumn({ name: 'school_id' })
   school: School;
 }
