@@ -12,6 +12,7 @@ import { School } from './school.entity';
 import { Image } from './image.entity';
 import { Comment } from './comment.entity';
 import { User } from './user.entity';
+import { ToggleLike } from './toggle-like.entity';
 
 @Entity('posts')
 export class Post {
@@ -43,6 +44,9 @@ export class Post {
 
   @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];
+
+  @OneToMany(() => ToggleLike, (toggleLike) => toggleLike.post)
+  likes: ToggleLike[];
 
   @CreateDateColumn({ type: 'timestamptz' })
   published_at: Date;

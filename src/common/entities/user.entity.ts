@@ -12,6 +12,7 @@ import { Role } from './role.entity';
 import { Post } from './post.entity';
 import { Student } from './student.entity';
 import { Comment } from './comment.entity';
+import { ToggleLike } from './toggle-like.entity';
 
 @Entity('users')
 export class User {
@@ -45,6 +46,9 @@ export class User {
 
   @OneToMany(() => Student, (student) => student.user)
   students: Student[];
+
+  @OneToMany(() => ToggleLike, (toggleLike) => toggleLike.user)
+  likes: ToggleLike[];
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
