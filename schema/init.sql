@@ -36,7 +36,6 @@ CREATE TABLE schools (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
-
 -- Create posts table
 CREATE TABLE posts (
     id SERIAL PRIMARY KEY,

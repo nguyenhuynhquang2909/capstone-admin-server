@@ -75,7 +75,7 @@ services:
     networks:
       - app-network
     deploy:
-      replicas: 3
+      replicas: 2
       restart_policy:
         condition: on-failure
       resources:
