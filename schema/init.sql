@@ -22,7 +22,7 @@ CREATE TABLE users (
 -- Create user_sessions table
 CREATE TABLE user_sessions (
     id SERIAL PRIMARY KEY,
-    access_token VARCHAR(255) NOT NULL,
+    access_token TEXT NOT NULL,
     user_id INTEGER NOT NULL REFERENCES users(id),
     access_token_expiration_time TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,

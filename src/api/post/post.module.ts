@@ -1,17 +1,21 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
+
 import { PostService } from './post.service';
 import { PostController } from './post.controller';
+
+import { AuthService } from '../auth/auth.service';
+
+import { JwtStrategy } from '../../common/guards/jwt.strategy';
+
 import { Post } from '../../common/entities/post.entity';
 import { School } from '../../common/entities/school.entity';
 import { User } from '../../common/entities/user.entity';
 import { Role } from '../../common/entities/role.entity';
 import { Comment } from '../../common/entities/comment.entity';
-import { UserSession } from '../../common/entities/user-session.entity';
-import { AuthService } from '../auth/auth.service';
-import { JwtStrategy } from '../../common/guards/jwt.strategy';
 import { ToggleLike } from '../../common/entities/toggle-like.entity';
-import { JwtModule } from '@nestjs/jwt';
+import { UserSession } from '../../common/entities/user-session.entity';
 
 @Module({
   imports: [
@@ -19,10 +23,10 @@ import { JwtModule } from '@nestjs/jwt';
       Post,
       School,
       User,
-      UserSession,
       Role,
-      ToggleLike,
       Comment,
+      ToggleLike,
+      UserSession,
     ]),
     JwtModule.register({
       secret: '123456',

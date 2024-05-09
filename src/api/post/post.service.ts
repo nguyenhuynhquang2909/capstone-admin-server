@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
 import { Post } from '../../common/entities/post.entity';
 import { ToggleLike } from '../../common/entities/toggle-like.entity';
 import { Comment } from '../../common/entities/comment.entity';
+
 import { AuthService } from '../../api/auth/auth.service';
 
 @Injectable()
@@ -52,7 +54,9 @@ export class PostService {
 
     const numLikes = post.likes ? post.likes.length : 0;
     const numComments = post.comments ? post.comments.length : 0;
-    const likers = post.likes ? post.likes.map((like) => like.user_id.toString()) : [];
+    const likers = post.likes
+      ? post.likes.map((like) => like.user_id.toString())
+      : [];
 
     return {
       id: post.id,
@@ -85,34 +89,49 @@ export class PostService {
     const post = await this.findPostByIdAndCheckSchool(userId, id);
     const mappedPost = this.mapPost(post);
 
-    const comments = post.comments ? post.comments.map((comment) => ({
-      id: comment.id,
-      content: comment.content,
-      user_id: comment.user_id,
-      created_at: comment.created_at,
-      updated_at: comment.updated_at,
-    })) : [];
+    const comments = post.comments
+      ? post.comments.map((comment) => ({
+          id: comment.id,
+          content: comment.content,
+          user_id: comment.user_id,
+          created_at: comment.created_at,
+          updated_at: comment.updated_at,
+        }))
+      : [];
 
     const numComments = comments.length;
 
     return { post: { ...mappedPost, numComments }, comments };
   }
 
-  async toggleLike(userId: number, postId: number): Promise<{ status: string; message: string }> {
+  async toggleLike(
+    userId: number,
+    postId: number,
+  ): Promise<{ status: string; message: string }> {
     await this.findPostByIdAndCheckSchool(userId, postId);
     const existingLike = await this.toggleLikeRepository.findOne({
       where: { user_id: userId, post_id: postId },
     });
     if (existingLike) {
-      await this.toggleLikeRepository.delete({ user_id: userId, post_id: postId });
+      await this.toggleLikeRepository.delete({
+        user_id: userId,
+        post_id: postId,
+      });
       return { status: 'success', message: 'Bỏ thích bài viết thành công' };
     } else {
-      await this.toggleLikeRepository.save({ user_id: userId, post_id: postId });
+      await this.toggleLikeRepository.save({
+        user_id: userId,
+        post_id: postId,
+      });
       return { status: 'success', message: 'Thích bài viết thành công' };
     }
   }
 
-  async commentPost(userId: number, postId: number, content: string): Promise<any> {
+  async commentPost(
+    userId: number,
+    postId: number,
+    content: string,
+  ): Promise<any> {
     const post = await this.findPostByIdAndCheckSchool(userId, postId);
     const comment = new Comment();
     comment.content = content;

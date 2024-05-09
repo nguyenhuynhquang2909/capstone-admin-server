@@ -14,7 +14,7 @@ export class UserSession {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 255, nullable: false })
+  @Column({ type: "text", nullable: false })
   access_token: string;
 
   @ManyToOne(() => User, { nullable: false })
