@@ -140,8 +140,8 @@ INSERT INTO users (name, phone, email, password, role_id) VALUES
 ('Parent 1', '0901234888', NULL, NULL, 1),
 ('Parent 2', '0901234889', NULL, NULL, 1),
 ('Khang Nguyen', '0903999938', NULL, NULL, 1),
-('SchoolAdmin 1', NULL, "admin1@gmail.com", "123", 2),
-('SchoolAdmin 2', NULL, "admin2@gmail.com", "456", 2);
+('SchoolAdmin 1', NULL, 'admin1@gmail.com', '123', 2),
+('SchoolAdmin 2', NULL, 'admin2@gmail.com', '456', 2);
 
 -- Insert dummy schools data
 INSERT INTO schools (name) VALUES
