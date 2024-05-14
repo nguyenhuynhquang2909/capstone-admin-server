@@ -7,12 +7,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 
-import { S3Client, PutObjectCommand, PutObjectCommandInput, PutObjectCommandOutput } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  PutObjectCommandInput,
+} from '@aws-sdk/client-s3';
 import { extname } from 'path';
 
 import { Post } from '../../common/entities/post.entity';
 import { ToggleLike } from '../../common/entities/toggle-like.entity';
 import { Comment } from '../../common/entities/comment.entity';
+import { Image } from '../../common/entities/image.entity';
 
 import { AuthService } from '../../api/auth/auth.service';
 
@@ -28,7 +33,10 @@ export class PostService {
     private readonly toggleLikeRepository: Repository<ToggleLike>,
     @InjectRepository(Comment)
     private readonly commentRepository: Repository<Comment>,
-private readonly configService: ConfigService  ) {}
+    private readonly configService: ConfigService,
+    @InjectRepository(Image)
+    private readonly imageRepository: Repository<Image>,
+  ) {}
 
   private async getUserSchoolIds(userId: number): Promise<number[]> {
     const user = await this.authService.getProfile(userId);
@@ -59,15 +67,68 @@ private readonly configService: ConfigService  ) {}
     return post;
   }
 
-  private async mapPost(post: Post): Promise<any> {
-    if (!post) return null;
+  private validateFiles(files: Express.Multer.File[]): void {
+    if (!files || files.length === 0) {
+      throw new NotFoundException('No files uploaded');
+    }
+  }
 
+  private async uploadToS3(post: Post, files: Express.Multer.File[]): Promise<void> {
+    // Read AWS credentials from environment variables
+    const region = this.configService.get<string>('AWS_REGION');
+    const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
+    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
+    const bucketName = this.configService.get<string>('S3_BUCKET_NAME');
+
+    // Initialize S3 client with credentials
+    const s3 = new S3Client({
+      region,
+      credentials: { accessKeyId, secretAccessKey },
+    });
+
+    // Define folder structure
+    const folderName = `schools/${post.school_id}/posts/${post.id}/images/`;
+
+    // Upload images to S3 bucket
+    const uploadPromises: Promise<any>[] = [];
+    const imageEntities: Image[] = []; // Store created Image entities
+
+    for (const file of files) {
+      const fileName = uuidv4() + extname(file.originalname);
+      const uploadParams: PutObjectCommandInput = {
+        Bucket: bucketName,
+        Key: folderName + fileName,
+        Body: file.buffer,
+        ACL: 'private',
+      };
+      uploadPromises.push(s3.send(new PutObjectCommand(uploadParams)));
+
+      // Create Image entity for each file
+      const imageUrl = `${fileName}`;
+      const image = new Image();
+      image.url = imageUrl;
+      image.post = post;
+      imageEntities.push(image);
+    }
+
+    // Wait for all uploads to finish
+    await Promise.all(uploadPromises);
+
+    // Save Image entities to the database
+    await this.imageRepository.save(imageEntities);
+  }
+
+  private async mapPostWithImages(post: Post): Promise<any> {
+    if (!post) return null;
+  
     const numLikes = post.likes ? post.likes.length : 0;
     const numComments = post.comments ? post.comments.length : 0;
-    const likers = post.likes
-      ? post.likes.map((like) => like.user_id.toString())
-      : [];
-
+    const likers = post.likes ? post.likes.map((like) => like.user_id.toString()) : [];
+  
+    const images = await this.imageRepository.find({ where: { post_id: post.id } });
+  
+    const imageUrls = images.map((image) => image.url);
+  
     return {
       id: post.id,
       title: post.title,
@@ -82,6 +143,7 @@ private readonly configService: ConfigService  ) {}
       numLikes,
       numComments,
       likers,
+      images: imageUrls, 
     };
   }
 
@@ -95,7 +157,9 @@ private readonly configService: ConfigService  ) {}
       .where('school.id IN (:...schoolIds)', { schoolIds })
       .andWhere('post.status = :status', { status: 'published' })
       .getMany();
-    return Promise.all(posts.map((post) => this.mapPost(post)));
+
+    // Map posts with images
+    return Promise.all(posts.map((post) => this.mapPostWithImages(post)));
   }
 
   async findOne(userId: number, id: number): Promise<any> {
@@ -103,7 +167,7 @@ private readonly configService: ConfigService  ) {}
     if (post.status !== 'published') {
       throw new NotFoundException('Bài viết không tồn tại');
     }
-    const mappedPost = await this.mapPost(post);
+    const mappedPost = await this.mapPostWithImages(post);
 
     const comments = post.comments
       ? post.comments.map((comment) => ({
@@ -217,52 +281,21 @@ private readonly configService: ConfigService  ) {}
     userId: number,
     postId: number,
     files: Express.Multer.File[],
-  ): Promise<any> {
+  ): Promise<{ status: string; message: string }> {
     // Ensure the user has access to the post
     const post = await this.findPostByIdAndCheckSchool(userId, postId);
+
+    // Check if post exists
     if (!post) {
       throw new NotFoundException('Bài viết không tồn tại');
     }
-  
-    // Check if files parameter is valid
-    if (!files || files.length === 0) {
-      throw new NotFoundException('No files uploaded');
-    }
-  
-    // Read AWS credentials from environment variables
-    const region = this.configService.get<string>('AWS_REGION');
-    const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
-    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
-    const bucketName = this.configService.get<string>('S3_BUCKET_NAME');
-  
-    // Initialize S3 client with credentials
-    const s3 = new S3Client({
-      region,
-      credentials: {
-        accessKeyId,
-        secretAccessKey,
-      },
-    });
-  
-    // Define folder structure
-    const folderName = `schools/${post.school_id}/posts/${postId}/images/`;
-  
+
+    // Validate files
+    this.validateFiles(files);
+
     // Upload images to S3 bucket
-    const uploadPromises: Promise<any>[] = [];
-    for (const file of files) {
-      const fileName = uuidv4() + extname(file.originalname); 
-      const uploadParams: PutObjectCommandInput = {
-        Bucket: bucketName,
-        Key: folderName + fileName,
-        Body: file.buffer,
-        ACL: 'private',
-      };
-      uploadPromises.push(s3.send(new PutObjectCommand(uploadParams)));
-    }
-  
-    // Wait for all uploads to finish
-    await Promise.all(uploadPromises);
-  
+    await this.uploadToS3(post, files);
+
     return { status: 'success', message: 'Tải lên hình ảnh thành công' };
   }
 }
