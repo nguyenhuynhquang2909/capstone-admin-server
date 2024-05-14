@@ -19,6 +19,15 @@ CREATE TABLE users (
     -- CONSTRAINT fk_role_id FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 
+-- Create user devices table
+CREATE TABLE user_devices (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    device_type VARCHAR(255) NOT NULL,
+    token TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create user_sessions table
 CREATE TABLE user_sessions (
     id SERIAL PRIMARY KEY,
@@ -128,6 +137,15 @@ CREATE TABLE user_tags (
     -- CONSTRAINT fk_comment_id FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
     -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     PRIMARY KEY (comment_id, user_id, placeholder_number)
+);
+
+-- Create notifications table
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Insert default roles

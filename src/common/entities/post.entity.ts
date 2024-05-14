@@ -49,7 +49,7 @@ export class Post {
   likes: ToggleLike[];
 
   @Column({ nullable: false })
-  status: string; 
+  status: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
   published_at: Date;
