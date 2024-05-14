@@ -127,7 +127,8 @@ export class PostService {
   
     const images = await this.imageRepository.find({ where: { post_id: post.id } });
   
-    const imageUrls = images.map((image) => image.url);
+    const folderName = `schools/${post.school_id}/posts/${post.id}/images/`;
+    const imageUrls = images.map((image) => `${folderName}${image.url}`);
   
     return {
       id: post.id,
