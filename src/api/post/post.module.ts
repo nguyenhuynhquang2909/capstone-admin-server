@@ -28,7 +28,7 @@ import { UserSession } from '../../common/entities/user-session.entity';
       Comment,
       ToggleLike,
       UserSession,
-      Image
+      Image,
     ]),
     JwtModule.register({
       secret: '123456',
