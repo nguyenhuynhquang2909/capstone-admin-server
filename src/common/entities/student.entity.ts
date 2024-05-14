@@ -19,14 +19,14 @@ export class Student {
   name: string;
 
   @Column({ nullable: false })
-  school_id: string;
+  school_id: number;
 
   @ManyToOne(() => School, (school) => school.students)
   @JoinColumn({ name: 'school_id' })
   school: School;
 
   @Column({ nullable: false })
-  user_id: string;
+  user_id: number;
 
   @ManyToOne(() => User, (user) => user.students)
   @JoinColumn({ name: 'user_id' })
