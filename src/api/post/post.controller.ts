@@ -76,7 +76,7 @@ export class PostController {
     const { content } = body;
     return this.postService.editComment(userId, +postId, +commentId, content);
   }
-  
+
   @Post(':id/images')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(FilesInterceptor('images', 30))
