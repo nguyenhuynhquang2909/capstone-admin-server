@@ -26,17 +26,17 @@ export class Post {
   content: string;
 
   @Column({ nullable: false })
-  school_id: string;
+  school_id: number;
 
   @ManyToOne(() => School, (school) => school.posts)
   @JoinColumn({ name: 'school_id' })
   school: School;
 
   @Column({ nullable: false })
-  user_id: string;
+  created_by: number;
 
   @ManyToOne(() => User, (user) => user.posts)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'created_by' })
   user: User;
 
   @OneToMany(() => Image, (image) => image.post)
@@ -47,6 +47,9 @@ export class Post {
 
   @OneToMany(() => ToggleLike, (toggleLike) => toggleLike.post)
   likes: ToggleLike[];
+
+  @Column({ nullable: false })
+  status: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
   published_at: Date;

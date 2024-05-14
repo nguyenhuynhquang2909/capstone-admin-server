@@ -13,6 +13,7 @@ import { Post } from '../../common/entities/post.entity';
 import { School } from '../../common/entities/school.entity';
 import { User } from '../../common/entities/user.entity';
 import { Role } from '../../common/entities/role.entity';
+import { Image } from '../../common/entities/image.entity';
 import { Comment } from '../../common/entities/comment.entity';
 import { ToggleLike } from '../../common/entities/toggle-like.entity';
 import { UserSession } from '../../common/entities/user-session.entity';
@@ -27,6 +28,7 @@ import { UserSession } from '../../common/entities/user-session.entity';
       Comment,
       ToggleLike,
       UserSession,
+      Image,
     ]),
     JwtModule.register({
       secret: '123456',

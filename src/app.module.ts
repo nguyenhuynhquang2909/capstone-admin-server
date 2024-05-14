@@ -4,11 +4,9 @@ import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
 import { PostgresModule } from './providers/database/postgres/postgres.module';
 import { RedisModule } from './providers/cache/redis/redis.module';
-import { ServerController } from './api/server/server.controller';
 import { UserModule } from './api/user/user.module';
 import { AuthModule } from './api/auth/auth.module';
 import { PostModule } from './api/post/post.module';
-import { HashtagModule } from './api/hashtag/hashtag.module';
 
 @Module({
   imports: [
@@ -23,10 +21,9 @@ import { HashtagModule } from './api/hashtag/hashtag.module';
     UserModule,
     AuthModule,
     RedisModule,
-    HashtagModule,
     PostModule,
   ],
-  controllers: [ServerController],
+  controllers: [],
   providers: [],
 })
 export class AppModule {}

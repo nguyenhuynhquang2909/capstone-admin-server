@@ -6,8 +6,13 @@ import {
   Param,
   Post,
   Body,
+  Delete,
+  Put,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { FilesInterceptor } from '@nestjs/platform-express/multer';
 
 import { PostService } from './post.service';
 
@@ -46,5 +51,41 @@ export class PostController {
     const { id: userId } = request.user;
     const { content } = body;
     return this.postService.commentPost(userId, +postId, content);
+  }
+
+  @Delete(':postId/comment/:commentId/delete')
+  @UseGuards(AuthGuard('jwt'))
+  async deleteComment(
+    @Req() request: any,
+    @Param('postId') postId: string,
+    @Param('commentId') commentId: string,
+  ) {
+    const { id: userId } = request.user;
+    return this.postService.deleteComment(userId, +postId, +commentId);
+  }
+
+  @Put(':postId/comment/:commentId/edit')
+  @UseGuards(AuthGuard('jwt'))
+  async editComment(
+    @Req() request: any,
+    @Param('postId') postId: string,
+    @Param('commentId') commentId: string,
+    @Body() body: any,
+  ) {
+    const { id: userId } = request.user;
+    const { content } = body;
+    return this.postService.editComment(userId, +postId, +commentId, content);
+  }
+
+  @Post(':id/images')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(FilesInterceptor('images', 30))
+  async uploadImages(
+    @Req() request: any,
+    @Param('id') postId: string,
+    @UploadedFiles() images: any,
+  ) {
+    const { id: userId } = request.user;
+    return this.postService.uploadImages(userId, +postId, images);
   }
 }
