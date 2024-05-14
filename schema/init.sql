@@ -43,7 +43,7 @@ CREATE TABLE students (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     school_id INTEGER NOT NULL REFERENCES schools(id),
-    user_id INTEGER NOT NULL REFERENCES users(id),
+    parent_id INTEGER NOT NULL REFERENCES users(id),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
     -- CONSTRAINT fk_school_id FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
