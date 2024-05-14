@@ -6,6 +6,8 @@ import {
   Param,
   Post,
   Body,
+  Delete,
+  Put
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -46,5 +48,29 @@ export class PostController {
     const { id: userId } = request.user;
     const { content } = body;
     return this.postService.commentPost(userId, +postId, content);
+  }
+  
+  @Delete(':postId/comment/:commentId/delete')
+  @UseGuards(AuthGuard('jwt'))
+  async deleteComment(
+    @Req() request: any,
+    @Param('postId') postId: string,
+    @Param('commentId') commentId: string
+  ) {
+    const { id: userId } = request.user;
+    return this.postService.deleteComment(userId, +postId, +commentId);
+  }
+  
+  @Put(':postId/comment/:commentId/edit')
+  @UseGuards(AuthGuard('jwt'))
+  async editComment(
+    @Req() request: any,
+    @Param('postId') postId: string,
+    @Param('commentId') commentId: string,
+    @Body() body: any
+  ) {
+    const { id: userId } = request.user;
+    const { content } = body;
+    return this.postService.editComment(userId, +postId, +commentId, content);
   }
 }

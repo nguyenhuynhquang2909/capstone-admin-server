@@ -41,16 +41,6 @@ export class AuthController {
     response.status(HttpStatus.OK).json(result);
   }
 
-  @Post('logout')
-  async logout(
-    @Headers('authorization') authHeader: string,
-    @Res() response: Response,
-  ): Promise<void> {
-    const result = await this.authService.logout(authHeader);
-    this.clearAuthorizationHeader(response);
-    response.status(HttpStatus.OK).json(result);
-  }
-
   @Get('profile')
   @UseGuards(AuthGuard('jwt'))
   async getProfile(

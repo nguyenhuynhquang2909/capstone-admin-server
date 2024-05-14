@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { randomInt } from 'crypto';
@@ -68,15 +65,6 @@ export class AuthService {
     await this.saveUserSession(user, accessToken);
 
     return { status: 'success', message: 'Mã OTP hợp lệ', accessToken };
-  }
-
-  async logout(
-    authHeader: string,
-  ): Promise<{ status: string; message: string }> {
-    const userId = this.extractUserIdFromToken(authHeader);
-    this.validateUserId(userId);
-
-    return { status: 'success', message: 'Người dùng đã đăng xuất thành công' };
   }
 
   async getProfile(userId: number): Promise<User | null> {

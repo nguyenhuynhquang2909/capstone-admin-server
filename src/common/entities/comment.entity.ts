@@ -19,7 +19,7 @@ export class Comment {
   content: string;
 
   @Column({ nullable: false })
-  post_id: string;
+  post_id: number;
 
   @ManyToOne(() => Post, (post) => post.comments)
   @JoinColumn({ name: 'post_id' })

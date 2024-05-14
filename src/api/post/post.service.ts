@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -139,5 +139,38 @@ export class PostService {
     comment.user = await this.authService.getProfile(userId);
     await this.commentRepository.save(comment);
     return { status: 'success', message: 'Bình luận bài viết thành công' };
+  }
+
+  async deleteComment(userId: number, postId: number, commentId: number): Promise<any> {
+    await this.findPostByIdAndCheckSchool(userId, postId);
+    const comment = await this.commentRepository.findOne({
+      where: { id: commentId, post: { id: postId } },
+      relations: ['user']
+    });
+    if (!comment) {
+      throw new NotFoundException(`Không tìm thấy bình luận`);
+    }
+    if (comment.user.id !== userId) {
+      throw new UnauthorizedException(`Bạn không có quyền xóa bình luận này`);
+    }
+    await this.commentRepository.remove(comment);
+    return { status: 'success', message: 'Xóa bình luận thành công' };
+  }
+
+  async editComment(userId: number, postId: number, commentId: number, content: string): Promise<any> {
+    await this.findPostByIdAndCheckSchool(userId, postId);
+    const comment = await this.commentRepository.findOne({
+      where: { id: commentId, post: { id: postId } },
+      relations: ['user']
+    });
+    if (!comment) {
+      throw new NotFoundException(`Không tìm thấy bình luận`);
+    }
+    if (comment.user.id !== userId) {
+      throw new UnauthorizedException(`Bạn không có quyền chỉnh sửa bình luận này`);
+    }
+    comment.content = content;
+    await this.commentRepository.save(comment);
+    return { status: 'success', message: 'Chỉnh sửa bình luận thành công' };
   }
 }
