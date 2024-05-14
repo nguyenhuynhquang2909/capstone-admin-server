@@ -63,7 +63,7 @@ export class PostService {
       title: post.title,
       content: post.content,
       school_id: post.school_id,
-      user_id: post.user_id,
+      created_by: post.created_by,
       published_at: post.published_at,
       created_at: post.created_at,
       updated_at: post.updated_at,
