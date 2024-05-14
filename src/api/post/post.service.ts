@@ -13,6 +13,7 @@ import {
   PutObjectCommandInput,
 } from '@aws-sdk/client-s3';
 import { extname } from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Post } from '../../common/entities/post.entity';
 import { ToggleLike } from '../../common/entities/toggle-like.entity';
@@ -20,8 +21,6 @@ import { Comment } from '../../common/entities/comment.entity';
 import { Image } from '../../common/entities/image.entity';
 
 import { AuthService } from '../../api/auth/auth.service';
-
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class PostService {
@@ -73,25 +72,26 @@ export class PostService {
     }
   }
 
-  private async uploadToS3(post: Post, files: Express.Multer.File[]): Promise<void> {
-    // Read AWS credentials from environment variables
+  private async uploadToS3(
+    post: Post,
+    files: Express.Multer.File[],
+  ): Promise<void> {
     const region = this.configService.get<string>('AWS_REGION');
     const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
-    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
+    const secretAccessKey = this.configService.get<string>(
+      'AWS_SECRET_ACCESS_KEY',
+    );
     const bucketName = this.configService.get<string>('S3_BUCKET_NAME');
 
-    // Initialize S3 client with credentials
     const s3 = new S3Client({
       region,
       credentials: { accessKeyId, secretAccessKey },
     });
 
-    // Define folder structure
     const folderName = `schools/${post.school_id}/posts/${post.id}/images/`;
 
-    // Upload images to S3 bucket
     const uploadPromises: Promise<any>[] = [];
-    const imageEntities: Image[] = []; // Store created Image entities
+    const imageEntities: Image[] = [];
 
     for (const file of files) {
       const fileName = uuidv4() + extname(file.originalname);
@@ -103,7 +103,6 @@ export class PostService {
       };
       uploadPromises.push(s3.send(new PutObjectCommand(uploadParams)));
 
-      // Create Image entity for each file
       const imageUrl = `${fileName}`;
       const image = new Image();
       image.url = imageUrl;
@@ -111,25 +110,25 @@ export class PostService {
       imageEntities.push(image);
     }
 
-    // Wait for all uploads to finish
     await Promise.all(uploadPromises);
 
-    // Save Image entities to the database
     await this.imageRepository.save(imageEntities);
   }
 
   private async mapPostWithImages(post: Post): Promise<any> {
     if (!post) return null;
-  
-    const numLikes = post.likes ? post.likes.length : 0;
-    const numComments = post.comments ? post.comments.length : 0;
-    const likers = post.likes ? post.likes.map((like) => like.user_id.toString()) : [];
-  
-    const images = await this.imageRepository.find({ where: { post_id: post.id } });
-  
+
+    const numLikes = post.likes?.length ?? 0;
+    const numComments = post.comments?.length ?? 0;
+    const likers = post.likes?.map((like) => like.user_id.toString()) ?? [];
+
+    const images = await this.imageRepository.find({
+      where: { post_id: post.id },
+    });
+
     const folderName = `schools/${post.school_id}/posts/${post.id}/images/`;
     const imageUrls = images.map((image) => `${folderName}${image.url}`);
-  
+
     return {
       id: post.id,
       title: post.title,
@@ -144,7 +143,7 @@ export class PostService {
       numLikes,
       numComments,
       likers,
-      images: imageUrls, 
+      images: imageUrls,
     };
   }
 
@@ -159,7 +158,6 @@ export class PostService {
       .andWhere('post.status = :status', { status: 'published' })
       .getMany();
 
-    // Map posts with images
     return Promise.all(posts.map((post) => this.mapPostWithImages(post)));
   }
 
@@ -170,15 +168,14 @@ export class PostService {
     }
     const mappedPost = await this.mapPostWithImages(post);
 
-    const comments = post.comments
-      ? post.comments.map((comment) => ({
-          id: comment.id,
-          content: comment.content,
-          user_id: comment.user_id,
-          created_at: comment.created_at,
-          updated_at: comment.updated_at,
-        }))
-      : [];
+    const comments =
+      post.comments?.map((comment) => ({
+        id: comment.id,
+        content: comment.content,
+        user_id: comment.user_id,
+        created_at: comment.created_at,
+        updated_at: comment.updated_at,
+      })) ?? [];
 
     const numComments = comments.length;
 
@@ -283,18 +280,14 @@ export class PostService {
     postId: number,
     files: Express.Multer.File[],
   ): Promise<{ status: string; message: string }> {
-    // Ensure the user has access to the post
     const post = await this.findPostByIdAndCheckSchool(userId, postId);
 
-    // Check if post exists
     if (!post) {
       throw new NotFoundException('Bài viết không tồn tại');
     }
 
-    // Validate files
     this.validateFiles(files);
 
-    // Upload images to S3 bucket
     await this.uploadToS3(post, files);
 
     return { status: 'success', message: 'Tải lên hình ảnh thành công' };
