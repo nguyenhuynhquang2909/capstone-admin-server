@@ -16,6 +16,8 @@ import { Comment } from '../../common/entities/comment.entity';
 
 import { AuthService } from '../../api/auth/auth.service';
 
+import { v4 as uuidv4 } from 'uuid';
+
 @Injectable()
 export class PostService {
   constructor(
@@ -221,18 +223,18 @@ private readonly configService: ConfigService  ) {}
     if (!post) {
       throw new NotFoundException('Bài viết không tồn tại');
     }
-    
+  
     // Check if files parameter is valid
     if (!files || files.length === 0) {
       throw new NotFoundException('No files uploaded');
     }
-    
+  
     // Read AWS credentials from environment variables
     const region = this.configService.get<string>('AWS_REGION');
     const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
     const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
     const bucketName = this.configService.get<string>('S3_BUCKET_NAME');
-
+  
     // Initialize S3 client with credentials
     const s3 = new S3Client({
       region,
@@ -241,25 +243,26 @@ private readonly configService: ConfigService  ) {}
         secretAccessKey,
       },
     });
-
+  
     // Define folder structure
     const folderName = `schools/${post.school_id}/posts/${postId}/images/`;
-
+  
     // Upload images to S3 bucket
     const uploadPromises: Promise<any>[] = [];
     for (const file of files) {
+      const fileName = uuidv4() + extname(file.originalname); 
       const uploadParams: PutObjectCommandInput = {
         Bucket: bucketName,
-        Key: folderName + extname(file.originalname),
+        Key: folderName + fileName,
         Body: file.buffer,
         ACL: 'private',
       };
       uploadPromises.push(s3.send(new PutObjectCommand(uploadParams)));
     }
-
+  
     // Wait for all uploads to finish
     await Promise.all(uploadPromises);
-
+  
     return { status: 'success', message: 'Tải lên hình ảnh thành công' };
   }
 }
