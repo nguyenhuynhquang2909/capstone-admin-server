@@ -1,6 +1,14 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
+
+import { S3Client, PutObjectCommand, PutObjectCommandInput, PutObjectCommandOutput } from '@aws-sdk/client-s3';
+import { extname } from 'path';
 
 import { Post } from '../../common/entities/post.entity';
 import { ToggleLike } from '../../common/entities/toggle-like.entity';
@@ -18,7 +26,7 @@ export class PostService {
     private readonly toggleLikeRepository: Repository<ToggleLike>,
     @InjectRepository(Comment)
     private readonly commentRepository: Repository<Comment>,
-  ) {}
+private readonly configService: ConfigService  ) {}
 
   private async getUserSchoolIds(userId: number): Promise<number[]> {
     const user = await this.authService.getProfile(userId);
@@ -49,7 +57,7 @@ export class PostService {
     return post;
   }
 
-  private mapPost(post: Post): any {
+  private async mapPost(post: Post): Promise<any> {
     if (!post) return null;
 
     const numLikes = post.likes ? post.likes.length : 0;
@@ -63,10 +71,12 @@ export class PostService {
       title: post.title,
       content: post.content,
       school_id: post.school_id,
+      school_name: post.school.name,
       created_by: post.created_by,
       published_at: post.published_at,
       created_at: post.created_at,
       updated_at: post.updated_at,
+      status: post.status,
       numLikes,
       numComments,
       likers,
@@ -77,17 +87,21 @@ export class PostService {
     const schoolIds = await this.getUserSchoolIds(userId);
     const posts = await this.postRepository
       .createQueryBuilder('post')
-      .innerJoin('post.school', 'school')
+      .innerJoinAndSelect('post.school', 'school')
       .leftJoinAndSelect('post.likes', 'like')
       .leftJoinAndSelect('post.comments', 'comment')
       .where('school.id IN (:...schoolIds)', { schoolIds })
+      .andWhere('post.status = :status', { status: 'published' })
       .getMany();
     return Promise.all(posts.map((post) => this.mapPost(post)));
   }
 
   async findOne(userId: number, id: number): Promise<any> {
     const post = await this.findPostByIdAndCheckSchool(userId, id);
-    const mappedPost = this.mapPost(post);
+    if (post.status !== 'published') {
+      throw new NotFoundException('Bài viết không tồn tại');
+    }
+    const mappedPost = await this.mapPost(post);
 
     const comments = post.comments
       ? post.comments.map((comment) => ({
@@ -108,7 +122,10 @@ export class PostService {
     userId: number,
     postId: number,
   ): Promise<{ status: string; message: string }> {
-    await this.findPostByIdAndCheckSchool(userId, postId);
+    const post = await this.findPostByIdAndCheckSchool(userId, postId);
+    if (post.status !== 'published') {
+      throw new UnauthorizedException('Bài viết không tồn tại');
+    }
     const existingLike = await this.toggleLikeRepository.findOne({
       where: { user_id: userId, post_id: postId },
     });
@@ -133,6 +150,9 @@ export class PostService {
     content: string,
   ): Promise<any> {
     const post = await this.findPostByIdAndCheckSchool(userId, postId);
+    if (post.status !== 'published') {
+      throw new UnauthorizedException('Bài viết không tồn tại');
+    }
     const comment = new Comment();
     comment.content = content;
     comment.post = post;
@@ -141,11 +161,18 @@ export class PostService {
     return { status: 'success', message: 'Bình luận bài viết thành công' };
   }
 
-  async deleteComment(userId: number, postId: number, commentId: number): Promise<any> {
-    await this.findPostByIdAndCheckSchool(userId, postId);
+  async deleteComment(
+    userId: number,
+    postId: number,
+    commentId: number,
+  ): Promise<any> {
+    const post = await this.findPostByIdAndCheckSchool(userId, postId);
+    if (post.status !== 'published') {
+      throw new UnauthorizedException('Bài viết không tồn tại');
+    }
     const comment = await this.commentRepository.findOne({
       where: { id: commentId, post: { id: postId } },
-      relations: ['user']
+      relations: ['user'],
     });
     if (!comment) {
       throw new NotFoundException(`Không tìm thấy bình luận`);
@@ -157,20 +184,82 @@ export class PostService {
     return { status: 'success', message: 'Xóa bình luận thành công' };
   }
 
-  async editComment(userId: number, postId: number, commentId: number, content: string): Promise<any> {
-    await this.findPostByIdAndCheckSchool(userId, postId);
+  async editComment(
+    userId: number,
+    postId: number,
+    commentId: number,
+    content: string,
+  ): Promise<any> {
+    const post = await this.findPostByIdAndCheckSchool(userId, postId);
+    if (post.status !== 'published') {
+      throw new UnauthorizedException('Bài viết không tồn tại');
+    }
     const comment = await this.commentRepository.findOne({
       where: { id: commentId, post: { id: postId } },
-      relations: ['user']
+      relations: ['user'],
     });
     if (!comment) {
       throw new NotFoundException(`Không tìm thấy bình luận`);
     }
     if (comment.user.id !== userId) {
-      throw new UnauthorizedException(`Bạn không có quyền chỉnh sửa bình luận này`);
+      throw new UnauthorizedException(
+        `Bạn không có quyền chỉnh sửa bình luận này`,
+      );
     }
     comment.content = content;
     await this.commentRepository.save(comment);
     return { status: 'success', message: 'Chỉnh sửa bình luận thành công' };
+  }
+
+  async uploadImages(
+    userId: number,
+    postId: number,
+    files: Express.Multer.File[],
+  ): Promise<any> {
+    // Ensure the user has access to the post
+    const post = await this.findPostByIdAndCheckSchool(userId, postId);
+    if (!post) {
+      throw new NotFoundException('Bài viết không tồn tại');
+    }
+    
+    // Check if files parameter is valid
+    if (!files || files.length === 0) {
+      throw new NotFoundException('No files uploaded');
+    }
+    
+    // Read AWS credentials from environment variables
+    const region = this.configService.get<string>('AWS_REGION');
+    const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
+    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
+    const bucketName = this.configService.get<string>('S3_BUCKET_NAME');
+
+    // Initialize S3 client with credentials
+    const s3 = new S3Client({
+      region,
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
+      },
+    });
+
+    // Define folder structure
+    const folderName = `schools/${post.school_id}/posts/${postId}/images/`;
+
+    // Upload images to S3 bucket
+    const uploadPromises: Promise<any>[] = [];
+    for (const file of files) {
+      const uploadParams: PutObjectCommandInput = {
+        Bucket: bucketName,
+        Key: folderName + extname(file.originalname),
+        Body: file.buffer,
+        ACL: 'private',
+      };
+      uploadPromises.push(s3.send(new PutObjectCommand(uploadParams)));
+    }
+
+    // Wait for all uploads to finish
+    await Promise.all(uploadPromises);
+
+    return { status: 'success', message: 'Tải lên hình ảnh thành công' };
   }
 }
