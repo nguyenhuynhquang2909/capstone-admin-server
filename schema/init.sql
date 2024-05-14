@@ -19,6 +19,15 @@ CREATE TABLE users (
     -- CONSTRAINT fk_role_id FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 
+-- Create user devices table
+CREATE TABLE user_devices (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    device_type VARCHAR(255) NOT NULL,
+    token TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create user_sessions table
 CREATE TABLE user_sessions (
     id SERIAL PRIMARY KEY,
@@ -43,7 +52,7 @@ CREATE TABLE students (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     school_id INTEGER NOT NULL REFERENCES schools(id),
-    user_id INTEGER NOT NULL REFERENCES users(id),
+    parent_id INTEGER NOT NULL REFERENCES users(id),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
     -- CONSTRAINT fk_school_id FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
@@ -56,7 +65,8 @@ CREATE TABLE posts (
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     school_id INTEGER NOT NULL REFERENCES schools(id),
-    user_id INTEGER NOT NULL REFERENCES users(id),
+    created_by INTEGER NOT NULL REFERENCES users(id),
+    status VARCHAR(50) NOT NULL,
     published_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
@@ -129,6 +139,15 @@ CREATE TABLE user_tags (
     PRIMARY KEY (comment_id, user_id, placeholder_number)
 );
 
+-- Create notifications table
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Insert default roles
 INSERT INTO roles (name) VALUES
 ('parent'),
@@ -149,27 +168,27 @@ INSERT INTO schools (name) VALUES
 ('School 2');
 
 -- Insert dummy students data
-INSERT INTO students (name, school_id, user_id) VALUES
+INSERT INTO students (name, school_id, parent_id) VALUES
 ('Student 1', 1, 1),
 ('Student 2', 1, 2),
 ('Student 3', 2, 3);
 
 -- Insert dummy posts data
-INSERT INTO posts (title, content, school_id, user_id) VALUES
-('News Bulletin: Field Trip to the Zoo', 'Our students had an amazing time exploring the zoo and learning about various animals!', 1, 4),
-('Science Fair Success!', 'Congratulations to all the young scientists who participated in our school science fair. Were proud of your hard work and creativity!', 2, 5),
-('Math Challenge: Who Will Be the Champion?', 'Get ready for an exciting math challenge! Sharpen your pencils and put on your thinking caps. Let the competition begin!', 1, 4),
-('Art Showcase: Unleash Your Creativity', 'Calling all budding artists! Showcase your talent in our school art exhibit. Let your imagination run wild!', 2, 5),
-('Community Service Day: Making a Difference Together', 'Join us for a day of giving back to our community. Together, we can make a positive impact!', 1, 4),
-('Parent-Teacher Conference Reminder', 'Dont forget to schedule your parent-teacher conference. Its a valuable opportunity to discuss your childs progress and goals.', 2, 5),
-('Healthy Eating Habits: Fueling Young Minds', 'Learn about the importance of nutrition for growing children and discover delicious and nutritious snack ideas.', 1, 4),
-('Outdoor Adventure Day: Exploring Nature', 'Get ready for a day of outdoor exploration! From nature walks to scavenger hunts, adventure awaits!', 2, 5),
-('Book Fair Bonanza: Dive into a World of Stories', 'Browse through a wide selection of books at our annual book fair. Discover new adventures and fuel your love for reading!', 1, 4),
-('Safety First: Tips for Staying Safe at School', 'Review essential safety tips with your child, from crossing the street to stranger danger. Together, we can create a safe environment for everyone.', 2, 5),
-('Cultural Diversity Celebration: Embracing Differences', 'Celebrate the rich tapestry of cultures within our school community. Join us for a day of cultural performances, food, and fun!', 1, 4),
-('Music Mania: Finding Your Rhythm', 'Explore the world of music through hands-on activities and interactive workshops. Discover your passion for rhythm and melody!', 2, 5),
-('Gardening Club: Growing Green Thumbs', 'Join our gardening club and cultivate a love for nature. Learn about plants, sustainability, and the joy of growing your own food!', 1, 4),
-('Fitness Fun Day: Get Moving and Stay Active', 'Get ready to jump, run, and play! Join us for a day of fitness activities designed to promote health and wellness.', 2, 5);
+INSERT INTO posts (title, content, school_id, created_by, status) VALUES
+('News Bulletin: Field Trip to the Zoo', 'Our students had an amazing time exploring the zoo and learning about various animals!', 1, 4, 'published'),
+('Science Fair Success!', 'Congratulations to all the young scientists who participated in our school science fair. Were proud of your hard work and creativity!', 2, 5, 'draft'),
+('Math Challenge: Who Will Be the Champion?', 'Get ready for an exciting math challenge! Sharpen your pencils and put on your thinking caps. Let the competition begin!', 1, 4, 'draft'),
+('Art Showcase: Unleash Your Creativity', 'Calling all budding artists! Showcase your talent in our school art exhibit. Let your imagination run wild!', 2, 5, 'published'),
+('Community Service Day: Making a Difference Together', 'Join us for a day of giving back to our community. Together, we can make a positive impact!', 1, 4, 'published'),
+('Parent-Teacher Conference Reminder', 'Dont forget to schedule your parent-teacher conference. Its a valuable opportunity to discuss your childs progress and goals.', 2, 5, 'draft'),
+('Healthy Eating Habits: Fueling Young Minds', 'Learn about the importance of nutrition for growing children and discover delicious and nutritious snack ideas.', 1, 4, 'published'),
+('Outdoor Adventure Day: Exploring Nature', 'Get ready for a day of outdoor exploration! From nature walks to scavenger hunts, adventure awaits!', 2, 5, 'published'),
+('Book Fair Bonanza: Dive into a World of Stories', 'Browse through a wide selection of books at our annual book fair. Discover new adventures and fuel your love for reading!', 1, 4, 'draft'),
+('Safety First: Tips for Staying Safe at School', 'Review essential safety tips with your child, from crossing the street to stranger danger. Together, we can create a safe environment for everyone.', 2, 5, 'draft'),
+('Cultural Diversity Celebration: Embracing Differences', 'Celebrate the rich tapestry of cultures within our school community. Join us for a day of cultural performances, food, and fun!', 1, 4, 'published'),
+('Music Mania: Finding Your Rhythm', 'Explore the world of music through hands-on activities and interactive workshops. Discover your passion for rhythm and melody!', 2, 5, 'draft'),
+('Gardening Club: Growing Green Thumbs', 'Join our gardening club and cultivate a love for nature. Learn about plants, sustainability, and the joy of growing your own food!', 1, 4, 'draft'),
+('Fitness Fun Day: Get Moving and Stay Active', 'Get ready to jump, run, and play! Join us for a day of fitness activities designed to promote health and wellness.', 2, 5, 'published');
 
 -- Insert dummy hashtags data
 INSERT INTO hashtags (tag) VALUES
