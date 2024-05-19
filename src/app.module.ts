@@ -7,6 +7,7 @@ import { RedisModule } from './providers/cache/redis/redis.module';
 import { UserModule } from './api/user/user.module';
 import { AuthModule } from './api/auth/auth.module';
 import { PostModule } from './api/post/post.module';
+import { NotificationModule } from './api/notification/notification.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PostModule } from './api/post/post.module';
     AuthModule,
     RedisModule,
     PostModule,
+    NotificationModule,
   ],
   controllers: [],
   providers: [],

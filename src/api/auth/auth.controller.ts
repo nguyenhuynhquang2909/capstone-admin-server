@@ -34,9 +34,11 @@ export class AuthController {
   @Post('verify')
   async verifyOtp(
     @Body() verifyOtpDto: VerifyOtpDto,
+    @Headers('device-token') deviceToken: string,
+    @Headers('device-type') deviceType: string,
     @Res() response: Response,
   ): Promise<void> {
-    const result = await this.authService.verifyOtp(verifyOtpDto);
+    const result = await this.authService.verifyOtp(verifyOtpDto, deviceToken, deviceType);
     this.setAuthorizationHeader(response, result.accessToken);
     response.status(HttpStatus.OK).json(result);
   }

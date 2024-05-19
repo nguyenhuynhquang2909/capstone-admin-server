@@ -20,7 +20,7 @@ CREATE TABLE users (
 );
 
 -- Create user devices table
-CREATE TABLE user_devices (
+CREATE TABLE device_tokens (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id),
     device_type VARCHAR(255) NOT NULL,
