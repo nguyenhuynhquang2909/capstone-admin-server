@@ -55,6 +55,10 @@ export class AuthService {
     this.validatePhone(phone);
     this.validateOtp(otp);
 
+    if (!deviceToken) {
+      throw new BadRequestException('Device token is required');
+    }
+
     const user = await this.userRepository.findOne({
       where: { phone },
       relations: ['role'],

@@ -9,6 +9,7 @@ import {
   HttpStatus,
   Res,
   Headers,
+  BadRequestException,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 
@@ -38,6 +39,9 @@ export class AuthController {
     @Headers('device-type') deviceType: string,
     @Res() response: Response,
   ): Promise<void> {
+    if (!deviceToken) {
+      throw new BadRequestException('Device token is required');
+    }
     const result = await this.authService.verifyOtp(verifyOtpDto, deviceToken, deviceType);
     this.setAuthorizationHeader(response, result.accessToken);
     response.status(HttpStatus.OK).json(result);
