@@ -48,6 +48,7 @@ export class AuthController {
       deviceType,
     );
     this.setAuthorizationHeader(response, result.accessToken);
+    delete result.accessToken;
     response.status(HttpStatus.OK).json(result);
   }
 
