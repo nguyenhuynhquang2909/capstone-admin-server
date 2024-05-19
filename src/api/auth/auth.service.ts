@@ -6,6 +6,7 @@ import { randomInt } from 'crypto';
 import { User } from '../../common/entities/user.entity';
 import { Role } from '../../common/entities/role.entity';
 import { UserSession } from '../../common/entities/user-session.entity';
+import { DeviceToken } from '../../common/entities/device-token.entity';
 
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
@@ -24,6 +25,8 @@ export class AuthService {
     private readonly userSessionRepository: Repository<UserSession>,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
+    @InjectRepository(DeviceToken)
+    private readonly deviceTokenRepository: Repository<DeviceToken>,
     private readonly jwtService: JwtService,
     private readonly cacheService: Cache,
   ) {}
@@ -45,6 +48,8 @@ export class AuthService {
 
   async verifyOtp(
     verifyOtpDto: VerifyOtpDto,
+    deviceToken: string,
+    deviceType: string,
   ): Promise<{ status: string; message: string; accessToken?: string }> {
     const { phone, otp } = verifyOtpDto;
     this.validatePhone(phone);
@@ -63,6 +68,7 @@ export class AuthService {
 
     const accessToken = this.generateAccessToken(user);
     await this.saveUserSession(user, accessToken);
+    await this.saveDeviceToken(user, deviceToken, deviceType);
 
     return { status: 'success', message: 'Mã OTP hợp lệ', accessToken };
   }
@@ -150,6 +156,20 @@ export class AuthService {
       Date.now() + 4 * 30 * 24 * 60 * 60 * 1000,
     );
     await this.userSessionRepository.save(userSession);
+  }
+
+  private async saveDeviceToken(
+    user: User,
+    deviceToken: string,
+    deviceType: string,
+  ): Promise<void> {
+    if (deviceToken && deviceType) {
+      const tokenEntity = new DeviceToken();
+      tokenEntity.token = deviceToken;
+      tokenEntity.device_type = deviceType;
+      tokenEntity.user = user;
+      await this.deviceTokenRepository.save(tokenEntity);
+    }
   }
 
   private extractUserIdFromToken(authHeader: string): number {
