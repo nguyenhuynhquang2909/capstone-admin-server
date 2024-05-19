@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { randomInt } from 'crypto';
 
@@ -29,6 +30,7 @@ export class AuthService {
     private readonly deviceTokenRepository: Repository<DeviceToken>,
     private readonly jwtService: JwtService,
     private readonly cacheService: Cache,
+    private readonly configService: ConfigService,
   ) {}
 
   async sendOtp(
@@ -143,7 +145,7 @@ export class AuthService {
       roleId: user.role.id,
       issuedAt: new Date().toISOString(),
       expiresAt: new Date(
-        Date.now() + 4 * 30 * 24 * 60 * 60 * 1000,
+        Date.now() + parseInt(this.configService.get<string>('JWT_EXPIRATION_TIME')) * 1000,
       ).toISOString(), // 4 months
     };
     return this.jwtService.sign(accessTokenPayload);
@@ -157,7 +159,7 @@ export class AuthService {
     userSession.access_token = accessToken;
     userSession.user = user;
     userSession.access_token_expiration_time = new Date(
-      Date.now() + 4 * 30 * 24 * 60 * 60 * 1000,
+      Date.now() + parseInt(this.configService.get<string>('JWT_EXPIRATION_TIME')) * 1000,
     );
     await this.userSessionRepository.save(userSession);
   }

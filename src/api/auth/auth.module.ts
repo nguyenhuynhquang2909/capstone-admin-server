@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { ThrottlerModule } from '@nestjs/throttler';
 
@@ -17,9 +18,13 @@ import { JwtStrategy } from '../../common/guards/jwt.strategy';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, UserSession, Role, DeviceToken]),
-    JwtModule.register({
-      secret: '123456',
-      signOptions: { expiresIn: '10368000s' },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: configService.get<string>('JWT_EXPIRATION_TIME') },
+      }),
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     ThrottlerModule.forRoot([
