@@ -30,14 +30,16 @@ import { DeviceToken } from '../../common/entities/device-token.entity';
       ToggleLike,
       UserSession,
       Image,
-      DeviceToken
+      DeviceToken,
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: configService.get<string>('JWT_EXPIRATION_TIME') },
+        signOptions: {
+          expiresIn: configService.get<string>('JWT_EXPIRATION_TIME'),
+        },
       }),
     }),
   ],

@@ -1,62 +1,72 @@
 version: '3.9'
 
 services:
-  db:
-    image: khangtgr/mykidz-postgres
-    container_name: mykidz-postgres
+  postgres:
+    image: khangtgr/mk-pg
+    container_name: mk-pg
     environment:
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
     networks:
-      - app-network
+      - backend
     restart: unless-stopped
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   redis:
-    image: khangtgr/mykidz-redis
-    container_name: mykidz-redis
+    image: redis:7.2.4-bookworm
+    container_name: mk-redis
     environment:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_USERNAME: ${REDIS_USERNAME}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
-      - redis_data:/data
+      - redis-data:/data
     ports:
       - '6379:6379'
     networks:
-      - app-network
+      - backend
     restart: unless-stopped
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 512M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   pgadmin:
-    image: khangtgr/mykidz-pgadmin4
-    container_name: mykidz-pgadmin
+    image: dpage/pgadmin4:snapshot
+    container_name: mk-pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_LISTEN_PORT: ${PGADMIN_PORT}
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      - pgadmin-data:/var/lib/pgadmin
     ports:
       - "${PGADMIN_PORT}:${PGADMIN_PORT}"
     depends_on:
-      - db
+      - postgres
     networks:
-      - app-network
+      - backend
     restart: unless-stopped
     deploy:
       resources:
@@ -64,18 +74,18 @@ services:
           cpus: '0.5'
           memory: 256M
 
-  appserver:
-    image: khangtgr/mykidz-appserver
+  app:
+    image: khangtgr/mk-app
     env_file:
       - .env
     ports:
       - "${LOCALHOST_PORT}"
     depends_on:
-      - db
+      - postgres
     networks:
-      - app-network
+      - backend
     deploy:
-      replicas: 2
+      replicas: 1
       restart_policy:
         condition: on-failure
       resources:
@@ -84,14 +94,14 @@ services:
           memory: 512M
 
   nginx:
-    image: khangtgr/mykidz-nginx
-    container_name: mykidz-nginx
+    image: khangtgr/mk-nginx
+    container_name: mk-nginx
     ports:
       - '9090:80'
     depends_on:
-      - appserver
+      - app
     networks:
-      - app-network
+      - backend
     restart: unless-stopped
     deploy:
       resources:
@@ -100,10 +110,10 @@ services:
           memory: 128M
 
 networks:
-  app-network:
+  backend:
     driver: bridge
 
 volumes:
-  postgres_data:
-  pgadmin_data:
-  redis_data:
+  postgres-data:
+  pgadmin-data:
+  redis-data:
