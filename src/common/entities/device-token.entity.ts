@@ -5,7 +5,7 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
-  PrimaryColumn
+  PrimaryColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -17,10 +17,10 @@ export class DeviceToken {
   @Column({ type: 'text', nullable: false })
   token: string;
 
-  @PrimaryColumn()
+  @PrimaryColumn({ nullable: false })
   user_id: number;
 
-  @ManyToOne(() => User, { nullable: false })
+  @ManyToOne(() => User, (user) => user.device_tokens)
   @JoinColumn({ name: 'user_id' })
   user: User;
 
