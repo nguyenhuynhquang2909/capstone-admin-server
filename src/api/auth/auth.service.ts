@@ -56,26 +56,26 @@ export class AuthService {
     const { phone, otp } = verifyOtpDto;
     this.validatePhone(phone);
     this.validateOtp(otp);
-  
+
     if (!deviceToken) {
       throw new BadRequestException('Device token is required');
     }
-  
+
     const user = await this.userRepository.findOne({
       where: { phone },
       relations: ['role'],
     });
     this.validateUserExistence(user);
-  
+
     const storedOtp = await this.cacheService.get<string>(phone);
     this.validateOtpMatch(storedOtp, otp);
-  
+
     await this.cacheService.del(phone);
-  
+
     const accessToken = this.generateAccessToken(user);
     await this.saveUserSession(user, accessToken);
     await this.saveDeviceToken(user, deviceToken, deviceType);
-  
+
     return { status: 'success', message: 'Mã OTP hợp lệ', accessToken };
   }
 
@@ -145,8 +145,10 @@ export class AuthService {
       roleId: user.role.id,
       issuedAt: new Date().toISOString(),
       expiresAt: new Date(
-        Date.now() + parseInt(this.configService.get<string>('JWT_EXPIRATION_TIME')) * 1000,
-      ).toISOString(), 
+        Date.now() +
+          parseInt(this.configService.get<string>('JWT_EXPIRATION_TIME')) *
+            1000,
+      ).toISOString(),
     };
     return this.jwtService.sign(accessTokenPayload);
   }
@@ -159,7 +161,8 @@ export class AuthService {
     userSession.access_token = accessToken;
     userSession.user = user;
     userSession.access_token_expiration_time = new Date(
-      Date.now() + parseInt(this.configService.get<string>('JWT_EXPIRATION_TIME')) * 1000,
+      Date.now() +
+        parseInt(this.configService.get<string>('JWT_EXPIRATION_TIME')) * 1000,
     );
     await this.userSessionRepository.save(userSession);
   }
@@ -171,9 +174,13 @@ export class AuthService {
   ): Promise<void> {
     if (deviceToken && deviceType) {
       const existingToken = await this.deviceTokenRepository.findOne({
-        where: { user_id: user.id, token: deviceToken, device_type: deviceType },
+        where: {
+          user_id: user.id,
+          token: deviceToken,
+          device_type: deviceType,
+        },
       });
-  
+
       if (!existingToken) {
         const tokenEntity = new DeviceToken();
         tokenEntity.token = deviceToken;
