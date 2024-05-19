@@ -42,7 +42,11 @@ export class AuthController {
     if (!deviceToken) {
       throw new BadRequestException('Device token is required');
     }
-    const result = await this.authService.verifyOtp(verifyOtpDto, deviceToken, deviceType);
+    const result = await this.authService.verifyOtp(
+      verifyOtpDto,
+      deviceToken,
+      deviceType,
+    );
     this.setAuthorizationHeader(response, result.accessToken);
     response.status(HttpStatus.OK).json(result);
   }

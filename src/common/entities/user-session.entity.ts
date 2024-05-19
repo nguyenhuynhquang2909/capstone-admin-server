@@ -6,7 +6,7 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
-  PrimaryColumn
+  PrimaryColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -18,10 +18,10 @@ export class UserSession {
   @Column({ type: 'text', nullable: false })
   access_token: string;
 
-  @PrimaryColumn()
+  @PrimaryColumn({ nullable: false })
   user_id: number;
 
-  @ManyToOne(() => User, { nullable: false })
+  @ManyToOne(() => User, (user) => user.user_sessions)
   @JoinColumn({ name: 'user_id' })
   user: User;
 

@@ -17,6 +17,7 @@ import { Image } from '../../common/entities/image.entity';
 import { Comment } from '../../common/entities/comment.entity';
 import { ToggleLike } from '../../common/entities/toggle-like.entity';
 import { UserSession } from '../../common/entities/user-session.entity';
+import { DeviceToken } from '../../common/entities/device-token.entity';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UserSession } from '../../common/entities/user-session.entity';
       ToggleLike,
       UserSession,
       Image,
+      DeviceToken
     ]),
     JwtModule.register({
       secret: '123456',
