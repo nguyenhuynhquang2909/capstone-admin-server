@@ -15,6 +15,7 @@ import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { CreateDeviceTokenDto } from './dto/create-device-token.dto';
 
 import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
@@ -36,9 +37,7 @@ export class AuthController {
     @Body() verifyOtpDto: VerifyOtpDto,
     @Res() response: Response,
   ): Promise<void> {
-    const result = await this.authService.verifyOtp(
-      verifyOtpDto,
-    );
+    const result = await this.authService.verifyOtp(verifyOtpDto);
     this.setAuthorizationHeader(response, result.accessToken);
     delete result.accessToken;
     response.status(HttpStatus.OK).json(result);
@@ -61,6 +60,25 @@ export class AuthController {
 
     response.status(HttpStatus.OK).json({ status: 'success', data: profile });
   }
+  
+  @Post('device-token')
+  @UseGuards(AuthGuard('jwt'))
+  async saveDeviceToken(
+    @Headers('authorization') authHeader: string,
+    @Body() createDeviceTokenDto: CreateDeviceTokenDto,
+    @Res() response: Response,
+  ): Promise<void> {
+    const accessToken = authHeader.split(' ')[1];
+    const userId = this.authService.decodeToken(accessToken).userId;
+
+    const result = await this.authService.saveDeviceToken(
+      userId,
+      createDeviceTokenDto.token,
+      createDeviceTokenDto.device_type,
+    );
+    
+    response.status(HttpStatus.OK).json({ status: 'success', data: result });
+}
 
   private setAuthorizationHeader(
     response: Response,
