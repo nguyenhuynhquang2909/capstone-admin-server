@@ -7,6 +7,7 @@ import { randomInt } from 'crypto';
 import { User } from '../../common/entities/user.entity';
 import { Role } from '../../common/entities/role.entity';
 import { UserSession } from '../../common/entities/user-session.entity';
+import { DeviceToken } from '../../common/entities/device-token.entity';
 
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
@@ -28,6 +29,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly cacheService: Cache,
     private readonly configService: ConfigService,
+    @InjectRepository(DeviceToken)
+    private readonly deviceTokenRepository: Repository<DeviceToken>,
   ) {}
 
   async sendOtp(
@@ -76,6 +79,26 @@ export class AuthService {
     });
     this.validateUserExistence(user);
     return user;
+  }
+
+  async saveDeviceToken(
+    userId: number,
+    token: string,
+    deviceType: string,
+  ): Promise<string> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    this.validateUserExistence(user);
+  
+    const deviceToken = new DeviceToken();
+    deviceToken.token = token;
+    deviceToken.device_type = deviceType;
+    deviceToken.user_id = userId;
+    
+    await this.deviceTokenRepository.save(deviceToken);
+  
+    return 'Device token được lưu thành công';
   }
 
   public decodeToken(token: string): { userId: number } | null {
@@ -157,7 +180,7 @@ export class AuthService {
     await this.userSessionRepository.save(userSession);
   }
 
-  private extractUserIdFromToken(authHeader: string): number {
+  public extractUserIdFromToken(authHeader: string): number {
     const accessToken = authHeader?.split(' ')[1];
     const decodedToken = this.jwtService.decode(accessToken) as {
       userId: number;
