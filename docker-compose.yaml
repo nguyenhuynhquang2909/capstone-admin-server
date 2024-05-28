@@ -73,6 +73,11 @@ services:
         limits:
           cpus: '0.5'
           memory: 256M
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   app:
     image: khangtgr/mk-app
@@ -108,6 +113,11 @@ services:
         limits:
           cpus: '0.5'
           memory: 128M
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 networks:
   backend:
