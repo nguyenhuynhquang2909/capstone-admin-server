@@ -2,15 +2,19 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { PushNotificationDto } from './dto/notification.dto';
 
-@Controller('notification')
+@Controller('notifications')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
   @Post('push')
-  async sendPushNotification(@Body() notification: PushNotificationDto) {
+  async sendPushNotification(@Body() payload: PushNotificationDto) {
     const userId = 1;
     const deviceTokens = await this.notificationService.getUserDeviceTokens(userId);
-    await this.notificationService.sendPushNotification(deviceTokens, notification);
-    return { success: true };
+
+    if (deviceTokens.length === 0) {
+      throw new Error('No device tokens available to send the notification.');
+    }
+
+    await this.notificationService.sendPushNotification(deviceTokens, payload);
   }
 }
