@@ -21,36 +21,43 @@ export class NotificationService {
     return tokens.map(token => token.token);
   }
   
-  async sendPushNotification(deviceTokens: string[], payload: any) {
-    if (!deviceTokens || deviceTokens.length === 0) {
-      console.error('No device tokens available to send the notification.');
-      throw new Error('No device tokens available to send the notification.');
-    }
+async sendPushNotification(deviceTokens: string[], payload: any) {
+  if (!deviceTokens || deviceTokens.length === 0) {
+    console.error('No device tokens available to send the notification.');
+    throw new Error('No device tokens available to send the notification.');
+  }
 
-    const message: admin.messaging.MulticastMessage = {
-      tokens: deviceTokens,
-      notification: {
-        title: payload.title,
-        body: payload.body,
-      },
-      android: {},
-      apns: {
-        payload: {
-          aps: {
-            alert: {
-              title: payload.title,
-              body: payload.body,
-            },
+  // Convert values to strings
+  const dataPayload = {
+    Nick: String(payload.nick),
+    Room: String(payload.room),
+  };
+
+  const message: admin.messaging.MulticastMessage = {
+    tokens: deviceTokens,
+    notification: {
+      title: payload.title,
+      body: payload.body,
+    },
+    data: dataPayload,
+    android: {},
+    apns: {
+      payload: {
+        aps: {
+          alert: {
+            title: payload.title,
+            body: payload.body,
           },
         },
       },
-    };
+    },
+  };
 
-    try {
-      const response = await admin.messaging().sendMulticast(message);
-      console.log('Successfully sent message:', response);
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
+  try {
+    const response = await admin.messaging().sendMulticast(message);
+    console.log('Successfully sent message:', response);
+  } catch (error) {
+    console.error('Error sending message:', error);
   }
+}
 }
