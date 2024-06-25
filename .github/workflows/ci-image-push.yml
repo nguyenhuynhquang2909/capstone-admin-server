@@ -24,9 +24,9 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: dockerfiles/mykidz-appserver.Dockerfile
+          file: dockerfiles/mk-app.Dockerfile
           push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-appserver:latest
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/mk-app:latest
 
   build_and_push_nginx:
     name: Build and push Nginx image
@@ -45,9 +45,9 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: dockerfiles/mykidz-nginx.Dockerfile
+          file: dockerfiles/mk-nginx.Dockerfile
           push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-nginx:latest
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/mk-nginx:latest
 
   build_and_push_postgres:
     name: Build and push Postgres image
@@ -66,51 +66,9 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: dockerfiles/mykidz-postgres.Dockerfile
+          file: dockerfiles/mk-pg.Dockerfile
           push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-postgres:latest
-
-  build_and_push_redis:
-    name: Build and push Redis image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{secrets.DOCKERHUB_USERNAME}}
-          password: ${{secrets.DOCKERHUB_TOKEN}}
-
-      - name: Build and push Redis image to Docker Hub
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: dockerfiles/mykidz-redis.Dockerfile
-          push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-redis:latest
-
-  build_and_push_pgadmin4:
-    name: Build and push PGAdmin4 image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{secrets.DOCKERHUB_USERNAME}}
-          password: ${{secrets.DOCKERHUB_TOKEN}}
-
-      - name: Build and push PGAdmin4 image to Docker Hub
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: dockerfiles/mykidz-pgadmin4.Dockerfile
-          push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}}/mykidz-pgadmin4:latest
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/mk-pg:latest
 
   push_compose_file_to_s3:
     name: Push docker-compose.yaml to AWS S3 Bucket
@@ -119,8 +77,6 @@ jobs:
       - build_and_push_appserver
       - build_and_push_nginx
       - build_and_push_postgres
-      - build_and_push_redis
-      - build_and_push_pgadmin4
     steps:
       - name: Checkout
         uses: actions/checkout@v2

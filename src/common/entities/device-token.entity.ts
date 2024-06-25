@@ -2,7 +2,6 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   CreateDateColumn,
-  UpdateDateColumn,
   Column,
   ManyToOne,
   JoinColumn,
@@ -10,27 +9,24 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 
-@Entity('user_sessions')
-export class UserSession {
+@Entity('device_tokens')
+export class DeviceToken {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: 'text', nullable: false })
-  access_token: string;
+  token: string;
 
   @PrimaryColumn({ nullable: false })
   user_id: number;
 
-  @ManyToOne(() => User, (user) => user.user_sessions)
+  @ManyToOne(() => User, (user) => user.device_tokens)
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column({ type: 'timestamptz', nullable: false })
-  access_token_expiration_time: Date;
+  @Column({ length: 255, nullable: false })
+  device_type: string;
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
-
-  @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  updated_at: Date;
 }

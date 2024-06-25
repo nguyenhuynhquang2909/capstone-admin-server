@@ -13,6 +13,8 @@ import { Post } from './post.entity';
 import { Student } from './student.entity';
 import { Comment } from './comment.entity';
 import { ToggleLike } from './toggle-like.entity';
+import { DeviceToken } from './device-token.entity';
+import { UserSession } from './user-session.entity';
 
 @Entity('users')
 export class User {
@@ -49,6 +51,12 @@ export class User {
 
   @OneToMany(() => ToggleLike, (toggleLike) => toggleLike.user)
   likes: ToggleLike[];
+
+  @OneToMany(() => DeviceToken, (deviceToken) => deviceToken.user)
+  device_tokens: DeviceToken[];
+
+  @OneToMany(() => UserSession, (userSession) => userSession.user)
+  user_sessions: UserSession[];
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

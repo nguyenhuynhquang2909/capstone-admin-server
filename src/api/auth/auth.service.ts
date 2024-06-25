@@ -1,14 +1,13 @@
-import {
-  Injectable,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { randomInt } from 'crypto';
 
 import { User } from '../../common/entities/user.entity';
 import { Role } from '../../common/entities/role.entity';
 import { UserSession } from '../../common/entities/user-session.entity';
+import { DeviceToken } from '../../common/entities/device-token.entity';
 
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
@@ -29,6 +28,9 @@ export class AuthService {
     private readonly roleRepository: Repository<Role>,
     private readonly jwtService: JwtService,
     private readonly cacheService: Cache,
+    private readonly configService: ConfigService,
+    @InjectRepository(DeviceToken)
+    private readonly deviceTokenRepository: Repository<DeviceToken>,
   ) {}
 
   async sendOtp(
@@ -70,15 +72,6 @@ export class AuthService {
     return { status: 'success', message: 'Mã OTP hợp lệ', accessToken };
   }
 
-  async logout(
-    authHeader: string,
-  ): Promise<{ status: string; message: string }> {
-    const userId = this.extractUserIdFromToken(authHeader);
-    this.validateUserId(userId);
-
-    return { status: 'success', message: 'Người dùng đã đăng xuất thành công' };
-  }
-
   async getProfile(userId: number): Promise<User | null> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
@@ -86,6 +79,26 @@ export class AuthService {
     });
     this.validateUserExistence(user);
     return user;
+  }
+
+  async saveDeviceToken(
+    userId: number,
+    token: string,
+    deviceType: string,
+  ): Promise<string> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    this.validateUserExistence(user);
+  
+    const deviceToken = new DeviceToken();
+    deviceToken.token = token;
+    deviceToken.device_type = deviceType;
+    deviceToken.user_id = userId;
+    
+    await this.deviceTokenRepository.save(deviceToken);
+  
+    return 'Device token được lưu thành công';
   }
 
   public decodeToken(token: string): { userId: number } | null {
@@ -145,8 +158,10 @@ export class AuthService {
       roleId: user.role.id,
       issuedAt: new Date().toISOString(),
       expiresAt: new Date(
-        Date.now() + 4 * 30 * 24 * 60 * 60 * 1000,
-      ).toISOString(), // 4 months
+        Date.now() +
+          parseInt(this.configService.get<string>('JWT_EXPIRATION_TIME')) *
+            1000,
+      ).toISOString(),
     };
     return this.jwtService.sign(accessTokenPayload);
   }
@@ -159,12 +174,13 @@ export class AuthService {
     userSession.access_token = accessToken;
     userSession.user = user;
     userSession.access_token_expiration_time = new Date(
-      Date.now() + 4 * 30 * 24 * 60 * 60 * 1000,
+      Date.now() +
+        parseInt(this.configService.get<string>('JWT_EXPIRATION_TIME')) * 1000,
     );
     await this.userSessionRepository.save(userSession);
   }
 
-  private extractUserIdFromToken(authHeader: string): number {
+  public extractUserIdFromToken(authHeader: string): number {
     const accessToken = authHeader?.split(' ')[1];
     const decodedToken = this.jwtService.decode(accessToken) as {
       userId: number;
