@@ -225,6 +225,12 @@ INSERT INTO classes (name, teacher_id, school_id) VALUES
 ('Class 1A', 1, 1),
 ('Class 2B', 2, 2);
 
+-- Insert dummy class_students data
+INSERT INTO class_students (class_id, student_id) VALUES
+(1, 1),
+(1, 2),
+(2, 3);
+
 -- Insert dummy daily_schedules data
 INSERT INTO daily_schedules (class_id, start_time, end_time, subject) VALUES
 (1, '2024-06-27 09:00:00', '2024-06-27 10:00:00', 'Math'),
@@ -316,12 +322,6 @@ INSERT INTO eating_schedules (class_id, schedule_time, start_time, end_time, mea
 INSERT INTO eating_schedules (class_id, schedule_time, start_time, end_time, meal, menu) VALUES
 (1, '2024-07-08 12:00:00', '2024-07-08 12:00:00', '2024-07-08 12:30:00', 'Lunch', 'Soup, Salad, Juice'),
 (2, '2024-07-08 12:30:00', '2024-07-08 12:30:00', '2024-07-08 13:00:00', 'Lunch', 'Sandwich, Fruit, Milk');
-
--- Insert dummy class_students data
-INSERT INTO class_students (class_id, student_id) VALUES
-(1, 1),
-(1, 2),
-(2, 3);
 
 -- Insert dummy absence data
 INSERT INTO absence (student_id, class_id, daily_schedule_id, reason) VALUES
