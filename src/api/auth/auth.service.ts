@@ -90,14 +90,14 @@ export class AuthService {
       where: { id: userId },
     });
     this.validateUserExistence(user);
-  
+
     const deviceToken = new DeviceToken();
     deviceToken.token = token;
     deviceToken.device_type = deviceType;
     deviceToken.user_id = userId;
-    
+
     await this.deviceTokenRepository.save(deviceToken);
-  
+
     return 'Device token được lưu thành công';
   }
 

@@ -6,9 +6,12 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
 import { School } from './school.entity';
+import { ClassStudent } from './class-student.entity';
+import { Absence } from './absence.entity';
 
 @Entity('students')
 export class Student {
@@ -31,6 +34,12 @@ export class Student {
   @ManyToOne(() => User, (user) => user.students)
   @JoinColumn({ name: 'parent_id' })
   user: User;
+
+  @OneToMany(() => ClassStudent, (classStudent) => classStudent.student)
+  classStudents: ClassStudent[];
+
+  @OneToMany(() => Absence, (absence) => absence.student)
+  absences: Absence[];
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

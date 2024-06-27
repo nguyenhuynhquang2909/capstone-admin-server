@@ -22,7 +22,10 @@ export class FcmService {
     this.messaging = admin.messaging();
   }
 
-  async sendPushNotification(deviceTokens: string[], payload: admin.messaging.Message) {
+  async sendPushNotification(
+    deviceTokens: string[],
+    payload: admin.messaging.Message,
+  ) {
     if (!deviceTokens || deviceTokens.length === 0) {
       console.error('No device tokens available to send the notification.');
       throw new Error('No device tokens available to send the notification.');
