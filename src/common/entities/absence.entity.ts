@@ -1,9 +1,4 @@
-import {
-  Entity,
-  ManyToOne,
-  PrimaryColumn,
-  JoinColumn,
-} from 'typeorm';
+import { Entity, ManyToOne, PrimaryColumn, JoinColumn } from 'typeorm';
 import { Student } from './student.entity';
 import { Class } from './class.entity';
 import { DailySchedule } from './daily-schedule.entity';
