@@ -60,7 +60,7 @@ export class AuthController {
 
     response.status(HttpStatus.OK).json({ status: 'success', data: profile });
   }
-  
+
   @Post('device-token')
   @UseGuards(AuthGuard('jwt'))
   async saveDeviceToken(
@@ -76,9 +76,9 @@ export class AuthController {
       createDeviceTokenDto.token,
       createDeviceTokenDto.device_type,
     );
-    
+
     response.status(HttpStatus.OK).json({ status: 'success', data: result });
-}
+  }
 
   private setAuthorizationHeader(
     response: Response,
