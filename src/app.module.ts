@@ -10,7 +10,7 @@ import { PostModule } from './api/post/post.module';
 import { NotificationModule } from './api/notification/notification.module';
 import { SeedingsModule } from './migrations/seedings/seedings.module';
 import { ClassScheduleModule } from './api/class_schedule/class_schedule.module';
-import { EatingScheduleModule } from './eating_schedule/eating_schedule.module';
+import { EatingScheduleModule } from './api/eating_schedule/eating_schedule.module';
 
 @Module({
   imports: [
