@@ -40,7 +40,10 @@ export class Class {
   @OneToMany(() => DailySchedule, (dailySchedule) => dailySchedule.classEntity)
   dailySchedules: DailySchedule[];
 
-  @OneToMany(() => EatingSchedule, (eatingSchedule) => eatingSchedule.classEntity)
+  @OneToMany(
+    () => EatingSchedule,
+    (eatingSchedule) => eatingSchedule.classEntity,
+  )
   eatingSchedules: EatingSchedule[];
 
   @OneToMany(() => ClassStudent, (classStudent) => classStudent.classEntity)

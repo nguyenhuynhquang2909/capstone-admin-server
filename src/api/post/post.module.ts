@@ -30,7 +30,7 @@ import { DeviceToken } from '../../common/entities/device-token.entity';
       ToggleLike,
       UserSession,
       Image,
-      DeviceToken
+      DeviceToken,
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],

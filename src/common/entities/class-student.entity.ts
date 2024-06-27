@@ -1,9 +1,4 @@
-import {
-  Entity,
-  ManyToOne,
-  PrimaryColumn,
-  JoinColumn,
-} from 'typeorm';
+import { Entity, ManyToOne, PrimaryColumn, JoinColumn } from 'typeorm';
 import { Class } from './class.entity';
 import { Student } from './student.entity';
 

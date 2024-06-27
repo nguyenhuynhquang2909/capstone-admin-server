@@ -8,9 +8,7 @@ import { NotificationController } from './notification.controller';
 import { DeviceToken } from '../../common/entities/device-token.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([DeviceToken]),
-    FcmModule],
+  imports: [TypeOrmModule.forFeature([DeviceToken]), FcmModule],
   controllers: [NotificationController],
   providers: [NotificationService],
 })

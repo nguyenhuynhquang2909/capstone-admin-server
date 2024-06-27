@@ -9,7 +9,8 @@ export class NotificationController {
   @Post('push')
   async sendPushNotification(@Body() payload: PushNotificationDto) {
     const userId = 3;
-    const deviceTokens = await this.notificationService.getUserDeviceTokens(userId);
+    const deviceTokens =
+      await this.notificationService.getUserDeviceTokens(userId);
 
     if (deviceTokens.length === 0) {
       throw new Error('No device tokens available to send the notification.');
