@@ -2,7 +2,10 @@ version: '3.9'
 
 services:
   postgres:
-    image: khangtgr/mk-pg
+    build:
+      context: .
+      dockerfile: ./dockerfiles/mk-pg.Dockerfile
+    # image: khangtgr/mk-pg
     container_name: mk-pg
     environment:
       POSTGRES_HOST: ${POSTGRES_HOST}
@@ -79,45 +82,45 @@ services:
       timeout: 5s
       retries: 3
 
-  app:
-    image: khangtgr/mk-app
-    env_file:
-      - .env
-    ports:
-      - "${LOCALHOST_PORT}"
-    depends_on:
-      - postgres
-    networks:
-      - backend
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-      resources:
-        limits:
-          cpus: '1'
-          memory: 512M
+  # app:
+  #   image: khangtgr/mk-app
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "${LOCALHOST_PORT}"
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - backend
+  #   deploy:
+  #     replicas: 1
+  #     restart_policy:
+  #       condition: on-failure
+  #     resources:
+  #       limits:
+  #         cpus: '1'
+  #         memory: 512M
 
-  nginx:
-    image: khangtgr/mk-nginx
-    container_name: mk-nginx
-    ports:
-      - '9090:80'
-    depends_on:
-      - app
-    networks:
-      - backend
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 128M
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+  # nginx:
+  #   image: khangtgr/mk-nginx
+  #   container_name: mk-nginx
+  #   ports:
+  #     - '9090:80'
+  #   depends_on:
+  #     - app
+  #   networks:
+  #     - backend
+  #   restart: unless-stopped
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.5'
+  #         memory: 128M
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
 
 networks:
   backend:

@@ -4,32 +4,30 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
-import { Post } from './post.entity';
-import { Student } from './student.entity';
-import { Teacher } from './teacher.entity';
+import { School } from './school.entity';
 import { Class } from './class.entity';
 
-@Entity('schools')
-export class School {
+@Entity('teachers')
+export class Teacher {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ length: 255, nullable: false })
   name: string;
 
-  @OneToMany(() => Student, (student) => student.school)
-  students: Student[];
+  @Column({ nullable: false })
+  school_id: number;
 
-  @OneToMany(() => Teacher, (teacher) => teacher.school)
-  teachers: Teacher[];
+  @ManyToOne(() => School, (school) => school.teachers)
+  @JoinColumn({ name: 'school_id' })
+  school: School;
 
-  @OneToMany(() => Class, (classEntity) => classEntity.school)
+  @OneToMany(() => Class, (classEntity) => classEntity.teacher)
   classes: Class[];
-
-  @OneToMany(() => Post, (post) => post.school)
-  posts: Post[];
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

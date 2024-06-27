@@ -16,10 +16,9 @@ CREATE TABLE users (
     role_id INTEGER NOT NULL REFERENCES roles(id),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-    -- CONSTRAINT fk_role_id FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 
--- Create user devices table
+-- Create device_tokens table
 CREATE TABLE device_tokens (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id),
@@ -36,7 +35,6 @@ CREATE TABLE user_sessions (
     access_token_expiration_time TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-    -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Create schools table
@@ -55,8 +53,58 @@ CREATE TABLE students (
     parent_id INTEGER NOT NULL REFERENCES users(id),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-    -- CONSTRAINT fk_school_id FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
-    -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create teachers table
+CREATE TABLE teachers (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    school_id INTEGER NOT NULL REFERENCES schools(id),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create classes table
+CREATE TABLE classes (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    teacher_id INTEGER NOT NULL REFERENCES teachers(id),
+    school_id INTEGER NOT NULL REFERENCES schools(id),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create daily_schedules table
+CREATE TABLE daily_schedules (
+    id SERIAL PRIMARY KEY,
+    class_id INTEGER NOT NULL REFERENCES classes(id),
+    schedule_time TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create eating_schedules table
+CREATE TABLE eating_schedules (
+    id SERIAL PRIMARY KEY,
+    class_id INTEGER NOT NULL REFERENCES classes(id),
+    schedule_time TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create class_students junction table
+CREATE TABLE class_students (
+    class_id INTEGER NOT NULL REFERENCES classes(id),
+    student_id INTEGER NOT NULL REFERENCES students(id),
+    PRIMARY KEY (class_id, student_id)
+);
+
+-- Create absence junction table
+CREATE TABLE absence (
+    student_id INTEGER NOT NULL REFERENCES students(id),
+    class_id INTEGER NOT NULL REFERENCES classes(id),
+    daily_schedule_id INTEGER NOT NULL REFERENCES daily_schedules(id),
+    PRIMARY KEY (student_id, class_id, daily_schedule_id)
 );
 
 -- Create posts table
@@ -70,8 +118,6 @@ CREATE TABLE posts (
     published_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-    -- CONSTRAINT fk_school_id FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
-    -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Create images table
@@ -80,7 +126,6 @@ CREATE TABLE images (
     url VARCHAR(255) NOT NULL,
     post_id INTEGER NOT NULL REFERENCES posts(id),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-    -- CONSTRAINT fk_post_id FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 );
 
 -- Create hashtags table
@@ -91,14 +136,11 @@ CREATE TABLE hashtags (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create posts_hashtags junction table (many-to-many relationship between posts and hashtags)
+-- Create posts_hashtags junction table
 CREATE TABLE posts_hashtags (
     post_id INTEGER NOT NULL REFERENCES posts(id),
     hashtag_id INTEGER NOT NULL REFERENCES hashtags(id),
-    placeholder_number INTEGER NOT NULL,
-    -- CONSTRAINT fk_post_id FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    -- CONSTRAINT fk_hashtag_id FOREIGN KEY (hashtag_id) REFERENCES hashtags(id) ON DELETE CASCADE,
-    PRIMARY KEY (post_id, hashtag_id, placeholder_number)
+    PRIMARY KEY (post_id, hashtag_id)
 );
 
 -- Create comments table
@@ -111,32 +153,25 @@ CREATE TABLE comments (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create toggle_likes junction table (many-to-many relationship between users and posts)
+-- Create toggle_likes junction table
 CREATE TABLE toggle_likes (
     user_id INTEGER NOT NULL REFERENCES users(id),
     post_id INTEGER NOT NULL REFERENCES posts(id),
-    -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    -- CONSTRAINT fk_post_id FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, post_id)
 );
 
--- Create school_admins junction table (many-to-many relationship between users (schoolAdmins) and schools)
+-- Create school_admins junction table
 CREATE TABLE school_admins (
     user_id INTEGER NOT NULL REFERENCES users(id),
     school_id INTEGER NOT NULL REFERENCES schools(id),
-    -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    -- CONSTRAINT fk_school_id FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, school_id)
 );
 
--- Create user_tags junction table (many-to-many relationship between users and comments)
+-- Create user_tags junction table
 CREATE TABLE user_tags (
     comment_id INTEGER NOT NULL REFERENCES comments(id),
     user_id INTEGER NOT NULL REFERENCES users(id),
-    placeholder_number INTEGER NOT NULL,
-    -- CONSTRAINT fk_comment_id FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
-    -- CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    PRIMARY KEY (comment_id, user_id, placeholder_number)
+    PRIMARY KEY (comment_id, user_id)
 );
 
 -- Create notifications table
@@ -172,6 +207,37 @@ INSERT INTO students (name, school_id, parent_id) VALUES
 ('Student 1', 1, 1),
 ('Student 2', 1, 2),
 ('Student 3', 2, 3);
+
+-- Insert dummy teachers data
+INSERT INTO teachers (name, school_id) VALUES
+('Teacher 1', 1),
+('Teacher 2', 2);
+
+-- Insert dummy classes data
+INSERT INTO classes (name, teacher_id, school_id) VALUES
+('Class 1A', 1, 1),
+('Class 2B', 2, 2);
+
+-- Insert dummy daily_schedules data
+INSERT INTO daily_schedules (class_id, schedule_time) VALUES
+(1, '2024-06-27 09:00:00'),
+(2, '2024-06-27 10:00:00');
+
+-- Insert dummy eating_schedules data
+INSERT INTO eating_schedules (class_id, schedule_time) VALUES
+(1, '2024-06-27 12:00:00'),
+(2, '2024-06-27 12:30:00');
+
+-- Insert dummy class_students data
+INSERT INTO class_students (class_id, student_id) VALUES
+(1, 1),
+(1, 2),
+(2, 3);
+
+-- Insert dummy absence data
+INSERT INTO absence (student_id, class_id, daily_schedule_id) VALUES
+(1, 1, 1),
+(3, 2, 2);
 
 -- Insert dummy posts data
 INSERT INTO posts (title, content, school_id, created_by, status) VALUES
