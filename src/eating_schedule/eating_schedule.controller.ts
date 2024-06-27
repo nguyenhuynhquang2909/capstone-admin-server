@@ -2,22 +2,22 @@ import {
   Controller,
   Get,
   Post,
-  Body,
+  // Body,
   Patch,
   Param,
   Delete,
 } from '@nestjs/common';
 import { EatingScheduleService } from './eating_schedule.service';
-import { CreateEatingScheduleDto } from './dto/create-eating_schedule.dto';
-import { UpdateEatingScheduleDto } from './dto/update-eating_schedule.dto';
+// import { CreateEatingScheduleDto } from './dto/create-eating_schedule.dto';
+// import { UpdateEatingScheduleDto } from './dto/update-eating_schedule.dto';
 
 @Controller('eating-schedule')
 export class EatingScheduleController {
   constructor(private readonly eatingScheduleService: EatingScheduleService) {}
 
   @Post()
-  create(@Body() createEatingScheduleDto: CreateEatingScheduleDto) {
-    return this.eatingScheduleService.create(createEatingScheduleDto);
+  create() {
+    return this.eatingScheduleService.create();
   }
 
   @Get()
@@ -33,9 +33,9 @@ export class EatingScheduleController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateEatingScheduleDto: UpdateEatingScheduleDto,
+    // @Body() updateEatingScheduleDto: UpdateEatingScheduleDto,
   ) {
-    return this.eatingScheduleService.update(+id, updateEatingScheduleDto);
+    return this.eatingScheduleService.update(+id);
   }
 
   @Delete(':id')
