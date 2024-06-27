@@ -2,22 +2,22 @@ import {
   Controller,
   Get,
   Post,
-  Body,
+  // Body,
   Patch,
   Param,
   Delete,
 } from '@nestjs/common';
 import { ClassScheduleService } from './class_schedule.service';
-import { CreateClassScheduleDto } from './dto/create-class_schedule.dto';
-import { UpdateClassScheduleDto } from './dto/update-class_schedule.dto';
+// import { CreateClassScheduleDto } from './dto/create-class_schedule.dto';
+// import { UpdateClassScheduleDto } from './dto/update-class_schedule.dto';
 
 @Controller('class-schedule')
 export class ClassScheduleController {
   constructor(private readonly classScheduleService: ClassScheduleService) {}
 
   @Post()
-  create(@Body() createClassScheduleDto: CreateClassScheduleDto) {
-    return this.classScheduleService.create(createClassScheduleDto);
+  create() {
+    return this.classScheduleService.create();
   }
 
   @Get()
@@ -33,9 +33,9 @@ export class ClassScheduleController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateClassScheduleDto: UpdateClassScheduleDto,
+    // @Body() updateClassScheduleDto: UpdateClassScheduleDto,
   ) {
-    return this.classScheduleService.update(+id, updateClassScheduleDto);
+    return this.classScheduleService.update(+id);
   }
 
   @Delete(':id')
