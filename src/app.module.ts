@@ -8,6 +8,9 @@ import { UserModule } from './api/user/user.module';
 import { AuthModule } from './api/auth/auth.module';
 import { PostModule } from './api/post/post.module';
 import { NotificationModule } from './api/notification/notification.module';
+import { SeedingsModule } from './migrations/seedings/seedings.module';
+import { ClassScheduleModule } from './api/class_schedule/class_schedule.module';
+import { EatingScheduleModule } from './eating_schedule/eating_schedule.module';
 
 @Module({
   imports: [
@@ -24,6 +27,9 @@ import { NotificationModule } from './api/notification/notification.module';
     RedisModule,
     PostModule,
     NotificationModule,
+    SeedingsModule,
+    ClassScheduleModule,
+    EatingScheduleModule,
   ],
   controllers: [],
   providers: [],
