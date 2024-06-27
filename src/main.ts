@@ -13,7 +13,7 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const PORT = configService.get<string>('LOCALHOST_PORT');
-
+  console.log('PORT', PORT);
   // Set global prefix
   app.setGlobalPrefix('api');
   app.enableVersioning({
@@ -32,7 +32,7 @@ async function bootstrap() {
 
   await app.listen(PORT);
 
-  // await app.listen(3100);
+  // await app.listen(3200);
   // const logger = new Logger('Bootstrap');
   // logger.log(`Server is running on: http://localhost:3100`);
 }
