@@ -26,6 +26,9 @@ export class DailySchedule {
   @Column({ type: 'timestamptz', nullable: false })
   schedule_time: Date;
 
+  // day and afternoon schedule of the class => 1: day, 2: afternoon
+  // start_time and end_time are the time of the class
+
   @OneToMany(() => Absence, (absence) => absence.dailySchedule)
   absences: Absence[];
 
