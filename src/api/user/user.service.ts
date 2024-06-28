@@ -10,6 +10,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '../../common/entities/user.entity';
 import { Role } from '../../common/entities/role.entity';
 import { plainToClass } from 'class-transformer';
+import {
+  IPaginationOptions,
+  Pagination,
+  paginate,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class UserService {
@@ -19,6 +24,13 @@ export class UserService {
     @InjectRepository(Role)
     private roleRepository: Repository<Role>,
   ) {}
+
+  // Add Pagination
+  async paginate(options: IPaginationOptions): Promise<Pagination<User>> {
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+    queryBuilder.leftJoinAndSelect('user.role', 'role');
+    return paginate<User>(queryBuilder, options);
+  }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { role_id, ...userData } = createUserDto;
