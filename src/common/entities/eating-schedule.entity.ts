@@ -22,9 +22,6 @@ export class EatingSchedule {
   classEntity: Class;
 
   @Column({ type: 'timestamptz', nullable: false })
-  schedule_time: Date;
-
-  @Column({ type: 'timestamptz', nullable: false })
   start_time: Date;
 
   @Column({ type: 'timestamptz', nullable: false })
