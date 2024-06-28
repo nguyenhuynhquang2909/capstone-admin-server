@@ -89,7 +89,6 @@ CREATE TABLE daily_schedules (
 CREATE TABLE eating_schedules (
     id SERIAL PRIMARY KEY,
     class_id INTEGER NOT NULL REFERENCES classes(id),
-    schedule_time TIMESTAMPTZ NOT NULL,
     start_time TIMESTAMPTZ NOT NULL,
     end_time TIMESTAMPTZ NOT NULL,
     meal VARCHAR(255) NOT NULL,
@@ -233,95 +232,116 @@ INSERT INTO class_students (class_id, student_id) VALUES
 
 -- Insert dummy daily_schedules data
 INSERT INTO daily_schedules (class_id, start_time, end_time, subject) VALUES
-(1, '2024-06-27 09:00:00', '2024-06-27 10:00:00', 'Math'),
-(1, '2024-06-27 10:00:00', '2024-06-27 11:00:00', 'Science'),
-
--- Tuesday
-(1, '2024-06-28 09:00:00', '2024-06-28 10:00:00', 'History'),
-(1, '2024-06-28 10:00:00', '2024-06-28 11:00:00', 'English'),
-
--- Wednesday
-(1, '2024-06-29 09:00:00', '2024-06-29 10:00:00', 'Physics'),
-(1, '2024-06-29 10:00:00', '2024-06-29 11:00:00', 'Biology'),
-
--- Thursday
-(1, '2024-06-30 09:00:00', '2024-06-30 10:00:00', 'Chemistry'),
-(1, '2024-06-30 10:00:00', '2024-06-30 11:00:00', 'Geography'),
-
--- Friday
-(1, '2024-07-01 09:00:00', '2024-07-01 10:00:00', 'Art'),
-(1, '2024-07-01 10:00:00', '2024-07-01 11:00:00', 'Music');
+(1, '2024-06-24 07:50:00', '2024-06-24 08:00:00', 'Tập thể dục/Morning Exercise'),
+(1, '2024-06-24 08:30:00', '2024-06-24 09:00:00', 'English'),
+(1, '2024-06-24 09:00:00', '2024-06-24 09:30:00', 'Interactive Learning'),
+(1, '2024-06-24 09:30:00', '2024-06-24 10:00:00', 'English Review'),
+(1, '2024-06-24 10:00:00', '2024-06-24 10:30:00', 'Hoạt động SN/Vui chơi'),
+(1, '2024-06-24 14:00:00', '2024-06-24 14:30:00', 'Phát triển nhận thức/Cognitive Development'),
+(1, '2024-06-24 15:00:00', '2024-06-24 15:30:00', 'Bơi lội/Swimming'),
+(1, '2024-06-24 15:30:00', '2024-06-24 16:00:00', 'Xem phim/Movie'),
+(1, '2024-06-24 16:00:00', '2024-06-24 16:30:00', 'Hoạt động vui chơi/Physical Activities'),
+(1, '2024-06-25 07:50:00', '2024-06-25 08:00:00', 'Tập thể dục/Morning Exercise'),
+(1, '2024-06-25 08:30:00', '2024-06-25 09:00:00', 'English'),
+(1, '2024-06-25 09:00:00', '2024-06-25 09:30:00', 'Interactive Learning'),
+(1, '2024-06-25 09:30:00', '2024-06-25 10:00:00', 'English Review'),
+(1, '2024-06-25 10:00:00', '2024-06-25 10:30:00', 'Hoạt động SN/Vui chơi'),
+(1, '2024-06-25 14:00:00', '2024-06-25 14:30:00', 'Phát triển nhận thức/Cognitive Development'),
+(1, '2024-06-25 15:00:00', '2024-06-25 15:30:00', 'Bơi lội/Swimming'),
+(1, '2024-06-25 15:30:00', '2024-06-25 16:00:00', 'Xem phim/Movie'),
+(1, '2024-06-25 16:00:00', '2024-06-25 16:30:00', 'Hoạt động vui chơi/Physical Activities'),
+(1, '2024-06-26 07:50:00', '2024-06-26 08:00:00', 'Tập thể dục/Morning Exercise'),
+(1, '2024-06-26 08:30:00', '2024-06-26 09:00:00', 'English'),
+(1, '2024-06-26 09:00:00', '2024-06-26 09:30:00', 'Interactive Learning'),
+(1, '2024-06-26 09:30:00', '2024-06-26 10:00:00', 'English Review'),
+(1, '2024-06-26 10:00:00', '2024-06-26 10:30:00', 'Hoạt động SN/Vui chơi'),
+(1, '2024-06-26 14:00:00', '2024-06-26 14:30:00', 'Phát triển nhận thức/Cognitive Development'),
+(1, '2024-06-26 15:00:00', '2024-06-26 15:30:00', 'Bơi lội/Swimming'),
+(1, '2024-06-26 15:30:00', '2024-06-26 16:00:00', 'Xem phim/Movie'),
+(1, '2024-06-26 16:00:00', '2024-06-26 16:30:00', 'Hoạt động vui chơi/Physical Activities'),
+(1, '2024-06-27 07:50:00', '2024-06-27 08:00:00', 'Tập thể dục/Morning Exercise'),
+(1, '2024-06-27 08:30:00', '2024-06-27 09:00:00', 'English'),
+(1, '2024-06-27 09:00:00', '2024-06-27 09:30:00', 'Interactive Learning'),
+(1, '2024-06-27 09:30:00', '2024-06-27 10:00:00', 'English Review'),
+(1, '2024-06-27 10:00:00', '2024-06-27 10:30:00', 'Hoạt động SN/Vui chơi'),
+(1, '2024-06-27 14:00:00', '2024-06-27 14:30:00', 'Phát triển nhận thức/Cognitive Development'),
+(1, '2024-06-27 15:00:00', '2024-06-27 15:30:00', 'Bơi lội/Swimming'),
+(1, '2024-06-27 15:30:00', '2024-06-27 16:00:00', 'Xem phim/Movie'),
+(1, '2024-06-27 16:00:00', '2024-06-27 16:30:00', 'Hoạt động vui chơi/Physical Activities'),
+(1, '2024-06-28 07:50:00', '2024-06-28 08:00:00', 'Tập thể dục/Morning Exercise'),
+(1, '2024-06-28 08:30:00', '2024-06-28 09:00:00', 'English'),
+(1, '2024-06-28 09:00:00', '2024-06-28 09:30:00', 'Interactive Learning'),
+(1, '2024-06-28 09:30:00', '2024-06-28 10:00:00', 'English Review'),
+(1, '2024-06-28 10:00:00', '2024-06-28 10:30:00', 'Hoạt động SN/Vui chơi'),
+(1, '2024-06-28 14:00:00', '2024-06-28 14:30:00', 'Phát triển nhận thức/Cognitive Development'),
+(1, '2024-06-28 15:00:00', '2024-06-28 15:30:00', 'Bơi lội/Swimming'),
+(1, '2024-06-28 15:30:00', '2024-06-28 16:00:00', 'Xem phim/Movie'),
+(1, '2024-06-28 16:00:00', '2024-06-28 16:30:00', 'Hoạt động vui chơi/Physical Activities');
 
 INSERT INTO daily_schedules (class_id, start_time, end_time, subject) VALUES
--- Monday
-(1, '2024-07-04 09:00:00', '2024-07-04 10:00:00', 'Physical Education'),
-(1, '2024-07-04 10:00:00', '2024-07-04 11:00:00', 'Computer Science'),
-
--- Tuesday
-(1, '2024-07-05 09:00:00', '2024-07-05 10:00:00', 'Literature'),
-(1, '2024-07-05 10:00:00', '2024-07-05 11:00:00', 'Math'),
-
--- Wednesday
-(1, '2024-07-06 09:00:00', '2024-07-06 10:00:00', 'Psychology'),
-(1, '2024-07-06 10:00:00', '2024-07-06 11:00:00', 'Sociology'),
-
--- Thursday
-(1, '2024-07-07 09:00:00', '2024-07-07 10:00:00', 'Foreign Language'),
-(1, '2024-07-07 10:00:00', '2024-07-07 11:00:00', 'Ethics'),
-
--- Friday
-(1, '2024-07-08 09:00:00', '2024-07-08 10:00:00', 'Drama'),
-(1, '2024-07-08 10:00:00', '2024-07-08 11:00:00', 'Philosophy');
+(2, '2024-06-24 07:50:00', '2024-06-24 08:00:00', 'Tập thể dục/Morning Exercise'),
+(2, '2024-06-24 08:30:00', '2024-06-24 09:00:00', 'English'),
+(2, '2024-06-24 09:00:00', '2024-06-24 09:30:00', 'Interactive Learning'),
+(2, '2024-06-24 09:30:00', '2024-06-24 10:00:00', 'English Review'),
+(2, '2024-06-24 10:00:00', '2024-06-24 10:30:00', 'Hoạt động SN/Vui chơi'),
+(2, '2024-06-24 14:00:00', '2024-06-24 14:30:00', 'Phát triển nhận thức/Cognitive Development'),
+(2, '2024-06-24 15:00:00', '2024-06-24 15:30:00', 'Bơi lội/Swimming'),
+(2, '2024-06-24 15:30:00', '2024-06-24 16:00:00', 'Xem phim/Movie'),
+(2, '2024-06-24 16:00:00', '2024-06-24 16:30:00', 'Hoạt động vui chơi/Physical Activities'),
+(2, '2024-06-25 07:50:00', '2024-06-25 08:00:00', 'Tập thể dục/Morning Exercise'),
+(2, '2024-06-25 08:30:00', '2024-06-25 09:00:00', 'English'),
+(2, '2024-06-25 09:00:00', '2024-06-25 09:30:00', 'Interactive Learning'),
+(2, '2024-06-25 09:30:00', '2024-06-25 10:00:00', 'English Review'),
+(2, '2024-06-25 10:00:00', '2024-06-25 10:30:00', 'Hoạt động SN/Vui chơi'),
+(2, '2024-06-25 14:00:00', '2024-06-25 14:30:00', 'Phát triển nhận thức/Cognitive Development'),
+(2, '2024-06-25 15:00:00', '2024-06-25 15:30:00', 'Bơi lội/Swimming'),
+(2, '2024-06-25 15:30:00', '2024-06-25 16:00:00', 'Xem phim/Movie'),
+(2, '2024-06-25 16:00:00', '2024-06-25 16:30:00', 'Hoạt động vui chơi/Physical Activities'),
+(2, '2024-06-26 07:50:00', '2024-06-26 08:00:00', 'Tập thể dục/Morning Exercise'),
+(2, '2024-06-26 08:30:00', '2024-06-26 09:00:00', 'English'),
+(2, '2024-06-26 09:00:00', '2024-06-26 09:30:00', 'Interactive Learning'),
+(2, '2024-06-26 09:30:00', '2024-06-26 10:00:00', 'English Review'),
+(2, '2024-06-26 10:00:00', '2024-06-26 10:30:00', 'Hoạt động SN/Vui chơi'),
+(2, '2024-06-26 14:00:00', '2024-06-26 14:30:00', 'Phát triển nhận thức/Cognitive Development'),
+(2, '2024-06-26 15:00:00', '2024-06-26 15:30:00', 'Bơi lội/Swimming'),
+(2, '2024-06-26 15:30:00', '2024-06-26 16:00:00', 'Xem phim/Movie'),
+(2, '2024-06-26 16:00:00', '2024-06-26 16:30:00', 'Hoạt động vui chơi/Physical Activities'),
+(2, '2024-06-27 07:50:00', '2024-06-27 08:00:00', 'Tập thể dục/Morning Exercise'),
+(2, '2024-06-27 08:30:00', '2024-06-27 09:00:00', 'English'),
+(2, '2024-06-27 09:00:00', '2024-06-27 09:30:00', 'Interactive Learning'),
+(2, '2024-06-27 09:30:00', '2024-06-27 10:00:00', 'English Review'),
+(2, '2024-06-27 10:00:00', '2024-06-27 10:30:00', 'Hoạt động SN/Vui chơi'),
+(2, '2024-06-27 14:00:00', '2024-06-27 14:30:00', 'Phát triển nhận thức/Cognitive Development'),
+(2, '2024-06-27 15:00:00', '2024-06-27 15:30:00', 'Bơi lội/Swimming'),
+(2, '2024-06-27 15:30:00', '2024-06-27 16:00:00', 'Xem phim/Movie'),
+(2, '2024-06-27 16:00:00', '2024-06-27 16:30:00', 'Hoạt động vui chơi/Physical Activities'),
+(2, '2024-06-28 07:50:00', '2024-06-28 08:00:00', 'Tập thể dục/Morning Exercise'),
+(2, '2024-06-28 08:30:00', '2024-06-28 09:00:00', 'English'),
+(2, '2024-06-28 09:00:00', '2024-06-28 09:30:00', 'Interactive Learning'),
+(2, '2024-06-28 09:30:00', '2024-06-28 10:00:00', 'English Review'),
+(2, '2024-06-28 10:00:00', '2024-06-28 10:30:00', 'Hoạt động SN/Vui chơi'),
+(2, '2024-06-28 14:00:00', '2024-06-28 14:30:00', 'Phát triển nhận thức/Cognitive Development'),
+(2, '2024-06-28 15:00:00', '2024-06-28 15:30:00', 'Bơi lội/Swimming'),
+(2, '2024-06-28 15:30:00', '2024-06-28 16:00:00', 'Xem phim/Movie'),
+(2, '2024-06-28 16:00:00', '2024-06-28 16:30:00', 'Hoạt động vui chơi/Physical Activities');
 
 -- Insert dummy eating_schedules data
-INSERT INTO eating_schedules (class_id, schedule_time, start_time, end_time, meal, menu) VALUES
-(1, '2024-06-27 12:00:00', '2024-06-27 12:00:00', '2024-06-27 12:30:00', 'Lunch', 'Pasta, Salad, Juice'),
-(2, '2024-06-27 12:30:00', '2024-06-27 12:30:00', '2024-06-27 13:00:00', 'Lunch', 'Sandwich, Fruit, Milk');
-
--- Tuesday
-INSERT INTO eating_schedules (class_id, schedule_time, start_time, end_time, meal, menu) VALUES
-(1, '2024-06-28 12:00:00', '2024-06-28 12:00:00', '2024-06-28 12:30:00', 'Lunch', 'Rice, Chicken, Vegetables'),
-(2, '2024-06-28 12:30:00', '2024-06-28 12:30:00', '2024-06-28 13:00:00', 'Lunch', 'Pizza, Salad, Soda');
-
--- Wednesday
-INSERT INTO eating_schedules (class_id, schedule_time, start_time, end_time, meal, menu) VALUES
-(1, '2024-06-29 12:00:00', '2024-06-29 12:00:00', '2024-06-29 12:30:00', 'Lunch', 'Soup, Sandwich, Fruit'),
-(2, '2024-06-29 12:30:00', '2024-06-29 12:30:00', '2024-06-29 13:00:00', 'Lunch', 'Burger, Fries, Milkshake');
-
--- Thursday
-INSERT INTO eating_schedules (class_id, schedule_time, start_time, end_time, meal, menu) VALUES
-(1, '2024-06-30 12:00:00', '2024-06-30 12:00:00', '2024-06-30 12:30:00', 'Lunch', 'Pasta, Breadsticks, Juice'),
-(2, '2024-06-30 12:30:00', '2024-06-30 12:30:00', '2024-06-30 13:00:00', 'Lunch', 'Salad, Sandwich, Smoothie');
-
--- Friday
-INSERT INTO eating_schedules (class_id, schedule_time, start_time, end_time, meal, menu) VALUES
-(1, '2024-07-01 12:00:00', '2024-07-01 12:00:00', '2024-07-01 12:30:00', 'Lunch', 'Chicken, Rice, Vegetables'),
-(2, '2024-07-01 12:30:00', '2024-07-01 12:30:00', '2024-07-01 13:00:00', 'Lunch', 'Pizza, Fruit, Soda');
-
--- Next week: Monday
-INSERT INTO eating_schedules (class_id, schedule_time, start_time, end_time, meal, menu) VALUES
-(1, '2024-07-04 12:00:00', '2024-07-04 12:00:00', '2024-07-04 12:30:00', 'Lunch', 'Soup, Sandwich, Juice'),
-(2, '2024-07-04 12:30:00', '2024-07-04 12:30:00', '2024-07-04 13:00:00', 'Lunch', 'Burger, Fries, Milkshake');
-
--- Tuesday
-INSERT INTO eating_schedules (class_id, schedule_time, start_time, end_time, meal, menu) VALUES
-(1, '2024-07-05 12:00:00', '2024-07-05 12:00:00', '2024-07-05 12:30:00', 'Lunch', 'Pasta, Breadsticks, Soda'),
-(2, '2024-07-05 12:30:00', '2024-07-05 12:30:00', '2024-07-05 13:00:00', 'Lunch', 'Salad, Sandwich, Smoothie');
-
--- Wednesday
-INSERT INTO eating_schedules (class_id, schedule_time, start_time, end_time, meal, menu) VALUES
-(1, '2024-07-06 12:00:00', '2024-07-06 12:00:00', '2024-07-06 12:30:00', 'Lunch', 'Chicken, Rice, Vegetables'),
-(2, '2024-07-06 12:30:00', '2024-07-06 12:30:00', '2024-07-06 13:00:00', 'Lunch', 'Pizza, Fruit, Soda');
-
--- Thursday
-INSERT INTO eating_schedules (class_id, schedule_time, start_time, end_time, meal, menu) VALUES
-(1, '2024-07-07 12:00:00', '2024-07-07 12:00:00', '2024-07-07 12:30:00', 'Lunch', 'Rice, Chicken, Vegetables'),
-(2, '2024-07-07 12:30:00', '2024-07-07 12:30:00', '2024-07-07 13:00:00', 'Lunch', 'Sandwich, Fruit, Milk');
-
--- Friday
-INSERT INTO eating_schedules (class_id, schedule_time, start_time, end_time, meal, menu) VALUES
-(1, '2024-07-08 12:00:00', '2024-07-08 12:00:00', '2024-07-08 12:30:00', 'Lunch', 'Soup, Salad, Juice'),
-(2, '2024-07-08 12:30:00', '2024-07-08 12:30:00', '2024-07-08 13:00:00', 'Lunch', 'Sandwich, Fruit, Milk');
+INSERT INTO eating_schedules (class_id, start_time, end_time, meal, menu) VALUES
+(1, '2024-06-24 08:00:00', '2024-06-24 08:30:00', 'Ăn sáng - Breakfast', 'Thịt bò - Steak'), -- Monday
+(1, '2024-06-24 10:30:00', '2024-06-24 11:30:00', 'Ăn trưa - Lunch', 'Thịt heo - Pork'),
+(1, '2024-06-24 14:30:00', '2024-06-24 15:00:00', 'Ăn xế - Snack', 'Thịt cừu - Lamb'),
+(1, '2024-06-25 08:00:00', '2024-06-25 08:30:00', 'Ăn sáng - Breakfast', 'Thịt bò - Steak'),
+(1, '2024-06-25 10:30:00', '2024-06-25 11:30:00', 'Ăn trưa - Lunch', 'Thịt heo - Pork'),
+(1, '2024-06-25 14:30:00', '2024-06-25 15:00:00', 'Ăn xế - Snack', 'Thịt cừu - Lamb'),
+(1, '2024-06-26 08:00:00', '2024-06-26 08:30:00', 'Ăn sáng - Breakfast', 'Thịt bò - Steak'),
+(1, '2024-06-26 10:30:00', '2024-06-26 11:30:00', 'Ăn trưa - Lunch', 'Thịt heo - Pork'),
+(1, '2024-06-26 14:30:00', '2024-06-26 15:00:00', 'Ăn xế - Snack', 'Thịt cừu - Lamb'),
+(1, '2024-06-27 08:00:00', '2024-06-27 08:30:00', 'Ăn sáng - Breakfast', 'Thịt bò - Steak'),
+(1, '2024-06-27 10:30:00', '2024-06-27 11:30:00', 'Ăn trưa - Lunch', 'Thịt heo - Pork'),
+(1, '2024-06-27 14:30:00', '2024-06-27 15:00:00', 'Ăn xế - Snack', 'Thịt cừu - Lamb'),
+(1, '2024-06-28 08:00:00', '2024-06-28 08:30:00', 'Ăn sáng - Breakfast', 'Thịt bò - Steak'),
+(1, '2024-06-28 10:30:00', '2024-06-28 11:30:00', 'Ăn trưa - Lunch', 'Thịt heo - Pork'),
+(1, '2024-06-28 14:30:00', '2024-06-28 15:00:00', 'Ăn xế - Snack', 'Thịt cừu - Lamb');
 
 -- Insert dummy absence data
 INSERT INTO absence (student_id, class_id, daily_schedule_id, reason) VALUES
