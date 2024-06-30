@@ -22,7 +22,16 @@ export class EatingSchedule {
   classEntity: Class;
 
   @Column({ type: 'timestamptz', nullable: false })
-  schedule_time: Date;
+  start_time: Date;
+
+  @Column({ type: 'timestamptz', nullable: false })
+  end_time: Date;
+
+  @Column({ nullable: false })
+  meal: string;
+
+  @Column({ type: 'text', nullable: false })
+  menu: string;
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

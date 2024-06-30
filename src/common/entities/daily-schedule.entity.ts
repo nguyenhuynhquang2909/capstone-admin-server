@@ -24,10 +24,13 @@ export class DailySchedule {
   classEntity: Class;
 
   @Column({ type: 'timestamptz', nullable: false })
-  schedule_time: Date;
+  start_time: Date;
 
-  // day and afternoon schedule of the class => 1: day, 2: afternoon
-  // start_time and end_time are the time of the class
+  @Column({ type: 'timestamptz', nullable: false })
+  end_time: Date;
+
+  @Column({ nullable: false })
+  subject: string;
 
   @OneToMany(() => Absence, (absence) => absence.dailySchedule)
   absences: Absence[];
