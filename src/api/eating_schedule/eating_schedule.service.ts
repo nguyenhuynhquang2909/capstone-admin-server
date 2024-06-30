@@ -1,27 +1,20 @@
 import { Injectable } from '@nestjs/common';
-// import { CreateEatingScheduleDto } from './dto/create-eating_schedule.dto';
-// import { UpdateEatingScheduleDto } from './dto/update-eating_schedule.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { EatingSchedule } from '../../common/entities/eating-schedule.entity';
 
 @Injectable()
 export class EatingScheduleService {
-  // @typescript-eslint/no-unused-vars
-  create() {
-    return 'This action adds a new eatingSchedule';
-  }
+  constructor(
+    @InjectRepository(EatingSchedule)
+    private eatingScheduleRepository: Repository<EatingSchedule>,
+  ) {}
 
-  findAll() {
-    return `This action returns all eatingSchedule`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} eatingSchedule`;
-  }
-
-  update(id: number) {
-    return `This action updates a #${id} eatingSchedule`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} eatingSchedule`;
+  async findByDateRange(startDate: string, endDate: string): Promise<EatingSchedule[]> {
+    return this.eatingScheduleRepository
+      .createQueryBuilder('schedule')
+      .where('schedule.start_time >= :startDate', { startDate })
+      .andWhere('schedule.end_time <= :endDate', { endDate })
+      .getMany();
   }
 }
