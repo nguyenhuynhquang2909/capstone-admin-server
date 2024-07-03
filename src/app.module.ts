@@ -11,6 +11,8 @@ import { NotificationModule } from './api/notification/notification.module';
 // import { SeedingsModule } from './migrations/seedings/seedings.module';
 import { ClassScheduleModule } from './api/class_schedule/class_schedule.module';
 import { EatingScheduleModule } from './api/eating_schedule/eating_schedule.module';
+import { AbsenceModule } from './api/absence/absence.module';
+import { AbsenceService } from './api/absence/absence.service';
 
 @Module({
   imports: [
@@ -20,6 +22,7 @@ import { EatingScheduleModule } from './api/eating_schedule/eating_schedule.modu
       store: redisStore,
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT,
+      auth_pass: process.env.REDIS_PASSWORD
     }),
     PostgresModule,
     UserModule,
@@ -30,8 +33,8 @@ import { EatingScheduleModule } from './api/eating_schedule/eating_schedule.modu
     // SeedingsModule,
     ClassScheduleModule,
     EatingScheduleModule,
+    AbsenceModule,
   ],
   controllers: [],
-  providers: [],
 })
 export class AppModule {}
