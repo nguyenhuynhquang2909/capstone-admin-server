@@ -22,7 +22,7 @@ export class AbsenceService {
       }
     async createAbsence(createAbsenceDto: CreateAbsenceDto): Promise<Absence> {
         const absence = this.absenceRepository.create(createAbsenceDto);
-        return this.abs
+        return this.absenceRepository.save(absence);
     }
 
 }
