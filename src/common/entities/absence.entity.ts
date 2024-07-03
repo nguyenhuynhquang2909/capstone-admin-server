@@ -19,6 +19,14 @@ export class Absence {
 
   @Column({length: 255, nullable: false})
   absence_type: string;
+
+  @Column({type: 'timestamp', nullable: false})
+  start_time: Date;
+
+  @Column({type: 'timestamp', nullable: false})
+  end_time: Date
+
+
   @Column({length: 255, nullable: false})
   reason: string;
 
