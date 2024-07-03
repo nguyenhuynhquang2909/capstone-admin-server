@@ -32,8 +32,6 @@ export class DailySchedule {
   @Column({ nullable: false })
   subject: string;
 
-  @OneToMany(() => Absence, (absence) => absence.dailySchedule)
-  absences: Absence[];
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

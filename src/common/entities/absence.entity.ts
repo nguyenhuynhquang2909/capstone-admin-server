@@ -11,8 +11,6 @@ export class Absence {
   @PrimaryColumn()
   class_id: number;
 
-  @PrimaryColumn()
-  daily_schedule_id: number;
 
   @Column({length: 255, nullable: false})
   absence_status: string;
@@ -38,7 +36,5 @@ export class Absence {
   @JoinColumn({ name: 'class_id' })
   classEntity: Class;
 
-  @ManyToOne(() => DailySchedule, (dailySchedule) => dailySchedule.absences)
-  @JoinColumn({ name: 'daily_schedule_id' })
-  dailySchedule: DailySchedule;
+
 }
