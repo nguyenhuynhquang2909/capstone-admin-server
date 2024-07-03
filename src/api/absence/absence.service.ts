@@ -3,6 +3,7 @@ import { InjectRepository} from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Absence } from 'src/common/entities/absence.entity';
+import { CreateAbsenceDto } from './dto/create-absence.dto';
 
 
 @Injectable()
@@ -19,5 +20,9 @@ export class AbsenceService {
           .where('student.parent_id = :parent_id', { parent_id: parentId }) // use correct placeholder
           .getMany();
       }
+    async createAbsence(createAbsenceDto: CreateAbsenceDto): Promise<Absence> {
+        const absence = this.absenceRepository.create(createAbsenceDto);
+        return this.abs
+    }
 
 }
