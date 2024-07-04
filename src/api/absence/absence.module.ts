@@ -13,6 +13,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from 'src/common/guards/jwt.strategy';
 import { AuthService } from '../auth/auth.service';
 import { AuthModule } from '../auth/auth.module';
+import { ClassStudent } from 'src/common/entities/class-student.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([
@@ -21,7 +22,8 @@ import { AuthModule } from '../auth/auth.module';
     Role,
     UserSession,
     DeviceToken,
-    Student
+    Student,
+    ClassStudent
   ]),
   JwtModule.registerAsync({
     imports: [ConfigModule],
