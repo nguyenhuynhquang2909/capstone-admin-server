@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository} from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -29,23 +29,43 @@ export class AbsenceService {
           .where('student.parent_id = :parent_id', { parent_id: parentId }) // use correct placeholder
           .getMany();
       }
-    async createAbsence(parentId: number, createAbsenceDto: CreateAbsenceDto): Promise<Absence> {
+    
+      async createAbsence(parentId: number, createAbsenceDto: CreateAbsenceDto): Promise<Absence> {
         const classStudent = await this.classStudentRepository
-            .createQueryBuilder('cs')
-            .innerJoinAndSelect('cs.student', 'student')
-            .where('student.parent_id = :parent_id', {parent_id: parentId})
-            .getOne();
-        
+          .createQueryBuilder('cs')
+          .innerJoinAndSelect('cs.student', 'student')
+          .where('student.parent_id = :parent_id', { parent_id: parentId })
+          .getOne();
+    
         if (!classStudent) {
-            throw new NotFoundException('Không tìm thấy học sinh');
+          throw new NotFoundException('Không tìm thấy học sinh');
         }
-        const absence = this.absenceRepository.create({
-            ...createAbsenceDto,
+    
+        const existingAbsence = await this.absenceRepository.findOne({
+          where: {
             student_id: classStudent.student_id,
             class_id: classStudent.class_id,
-            absence_status: createAbsenceDto.absence_status || AbsenceStatus.Pending
+            start_time: createAbsenceDto.start_time,
+            end_time: createAbsenceDto.end_time,
+          },
         });
-        return this.absenceRepository.save(absence);
-    }
+    
+        if (existingAbsence) {
+          throw new ConflictException('Absence record already exists for the specified student and class during this period.');
+        }
+    
+        const absence = this.absenceRepository.create({
+          ...createAbsenceDto,
+          student_id: classStudent.student_id,
+          class_id: classStudent.class_id,
+          absence_status: createAbsenceDto.absence_status || AbsenceStatus.Pending,
+        });
+    
+        console.log('Creating absence: ', absence);
+         await this.absenceRepository.insert(absence);
+    
+        // Manually returning the absence object
+        return absence;
+      }
 
 }
