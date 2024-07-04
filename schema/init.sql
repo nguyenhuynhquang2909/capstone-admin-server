@@ -348,8 +348,8 @@ INSERT INTO eating_schedules (class_id, start_time, end_time, meal, menu) VALUES
 
 -- Insert dummy absence data
 INSERT INTO absence (student_id, class_id, daily_schedule_id, absence_status,absence_type,reason, start_time, end_time) VALUES
-(1, 1, 'Absent','Health Issue', 'Sick', '2024-07-01 08:00:00', '2024-07-01 10:00:00' ),
-(3, 2, 'Absent','Family Leave','Family Emergency', '2024-07-02 09:00:00.000', '2024-07-02 11:00:00.000');
+(1, 1, 'Pending','Health Issue', 'Sick', '2024-07-01 08:00:00', '2024-07-01 10:00:00' ),
+(3, 2, 'Accepted','Family Leave','Family Emergency', '2024-07-02 09:00:00.000', '2024-07-02 11:00:00.000');
 
 -- Insert dummy posts data
 INSERT INTO posts (title, content, school_id, created_by, status) VALUES

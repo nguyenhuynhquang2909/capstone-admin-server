@@ -1,4 +1,5 @@
 export enum AbsenceStatus {
-    Absent = 'Absent',
-    Late = 'Late'
+    Pending = 'Pending',
+    Accepted = 'Accepted',
+    Rejected = 'Rejected'
 }
