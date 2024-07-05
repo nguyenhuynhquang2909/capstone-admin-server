@@ -12,6 +12,7 @@ export class AbsenceController {
     @UseGuards(AuthGuard('jwt'))
     async findAll(@Req() request: any) {
         const user = request.user; 
+        console.log('Authenticated user', user);
         const parentId = user.id; 
         return this.absenceService.findAllAbsences(parentId);
     }
