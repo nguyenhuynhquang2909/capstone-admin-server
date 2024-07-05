@@ -113,7 +113,7 @@ CREATE TABLE absence (
     reason VARCHAR(255) NOT NULL,
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP NOT NULL,
-    PRIMARY KEY (student_id, class_id, daily_schedule_id)
+    PRIMARY KEY (student_id, class_id)
 );
 
 -- Create posts table

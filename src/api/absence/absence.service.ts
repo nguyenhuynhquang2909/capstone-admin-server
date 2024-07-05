@@ -23,12 +23,30 @@ export class AbsenceService {
     ) {}
 
     async findAllAbsences(parentId: number): Promise<Absence[]> {
-        return this.absenceRepository
-          .createQueryBuilder('absence')
-          .innerJoinAndSelect('absence.student', 'student')
-          .where('student.parent_id = :parent_id', { parent_id: parentId }) // use correct placeholder
-          .getMany();
+        const sql = `
+          SELECT 
+            absence.student_id,
+            absence.class_id,
+            absence.absence_status,
+            absence.absence_type,
+            absence.start_time,
+            absence.end_time,
+            absence.reason,
+            s."name" as student_name,
+            s.parent_id 
+          FROM 
+            absence
+          INNER JOIN 
+            students s ON absence.student_id = s.id 
+          INNER JOIN 
+            class_students cs ON s.id = cs.student_id
+          WHERE 
+            s.parent_id = $1
+        `;
+        const results = await this.absenceRepository.query(sql, [parentId]);
+        return results;
       }
+    
     
       async createAbsence(parentId: number, createAbsenceDto: CreateAbsenceDto): Promise<Absence> {
         const classStudent = await this.classStudentRepository
