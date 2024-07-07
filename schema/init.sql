@@ -108,9 +108,12 @@ CREATE TABLE class_students (
 CREATE TABLE absence (
     student_id INTEGER NOT NULL REFERENCES students(id),
     class_id INTEGER NOT NULL REFERENCES classes(id),
-    daily_schedule_id INTEGER NOT NULL REFERENCES daily_schedules(id),
-    reason TEXT NOT NULL,
-    PRIMARY KEY (student_id, class_id, daily_schedule_id)
+    absence_status VARCHAR(255) NOT NULL,
+    absence_type VARCHAR(255) NOT NULL,
+    reason VARCHAR(255) NOT NULL,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    PRIMARY KEY (student_id, class_id)
 );
 
 -- Create posts table
@@ -344,9 +347,9 @@ INSERT INTO eating_schedules (class_id, start_time, end_time, meal, menu) VALUES
 (1, '2024-06-28 14:30:00', '2024-06-28 15:00:00', 'Ăn xế - Snack', 'Thịt cừu - Lamb');
 
 -- Insert dummy absence data
-INSERT INTO absence (student_id, class_id, daily_schedule_id, reason) VALUES
-(1, 1, 1, 'Sick'),
-(3, 2, 2, 'Family Emergency');
+INSERT INTO absence (student_id, class_id, daily_schedule_id, absence_status,absence_type,reason, start_time, end_time) VALUES
+(1, 1, 'Pending','Health Issue', 'Sick', '2024-07-01 08:00:00', '2024-07-01 10:00:00' ),
+(3, 2, 'Accepted','Family Leave','Family Emergency', '2024-07-02 09:00:00.000', '2024-07-02 11:00:00.000');
 
 -- Insert dummy posts data
 INSERT INTO posts (title, content, school_id, created_by, status) VALUES
