@@ -10,7 +10,10 @@ export class EatingScheduleService {
     private eatingScheduleRepository: Repository<EatingSchedule>,
   ) {}
 
-  async findByDateRange(startDate: string, endDate: string): Promise<EatingSchedule[]> {
+  async findByDateRange(
+    startDate: string,
+    endDate: string,
+  ): Promise<EatingSchedule[]> {
     return this.eatingScheduleRepository
       .createQueryBuilder('schedule')
       .where('schedule.start_time >= :startDate', { startDate })
