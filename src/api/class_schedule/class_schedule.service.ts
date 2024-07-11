@@ -16,10 +16,18 @@ export class ClassScheduleService {
     private classStudentRepository: Repository<ClassStudent>,
   ) {}
 
-  async findByDateRange(userId: number, startDate: string, endDate: string): Promise<DailySchedule[]> {
+  async findByDateRange(
+    userId: number,
+    startDate: string,
+    endDate: string,
+  ): Promise<DailySchedule[]> {
     return this.dailyScheduleRepository
       .createQueryBuilder('schedule')
-      .innerJoin(ClassStudent, 'classStudent', 'classStudent.class_id = schedule.class_id')
+      .innerJoin(
+        ClassStudent,
+        'classStudent',
+        'classStudent.class_id = schedule.class_id',
+      )
       .innerJoin(Student, 'student', 'student.id = classStudent.student_id')
       .where('student.parent_id = :userId', { userId })
       .andWhere('schedule.start_time >= :startDate', { startDate })
@@ -30,7 +38,7 @@ export class ClassScheduleService {
         'schedule.class_id',
         'schedule.start_time',
         'schedule.end_time',
-        'schedule.subject'
+        'schedule.subject',
       ])
       .getMany();
   }
