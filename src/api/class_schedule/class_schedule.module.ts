@@ -18,14 +18,17 @@ import { Student } from '../../common/entities/student.entity';
 import { ClassStudent } from '../../common/entities/class-student.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([DailySchedule,
+  imports: [
+    TypeOrmModule.forFeature([
+      DailySchedule,
       User,
       Role,
       UserSession,
       DeviceToken,
-      Student, ClassStudent
-]),
-      JwtModule.registerAsync({
+      Student,
+      ClassStudent,
+    ]),
+    JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -35,7 +38,7 @@ import { ClassStudent } from '../../common/entities/class-student.entity';
         },
       }),
     }),
-],
+  ],
   controllers: [ClassScheduleController],
   providers: [ClassScheduleService, JwtStrategy, AuthService],
 })
