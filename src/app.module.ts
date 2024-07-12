@@ -13,6 +13,7 @@ import { ClassScheduleModule } from './api/class_schedule/class_schedule.module'
 import { EatingScheduleModule } from './api/eating_schedule/eating_schedule.module';
 import { AbsenceModule } from './api/absence/absence.module';
 import { AbsenceService } from './api/absence/absence.service';
+import { ImageModule } from './api/image/image.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { AbsenceService } from './api/absence/absence.service';
     ClassScheduleModule,
     EatingScheduleModule,
     AbsenceModule,
+    ImageModule,
   ],
   controllers: [],
 })

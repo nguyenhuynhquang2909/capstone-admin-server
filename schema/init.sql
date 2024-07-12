@@ -139,6 +139,29 @@ CREATE TABLE images (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create main_images table
+CREATE TABLE main_images (
+    id SERIAL PRIMARY KEY,
+    url VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create post_images junction table
+CREATE TABLE post_images (
+    post_id INTEGER NOT NULL REFERENCES posts(id),
+    image_id INTEGER NOT NULL REFERENCES main_images(id),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (post_id, image_id)
+);
+
+-- Create student_images junction table
+CREATE TABLE student_images (
+    student_id INTEGER NOT NULL REFERENCES students(id),
+    image_id INTEGER NOT NULL REFERENCES main_images(id),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (student_id, image_id)
+);
+
 -- Create hashtags table
 CREATE TABLE hashtags (
     id SERIAL PRIMARY KEY,
@@ -380,3 +403,41 @@ INSERT INTO hashtags (tag) VALUES
 INSERT INTO school_admins (user_id, school_id) VALUES
 (4, 1),
 (5, 2);
+
+INSERT INTO main_images (url) VALUES
+('https://static.independent.co.uk/s3fs-public/thumbnails/image/2017/01/20/18/anya-taylor-joy.jpg'),
+('https://media.glamourmagazine.co.uk/photos/643ea5db549a207868379869/master/w_1600%2Cc_limit/ANYA%2520TAYLOR%2520JOY%2520180423%2520GettyImages-1441299394.jpg'),
+('https://www.hollywoodreporter.com/wp-content/uploads/2021/10/GettyImages-1349090857-H-2021.jpg'),
+('https://example.com/student2_image1.jpg'),
+('https://example.com/student2_image2.jpg'),
+('https://example.com/student2_image3.jpg'),
+('https://m.media-amazon.com/images/M/MV5BMzczNzNiMDAtMmUzZS00MTkwLWIwOTYtNmYyNjg3MTVkNThhXkEyXkFqcGdeQXVyMjA4MjI5MTA@._V1_FMjpg_UX1000_.jpg'),
+('https://media.vanityfair.com/photos/61b7b68055295c52cf01c963/master/w_2560%2Cc_limit/GettyImages-1358673668.jpg'),
+('https://cdn.britannica.com/25/157825-050-227F6B8A/Ben-Affleck-2007.jpg'),
+('https://example.com/post1_image1.jpg'),
+('https://example.com/post1_image2.jpg'),
+('https://example.com/post1_image3.jpg'),
+('https://example.com/post2_image1.jpg'),
+('https://example.com/post2_image2.jpg'),
+('https://example.com/post2_image3.jpg');
+
+-- Assuming post_id and image_id values are available
+INSERT INTO post_images (post_id, image_id) VALUES
+(1, 10),
+(1, 11),
+(1, 12),
+(2, 13),
+(2, 14),
+(2, 15);
+
+-- Assuming student_id and image_id values are available
+INSERT INTO student_images (student_id, image_id) VALUES
+(1, 1),
+(1, 2),
+(1, 3),
+(2, 4),
+(2, 5),
+(2, 6),
+(3, 7),
+(3, 8),
+(3, 9);
