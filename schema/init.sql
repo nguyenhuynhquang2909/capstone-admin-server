@@ -104,8 +104,9 @@ CREATE TABLE class_students (
     PRIMARY KEY (class_id, student_id)
 );
 
--- Create absence junction table
+-- Create absence table 
 CREATE TABLE absence (
+    id SERIAL PRIMARY KEY,
     student_id INTEGER NOT NULL REFERENCES students(id),
     class_id INTEGER NOT NULL REFERENCES classes(id),
     absence_status VARCHAR(255) NOT NULL,
@@ -113,7 +114,8 @@ CREATE TABLE absence (
     reason VARCHAR(255) NOT NULL,
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP NOT NULL,
-    PRIMARY KEY (student_id, class_id)
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create posts table
@@ -135,6 +137,29 @@ CREATE TABLE images (
     url VARCHAR(255) NOT NULL,
     post_id INTEGER NOT NULL REFERENCES posts(id),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create main_images table
+CREATE TABLE main_images (
+    id SERIAL PRIMARY KEY,
+    url VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create post_images junction table
+CREATE TABLE post_images (
+    post_id INTEGER NOT NULL REFERENCES posts(id),
+    image_id INTEGER NOT NULL REFERENCES main_images(id),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (post_id, image_id)
+);
+
+-- Create student_images junction table
+CREATE TABLE student_images (
+    student_id INTEGER NOT NULL REFERENCES students(id),
+    image_id INTEGER NOT NULL REFERENCES main_images(id),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (student_id, image_id)
 );
 
 -- Create hashtags table
@@ -347,7 +372,7 @@ INSERT INTO eating_schedules (class_id, start_time, end_time, meal, menu) VALUES
 (1, '2024-06-28 14:30:00', '2024-06-28 15:00:00', 'Ăn xế - Snack', 'Thịt cừu - Lamb');
 
 -- Insert dummy absence data
-INSERT INTO absence (student_id, class_id, daily_schedule_id, absence_status,absence_type,reason, start_time, end_time) VALUES
+INSERT INTO absence (student_id, class_id, absence_status, absence_type, reason, start_time, end_time) VALUES
 (1, 1, 'Pending','Health Issue', 'Sick', '2024-07-01 08:00:00', '2024-07-01 10:00:00' ),
 (3, 2, 'Accepted','Family Leave','Family Emergency', '2024-07-02 09:00:00.000', '2024-07-02 11:00:00.000');
 
@@ -355,9 +380,7 @@ INSERT INTO absence (student_id, class_id, daily_schedule_id, absence_status,abs
 INSERT INTO posts (title, content, school_id, created_by, status) VALUES
 ('News Bulletin: Field Trip to the Zoo', 'Our students had an amazing time exploring the zoo and learning about various animals!', 1, 4, 'published'),
 ('Science Fair Success!', 'Congratulations to all the young scientists who participated in our school science fair. Were proud of your hard work and creativity!', 2, 5, 'draft'),
-('Math Challenge: Who Will Be the Champion?', 'Get ready for an exciting math challenge!
-
- Sharpen your pencils and put on your thinking caps. Let the competition begin!', 1, 4, 'draft'),
+('Math Challenge: Who Will Be the Champion?', 'Get ready for an exciting math challenge! Sharpen your pencils and put on your thinking caps. Let the competition begin!', 1, 4, 'draft'),
 ('Art Showcase: Unleash Your Creativity', 'Calling all budding artists! Showcase your talent in our school art exhibit. Let your imagination run wild!', 2, 5, 'published'),
 ('Community Service Day: Making a Difference Together', 'Join us for a day of giving back to our community. Together, we can make a positive impact!', 1, 4, 'published'),
 ('Parent-Teacher Conference Reminder', 'Dont forget to schedule your parent-teacher conference. Its a valuable opportunity to discuss your childs progress and goals.', 2, 5, 'draft'),
@@ -380,3 +403,41 @@ INSERT INTO hashtags (tag) VALUES
 INSERT INTO school_admins (user_id, school_id) VALUES
 (4, 1),
 (5, 2);
+
+INSERT INTO main_images (url) VALUES
+('https://static.independent.co.uk/s3fs-public/thumbnails/image/2017/01/20/18/anya-taylor-joy.jpg'),
+('https://media.glamourmagazine.co.uk/photos/643ea5db549a207868379869/master/w_1600%2Cc_limit/ANYA%2520TAYLOR%2520JOY%2520180423%2520GettyImages-1441299394.jpg'),
+('https://www.hollywoodreporter.com/wp-content/uploads/2021/10/GettyImages-1349090857-H-2021.jpg'),
+('https://example.com/student2_image1.jpg'),
+('https://example.com/student2_image2.jpg'),
+('https://example.com/student2_image3.jpg'),
+('https://m.media-amazon.com/images/M/MV5BMzczNzNiMDAtMmUzZS00MTkwLWIwOTYtNmYyNjg3MTVkNThhXkEyXkFqcGdeQXVyMjA4MjI5MTA@._V1_FMjpg_UX1000_.jpg'),
+('https://media.vanityfair.com/photos/61b7b68055295c52cf01c963/master/w_2560%2Cc_limit/GettyImages-1358673668.jpg'),
+('https://cdn.britannica.com/25/157825-050-227F6B8A/Ben-Affleck-2007.jpg'),
+('https://example.com/post1_image1.jpg'),
+('https://example.com/post1_image2.jpg'),
+('https://example.com/post1_image3.jpg'),
+('https://example.com/post2_image1.jpg'),
+('https://example.com/post2_image2.jpg'),
+('https://example.com/post2_image3.jpg');
+
+-- Assuming post_id and image_id values are available
+INSERT INTO post_images (post_id, image_id) VALUES
+(1, 10),
+(1, 11),
+(1, 12),
+(2, 13),
+(2, 14),
+(2, 15);
+
+-- Assuming student_id and image_id values are available
+INSERT INTO student_images (student_id, image_id) VALUES
+(1, 1),
+(1, 2),
+(1, 3),
+(2, 4),
+(2, 5),
+(2, 6),
+(3, 7),
+(3, 8),
+(3, 9);

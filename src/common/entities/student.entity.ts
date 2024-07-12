@@ -1,17 +1,9 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
-  OneToMany,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { User } from './user.entity';
 import { School } from './school.entity';
 import { ClassStudent } from './class-student.entity';
 import { Absence } from './absence.entity';
+import { StudentImage } from './student-image.entity';  // Add this import
 
 @Entity('students')
 export class Student {
@@ -40,6 +32,9 @@ export class Student {
 
   @OneToMany(() => Absence, (absence) => absence.student)
   absences: Absence[];
+
+  @OneToMany(() => StudentImage, (studentImage) => studentImage.student)  // Add this relation
+  studentImages: StudentImage[];
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
