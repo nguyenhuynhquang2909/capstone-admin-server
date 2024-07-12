@@ -104,8 +104,9 @@ CREATE TABLE class_students (
     PRIMARY KEY (class_id, student_id)
 );
 
--- Create absence junction table
+-- Create absence table 
 CREATE TABLE absence (
+    id SERIAL PRIMARY KEY,
     student_id INTEGER NOT NULL REFERENCES students(id),
     class_id INTEGER NOT NULL REFERENCES classes(id),
     absence_status VARCHAR(255) NOT NULL,
@@ -113,7 +114,8 @@ CREATE TABLE absence (
     reason VARCHAR(255) NOT NULL,
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP NOT NULL,
-    PRIMARY KEY (student_id, class_id)
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create posts table
@@ -347,7 +349,7 @@ INSERT INTO eating_schedules (class_id, start_time, end_time, meal, menu) VALUES
 (1, '2024-06-28 14:30:00', '2024-06-28 15:00:00', 'Ăn xế - Snack', 'Thịt cừu - Lamb');
 
 -- Insert dummy absence data
-INSERT INTO absence (student_id, class_id, daily_schedule_id, absence_status,absence_type,reason, start_time, end_time) VALUES
+INSERT INTO absence (student_id, class_id, absence_status, absence_type, reason, start_time, end_time) VALUES
 (1, 1, 'Pending','Health Issue', 'Sick', '2024-07-01 08:00:00', '2024-07-01 10:00:00' ),
 (3, 2, 'Accepted','Family Leave','Family Emergency', '2024-07-02 09:00:00.000', '2024-07-02 11:00:00.000');
 
@@ -355,9 +357,7 @@ INSERT INTO absence (student_id, class_id, daily_schedule_id, absence_status,abs
 INSERT INTO posts (title, content, school_id, created_by, status) VALUES
 ('News Bulletin: Field Trip to the Zoo', 'Our students had an amazing time exploring the zoo and learning about various animals!', 1, 4, 'published'),
 ('Science Fair Success!', 'Congratulations to all the young scientists who participated in our school science fair. Were proud of your hard work and creativity!', 2, 5, 'draft'),
-('Math Challenge: Who Will Be the Champion?', 'Get ready for an exciting math challenge!
-
- Sharpen your pencils and put on your thinking caps. Let the competition begin!', 1, 4, 'draft'),
+('Math Challenge: Who Will Be the Champion?', 'Get ready for an exciting math challenge! Sharpen your pencils and put on your thinking caps. Let the competition begin!', 1, 4, 'draft'),
 ('Art Showcase: Unleash Your Creativity', 'Calling all budding artists! Showcase your talent in our school art exhibit. Let your imagination run wild!', 2, 5, 'published'),
 ('Community Service Day: Making a Difference Together', 'Join us for a day of giving back to our community. Together, we can make a positive impact!', 1, 4, 'published'),
 ('Parent-Teacher Conference Reminder', 'Dont forget to schedule your parent-teacher conference. Its a valuable opportunity to discuss your childs progress and goals.', 2, 5, 'draft'),
