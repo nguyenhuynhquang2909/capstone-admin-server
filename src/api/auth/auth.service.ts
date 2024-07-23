@@ -1,8 +1,10 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { randomInt } from 'crypto';
+
+import * as bcrypt from 'bcrypt';
 
 import { User } from '../../common/entities/user.entity';
 import { Role } from '../../common/entities/role.entity';
@@ -16,6 +18,9 @@ import { JwtService } from '@nestjs/jwt';
 import { Cache } from '@nestjs/cache-manager';
 
 import { JwtPayload } from '../../common/interfaces/jwt-payload.interface';
+import { CreateAdminAuthDto } from './dto/create-admin-auth.dto';
+import { create } from 'domain';
+import { access } from 'fs';
 
 @Injectable()
 export class AuthService {
@@ -32,6 +37,36 @@ export class AuthService {
     @InjectRepository(DeviceToken)
     private readonly deviceTokenRepository: Repository<DeviceToken>,
   ) {}
+
+  async findUserByEmail(email: string): Promise<User | undefined> {
+    return await this.userRepository.createQueryBuilder('u')
+      .leftJoinAndSelect('u.role', 'r')
+      .where('u.email = :email', { email })
+      .limit(1)
+      .getOne();
+  }
+
+  async loginAdmin(createAdminAuthDto: CreateAdminAuthDto): Promise<{status: string, message: string, accessToken?: string}> {
+    const {email, password} = createAdminAuthDto;
+    const user = await this.findUserByEmail(email);
+
+    if (!user || user.role_id !== 2) {
+      throw new UnauthorizedException('Unauthorized Access: Admin credentials required');
+    }
+
+    const isPassWordValid = await bcrypt.compare(password, user.password);
+    console.log('Password provided:', password);
+    console.log('Hashed password in DB:', user.password);
+    console.log('Password comparison result:', isPassWordValid);
+
+    if (!isPassWordValid) {
+      throw new UnauthorizedException('Invalid credentials')
+    }
+    const accessToken = this.generateAccessToken(user);
+    await this.saveUserSession(user, accessToken);
+    return { status: 'success', message: 'Login successful', accessToken };
+
+  }
 
   async sendOtp(
     createAuthDto: CreateAuthDto,
