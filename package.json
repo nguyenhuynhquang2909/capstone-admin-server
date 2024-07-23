@@ -38,6 +38,7 @@
     "@nestjs/platform-express": "^10.3.8",
     "@nestjs/throttler": "^5.1.2",
     "@nestjs/typeorm": "^10.0.2",
+    "@types/bcrypt": "^5.0.2",
     "api-query-params": "^5.4.0",
     "aws-sdk": "^2.1619.0",
     "bcrypt": "^5.1.1",
