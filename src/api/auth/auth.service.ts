@@ -47,26 +47,28 @@ export class AuthService {
   }
 
   async loginAdmin(createAdminAuthDto: CreateAdminAuthDto): Promise<{status: string, message: string, accessToken?: string}> {
-    const {email, password} = createAdminAuthDto;
+    const { email, password } = createAdminAuthDto;
     const user = await this.findUserByEmail(email);
 
     if (!user || user.role_id !== 2) {
       throw new UnauthorizedException('Unauthorized Access: Admin credentials required');
     }
 
-    const isPassWordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     console.log('Password provided:', password);
     console.log('Hashed password in DB:', user.password);
-    console.log('Password comparison result:', isPassWordValid);
+    console.log('Password comparison result:', isPasswordValid);
 
-    if (!isPassWordValid) {
-      throw new UnauthorizedException('Invalid credentials')
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
     }
+
     const accessToken = this.generateAccessToken(user);
     await this.saveUserSession(user, accessToken);
+    console.log('Returning response with accessToken:', accessToken);
     return { status: 'success', message: 'Login successful', accessToken };
-
   }
+
 
   async sendOtp(
     createAuthDto: CreateAuthDto,
