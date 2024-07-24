@@ -26,11 +26,11 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @Throttle({default: {limit: 3, ttl: 60000}})
   @Post('admin/login')
-  async loginAdmin(@Body() createAdminAuthDto: CreateAdminAuthDto, @Res() respone: Response) {
+  async loginAdmin(@Body() createAdminAuthDto: CreateAdminAuthDto, @Res() response: Response) {
     const result = await this.authService.loginAdmin(createAdminAuthDto);
-    respone.setHeader('Authorization', 'Bearer ${result.accessToken}');
+    this.setAuthorizationHeader(response, result.accessToken);
     delete result.accessToken;
-    respone.status(HttpStatus.OK).json(result);
+    response.status(HttpStatus.OK).json(result);
   }
 
   @Throttle({ default: { limit: 3, ttl: 60000 } })
