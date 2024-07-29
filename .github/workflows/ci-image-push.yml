@@ -1,4 +1,4 @@
-name: 💎 CI Build & Push Image
+ame: 💎 CI Build & Push Image
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build_and_push_appserver:
-    name: Build and push Appserver image
+    name: Build and Push Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -24,68 +24,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: dockerfiles/mk-app.Dockerfile
+          file: Dockerfile
           push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}}/mk-app:latest
-
-  build_and_push_nginx:
-    name: Build and push Nginx image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{secrets.DOCKERHUB_USERNAME}}
-          password: ${{secrets.DOCKERHUB_TOKEN}}
-
-      - name: Build and push Nginx image to Docker Hub
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: dockerfiles/mk-nginx.Dockerfile
-          push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}}/mk-nginx:latest
-
-  build_and_push_postgres:
-    name: Build and push Postgres image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{secrets.DOCKERHUB_USERNAME}}
-          password: ${{secrets.DOCKERHUB_TOKEN}}
-
-      - name: Build and push Postgres image to Docker Hub
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: dockerfiles/mk-pg.Dockerfile
-          push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}}/mk-pg:latest
-
-  push_compose_file_to_s3:
-    name: Push docker-compose.yaml to AWS S3 Bucket
-    runs-on: ubuntu-latest
-    needs:
-      - build_and_push_appserver
-      - build_and_push_nginx
-      - build_and_push_postgres
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup AWS CLI
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-southeast-1
-      - name: Sync files to S3 bucket
-        run: |
-          aws s3 cp docker-compose.yaml s3://${{secrets.S3_BUCKET_NAME}}/
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_APP_REGISTRY}}:latest
