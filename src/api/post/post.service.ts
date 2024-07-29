@@ -21,6 +21,9 @@ import { Comment } from '../../common/entities/comment.entity';
 import { Image } from '../../common/entities/image.entity';
 
 import { AuthService } from '../../api/auth/auth.service';
+import { CreatePostDto } from './dto/create-post.dto';
+import { User } from 'src/decorator/customize';
+import { PostHashtag } from 'src/common/entities/post-hashtag.entity';
 
 @Injectable()
 export class PostService {
@@ -35,6 +38,9 @@ export class PostService {
     private readonly configService: ConfigService,
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
+    @InjectRepository(PostHashtag)
+    private readonly postHashtagRepository: Repository<PostHashtag>,
+    
   ) {}
 
   private async getUserSchoolIds(userId: number): Promise<number[]> {
@@ -146,6 +152,22 @@ export class PostService {
       images: imageUrls,
     };
   }
+  // public async create(userId: number, createPostDto: CreatePostDto, files: Express.Multer.File[]): Promise<any> {
+  //   const {title, content} = createPostDto;
+  //   const userSchoolIds = await this.getUserSchoolIds(userId);
+  //   if (!userSchoolIds.length) {
+  //     throw new UnauthorizedException('User does not belong to any school');
+  //   }
+  //   const schoolId = userSchoolIds[0];
+  //   const post = new Post();
+  //   post.title = title;
+  //   post.content = content;
+  //   post.school_id = schoolId;
+  //   post.created_by = userId;
+
+  //   const savedPost = await this.postRepository.save
+    
+  // }
 
   async findAll(userId: number): Promise<any[]> {
     const schoolIds = await this.getUserSchoolIds(userId);
