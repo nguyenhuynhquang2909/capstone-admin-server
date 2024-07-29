@@ -1,4 +1,4 @@
-ame: 💎 CI Build & Push Image
+name: 💎 CI Build & Push Image
 
 on:
   pull_request:
