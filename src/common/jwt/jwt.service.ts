@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 
 @Injectable()
@@ -8,7 +8,7 @@ export class JwtService {
 
   generateToken(payload: any): string {
     return jwt.sign(payload, this.secretKey, {
-      expiresIn: process.env.JWT_EXPIRATION_TIME,
+      expiresIn: process.env.JWT_EXPIRATION_TIME || '8760h',
     });
   }
 
@@ -16,7 +16,7 @@ export class JwtService {
     try {
       return jwt.verify(token, this.secretKey);
     } catch (error) {
-      throw new Error('Invalid token');
+      throw new UnauthorizedException('Invalid token');
     }
   }
 }
