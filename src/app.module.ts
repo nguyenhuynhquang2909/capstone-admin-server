@@ -3,10 +3,11 @@ import { ConfigModule } from '@nestjs/config';
 
 // APIs
 import { AuthModule } from './apis/auth/auth.module';
+import { PostModule } from './apis/post/post.module';
+import { MediaModule } from './apis/media/media.module';
 
 // Configs
 import { PostgresModule } from './configs/postgres.module';
-import { PostModule } from './apis/post/post.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { PostModule } from './apis/post/post.module';
     PostgresModule,
     AuthModule,
     PostModule,
+    MediaModule,
   ],
 })
 export class AppModule {}
