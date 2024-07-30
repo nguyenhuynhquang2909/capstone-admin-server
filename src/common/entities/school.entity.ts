@@ -10,6 +10,7 @@ import { Class } from './class.entity';
 import { Student } from './student.entity';
 import { Teacher } from './teacher.entity';
 import { Post } from './post.entity';
+import { Media } from './media.entity';
 import { SchoolAdmin } from './school-admin.entity';
 
 @Entity({ name: 'schools' })
@@ -37,6 +38,9 @@ export class School {
 
   @OneToMany(() => Post, (post) => post.school)
   posts: Post[];
+
+  @OneToMany(() => Media, (media) => media.school)
+  media: Media[];
 
   @OneToMany(() => SchoolAdmin, (schoolAdmin) => schoolAdmin.school)
   school_admins: SchoolAdmin[];
