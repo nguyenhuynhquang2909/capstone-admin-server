@@ -18,6 +18,9 @@ import { Comment } from '../../common/entities/comment.entity';
 import { ToggleLike } from '../../common/entities/toggle-like.entity';
 import { UserSession } from '../../common/entities/user-session.entity';
 import { DeviceToken } from '../../common/entities/device-token.entity';
+import { Hashtag } from 'src/common/entities/hashtag.entity';
+import { PostHashtag } from 'src/common/entities/post-hashtag.entity';
+import { PostImage } from 'src/common/entities/post-image.entity';
 
 @Module({
   imports: [
@@ -31,6 +34,9 @@ import { DeviceToken } from '../../common/entities/device-token.entity';
       UserSession,
       Image,
       DeviceToken,
+      Hashtag,
+      PostHashtag,
+      PostImage
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],

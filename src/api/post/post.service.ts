@@ -24,6 +24,8 @@ import { AuthService } from '../../api/auth/auth.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { User } from 'src/decorator/customize';
 import { PostHashtag } from 'src/common/entities/post-hashtag.entity';
+import { Hashtag } from 'src/common/entities/hashtag.entity';
+import { PostImage } from 'src/common/entities/post-image.entity';
 
 @Injectable()
 export class PostService {
@@ -38,8 +40,12 @@ export class PostService {
     private readonly configService: ConfigService,
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
+    @InjectRepository(Hashtag)
+    private readonly hashtagRepository: Repository<Hashtag>,
     @InjectRepository(PostHashtag)
     private readonly postHashtagRepository: Repository<PostHashtag>,
+    @InjectRepository(PostImage)
+    private readonly postImageRepository: Repository<PostImage>
     
   ) {}
 
@@ -78,27 +84,60 @@ export class PostService {
     }
   }
 
-  private async uploadToS3(
-    post: Post,
-    files: Express.Multer.File[],
-  ): Promise<void> {
-    const region = this.configService.get<string>('AWS_REGION');
-    const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
-    const secretAccessKey = this.configService.get<string>(
-      'AWS_SECRET_ACCESS_KEY',
-    );
-    const bucketName = this.configService.get<string>('S3_BUCKET_NAME');
+  // private async uploadToS3(
+  //   post: Post,
+  //   files: Express.Multer.File[],
+  // ): Promise<void> {
+  //   const region = this.configService.get<string>('AWS_REGION');
+  //   const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
+  //   const secretAccessKey = this.configService.get<string>(
+  //     'AWS_SECRET_ACCESS_KEY',
+  //   );
+  //   const bucketName = this.configService.get<string>('S3_BUCKET_NAME');
 
+  //   const s3 = new S3Client({
+  //     region,
+  //     credentials: { accessKeyId, secretAccessKey },
+  //   });
+
+  //   const folderName = `schools/${post.school_id}/posts/${post.id}/images/`;
+
+  //   const uploadPromises: Promise<any>[] = [];
+  //   const imageEntities: Image[] = [];
+
+  //   for (const file of files) {
+  //     const fileName = uuidv4() + extname(file.originalname);
+  //     const uploadParams: PutObjectCommandInput = {
+  //       Bucket: bucketName,
+  //       Key: folderName + fileName,
+  //       Body: file.buffer,
+  //       ACL: 'private',
+  //     };
+  //     uploadPromises.push(s3.send(new PutObjectCommand(uploadParams)));
+
+  //     const imageUrl = `${fileName}`;
+  //     const image = new Image();
+  //     image.url = imageUrl;
+  //     image.post = post;
+  //     imageEntities.push(image);
+  //   }
+
+  //   await Promise.all(uploadPromises);
+
+  //   await this.imageRepository.save(imageEntities);
+  // }
+  private async uploadToS3(post: Post, files: Express.Multer.File[]): Promise<Image[]> {
+    const region =  this.configService.get<string>('AWS_REGION');
+    const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
+    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
+    const bucketName = this.configService.get<string>('S3_BUCKET_NAME');
     const s3 = new S3Client({
       region,
-      credentials: { accessKeyId, secretAccessKey },
-    });
-
+      credentials: {accessKeyId, secretAccessKey}
+    })
     const folderName = `schools/${post.school_id}/posts/${post.id}/images/`;
-
     const uploadPromises: Promise<any>[] = [];
     const imageEntities: Image[] = [];
-
     for (const file of files) {
       const fileName = uuidv4() + extname(file.originalname);
       const uploadParams: PutObjectCommandInput = {
@@ -109,16 +148,15 @@ export class PostService {
       };
       uploadPromises.push(s3.send(new PutObjectCommand(uploadParams)));
 
-      const imageUrl = `${fileName}`;
+      const imageUrl = `${folderName}${fileName}`;
       const image = new Image();
       image.url = imageUrl;
       image.post = post;
       imageEntities.push(image);
+
+      await Promise.all(uploadPromises);
+      return this.imageRepository.save(imageEntities);
     }
-
-    await Promise.all(uploadPromises);
-
-    await this.imageRepository.save(imageEntities);
   }
 
   private async mapPostWithImages(post: Post): Promise<any> {
@@ -152,22 +190,55 @@ export class PostService {
       images: imageUrls,
     };
   }
-  // public async create(userId: number, createPostDto: CreatePostDto, files: Express.Multer.File[]): Promise<any> {
-  //   const {title, content} = createPostDto;
-  //   const userSchoolIds = await this.getUserSchoolIds(userId);
-  //   if (!userSchoolIds.length) {
-  //     throw new UnauthorizedException('User does not belong to any school');
-  //   }
-  //   const schoolId = userSchoolIds[0];
-  //   const post = new Post();
-  //   post.title = title;
-  //   post.content = content;
-  //   post.school_id = schoolId;
-  //   post.created_by = userId;
+ async createAndAssociateHashtags(post: Post, hashtags: string[]): Promise<void> {
+    for (const tag of hashtags) {
+      let hashtag = await this.hashtagRepository.findOne({where: {tag}});
+      if (!hashtag) {
+        hashtag = new Hashtag();
+        hashtag.tag = tag;
+        hashtag = await this.hashtagRepository.save(hashtag);
+      }
+      const postHashtag = new PostHashtag();
+      postHashtag.post = post;
+      postHashtag.hashtag = hashtag;
+      postHashtag.hash_tag_id = hashtag.id;
+      await this.postHashtagRepository.save(postHashtag);
+    }
+  }
 
-  //   const savedPost = await this.postRepository.save
-    
-  // }
+ async create(userId: number, createPostDto: CreatePostDto, files: Express.Multer.File[]): Promise<any> {
+    const {title, content, hashtags} = createPostDto;
+    const userSchoolIds = await this.getUserSchoolIds(userId);
+    if (!userSchoolIds.length) {
+      throw new UnauthorizedException('User does not belong to any school');
+    }
+    const schoolId = userSchoolIds[0];
+    console.log(schoolId);
+    const post = new Post();
+    post.title = title;
+    post.content = content;
+    post.school_id = schoolId;
+    post.created_by = userId;
+
+    const savedPost = await this.postRepository.save(post);
+
+    this.validateFiles(files);
+    const images = await this.uploadToS3(savedPost, files);
+    for (const image of images) {
+      const postImage = new PostImage();
+      postImage.post_id = savedPost.id;
+      postImage.image_id = image.id;
+      await this.postImageRepository.save(postImage);
+    }
+    await this.createAndAssociateHashtags(savedPost, hashtags);
+    const mappedPost = await this.mapPostWithImages(savedPost);
+    return {
+      status: 'success',
+      message: 'Post created successfully',
+      data: mappedPost
+    }
+
+  }
 
   async findAll(userId: number): Promise<any[]> {
     const schoolIds = await this.getUserSchoolIds(userId);

@@ -24,13 +24,15 @@ import { CreatePostDto } from './dto/create-post.dto';
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
-  // @Post()
-  // @UseGuards(AuthGuard('jwt'), RolesGuard)
-  // @Roles(2)
-  // async create(@Req() request: any, @Body() createPostDto: CreatePostDto) {
-  //   const {id: userId } = request.user;
-  //   return this.postService.create(userId, createPostDto);
-  // }
+  @Post()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(2)
+  @UseInterceptors(FilesInterceptor('images'))
+  async create(@Req() request: any, @Body() createPostDto: CreatePostDto, @UploadedFiles() files: Express.Multer.File[]) {
+    const {id: userId}= request.user;
+    return this.postService.create(userId, createPostDto, files);
+  }
+
   @Get()
   @UseGuards(AuthGuard('jwt'))
   async findAll(@Req() request: any) {

@@ -105,18 +105,21 @@ CREATE TABLE class_students (
 );
 
 -- Create absence table 
-CREATE TABLE absence (
+CREATE TABLE requests (
     id SERIAL PRIMARY KEY,
-    student_id INTEGER NOT NULL REFERENCES students(id),
+    student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
     class_id INTEGER NOT NULL REFERENCES classes(id),
-    absence_status VARCHAR(255) NOT NULL,
-    absence_type VARCHAR(255) NOT NULL,
-    reason VARCHAR(255) NOT NULL,
-    start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP NOT NULL,
+    status TEXT NOT NULL,
+    request_type TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    note TEXT NOT NULL,
+    description TEXT NOT NULL,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- Create posts table
 CREATE TABLE posts (
@@ -131,36 +134,14 @@ CREATE TABLE posts (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create images table
-CREATE TABLE images (
-    id SERIAL PRIMARY KEY,
-    url VARCHAR(255) NOT NULL,
-    post_id INTEGER NOT NULL REFERENCES posts(id),
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+-- Create post_classes junction table
+CREATE TABLE post_classes (
+    class_id INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+    post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    PRIMARY KEY (class_id, post_id)
 );
 
--- Create main_images table
-CREATE TABLE main_images (
-    id SERIAL PRIMARY KEY,
-    url VARCHAR(255) NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
 
--- Create post_images junction table
-CREATE TABLE post_images (
-    post_id INTEGER NOT NULL REFERENCES posts(id),
-    image_id INTEGER NOT NULL REFERENCES main_images(id),
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (post_id, image_id)
-);
-
--- Create student_images junction table
-CREATE TABLE student_images (
-    student_id INTEGER NOT NULL REFERENCES students(id),
-    image_id INTEGER NOT NULL REFERENCES main_images(id),
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (student_id, image_id)
-);
 
 -- Create hashtags table
 CREATE TABLE hashtags (
