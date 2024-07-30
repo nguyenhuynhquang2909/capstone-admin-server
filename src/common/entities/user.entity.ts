@@ -9,48 +9,45 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Role } from './role.entity';
+import { DeviceToken } from './device-token.entity';
+import { UserSession } from './user-session.entity';
 import { Post } from './post.entity';
 import { Student } from './student.entity';
 import { Comment } from './comment.entity';
+import { SchoolAdmin } from './school-admin.entity';
+import { Notification } from './notification.entity';
 import { ToggleLike } from './toggle-like.entity';
-import { DeviceToken } from './device-token.entity';
-import { UserSession } from './user-session.entity';
+import { UserTag } from './user-tag.entity';
 
-@Entity('users')
+@Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @Column({ length: 20, unique: true })
+  @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
   phone: string;
 
-  @Column({ length: 255, unique: true })
+  @Column({ type: 'varchar', length: 255, unique: true, nullable: true })
   email: string;
 
-  @Column({ length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   password: string;
 
-  @Column({ nullable: false })
+  @Column()
   role_id: number;
 
   @ManyToOne(() => Role, (role) => role.users)
   @JoinColumn({ name: 'role_id' })
   role: Role;
 
-  @OneToMany(() => Comment, (comment) => comment.user)
-  comments: Comment[];
+  @CreateDateColumn({ type: 'timestamptz' })
+  created_at: Date;
 
-  @OneToMany(() => Post, (post) => post.user)
-  posts: Post[];
-
-  @OneToMany(() => Student, (student) => student.user)
-  students: Student[];
-
-  @OneToMany(() => ToggleLike, (toggleLike) => toggleLike.user)
-  likes: ToggleLike[];
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updated_at: Date;
 
   @OneToMany(() => DeviceToken, (deviceToken) => deviceToken.user)
   device_tokens: DeviceToken[];
@@ -58,11 +55,24 @@ export class User {
   @OneToMany(() => UserSession, (userSession) => userSession.user)
   user_sessions: UserSession[];
 
-  @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
+  @OneToMany(() => Post, (post) => post.created_by)
+  posts: Post[];
 
-  @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  updated_at: Date;
+  @OneToMany(() => Student, (student) => student.parent)
+  students: Student[];
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comments: Comment[];
+
+  @OneToMany(() => SchoolAdmin, (schoolAdmin) => schoolAdmin.user)
+  school_admins: SchoolAdmin[];
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
+
+  @OneToMany(() => ToggleLike, (toggleLike) => toggleLike.user)
+  toggle_likes: ToggleLike[];
+
+  @OneToMany(() => UserTag, (userTag) => userTag.user)
+  user_tags: UserTag[];
 }
-
-// Hello

@@ -2,7 +2,7 @@ import { Entity, ManyToOne, PrimaryColumn, JoinColumn } from 'typeorm';
 import { Class } from './class.entity';
 import { Student } from './student.entity';
 
-@Entity('class_students')
+@Entity({ name: 'class_students' })
 export class ClassStudent {
   @PrimaryColumn()
   class_id: number;
@@ -10,11 +10,15 @@ export class ClassStudent {
   @PrimaryColumn()
   student_id: number;
 
-  @ManyToOne(() => Class, (classEntity) => classEntity.classStudents)
+  @ManyToOne(() => Class, (classEntity) => classEntity.class_students, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'class_id' })
-  classEntity: Class;
+  class: Class;
 
-  @ManyToOne(() => Student, (student) => student.classStudents)
+  @ManyToOne(() => Student, (student) => student.class_students, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'student_id' })
   student: Student;
 }
