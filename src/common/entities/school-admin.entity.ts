@@ -1,8 +1,8 @@
-import { Entity, PrimaryColumn, JoinColumn, OneToOne } from 'typeorm';
+import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from './user.entity';
 import { School } from './school.entity';
 
-@Entity('school_admins')
+@Entity({ name: 'school_admins' })
 export class SchoolAdmin {
   @PrimaryColumn()
   user_id: number;
@@ -10,11 +10,13 @@ export class SchoolAdmin {
   @PrimaryColumn()
   school_id: number;
 
-  @OneToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.school_admins, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @OneToOne(() => School, (school) => school.id)
+  @ManyToOne(() => School, (school) => school.school_admins, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'school_id' })
   school: School;
 }

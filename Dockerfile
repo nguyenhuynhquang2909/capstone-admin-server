@@ -2,7 +2,7 @@
 # BUILD FOR LOCAL 'DEVELOPMENT'
 ###################
 
-FROM node:22.1.0-bullseye As development
+FROM node:21.7.3-alpine As development
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -25,7 +25,7 @@ USER node
 # 'BUILD' FOR PRODUCTION
 ###################
 
-FROM node:22.1.0-bullseye As build
+FROM node:21.7.3-alpine As build
 
 WORKDIR /usr/src/app
 
@@ -56,7 +56,7 @@ USER node
 # 'PRODUCTION'
 ###################
 
-FROM node:22.1.0-bullseye As production
+FROM node:21.7.3-alpine As production
 
 # Copy the bundled code from the build stage to the production image
 COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
