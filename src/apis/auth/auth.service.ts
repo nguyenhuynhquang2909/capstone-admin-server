@@ -1,18 +1,18 @@
 import {
   Injectable,
   NotFoundException,
-  BadRequestException,
-  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import Ioredis from 'ioredis';
+// import * as bcrypt from 'bcrypt';
+
+// Common
+import { JwtService } from '../../common/jwt/jwt.service';
 
 // DTO
 import { LoginDto } from './dto/login.dto';
-import { VerifyDto } from './dto/verify.dto';
 
-// Entities
+// Enttities
 import { User } from '../../common/entities/user.entity';
 
 @Injectable()
@@ -20,52 +20,30 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @Inject('REDIS_CLIENT')
-    private readonly redisClient: Ioredis,
+    private readonly jwtService: JwtService,
   ) {}
 
   async login(loginDto: LoginDto) {
-    const { phone } = loginDto;
-    const user = await this.userRepository.findOne({ where: { phone } });
+    const { email, password } = loginDto;
+    const user = await this.userRepository.findOne({ where: { email } });
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    const otp = this.generateOtp();
+    // const isPasswordValid = await bcrypt.compare(password, user.password);
+    // if (!isPasswordValid) {
+    //   throw new UnauthorizedException('Invalid credentials');
+    // }
 
-    await this.redisClient.set(phone, otp, 'EX', 60);
+    const token = this.jwtService.generateToken({
+      userId: user.id,
+      email: user.email,
+    });
 
     return {
       message: 'Login successful',
-      otp,
+      token,
     };
-  }
-
-  async verify(verifyDto: VerifyDto) {
-    const { phone, otp } = verifyDto;
-
-    const storedOtp = await this.redisClient.get(phone);
-
-    if (!storedOtp) {
-      throw new BadRequestException('OTP expired or invalid');
-    }
-
-    if (otp !== storedOtp) {
-      await this.redisClient.del(phone);
-      throw new BadRequestException('OTP does not match');
-    }
-
-    const user = await this.userRepository.findOne({ where: { phone } });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    return user;
-  }
-
-  private generateOtp(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 }
