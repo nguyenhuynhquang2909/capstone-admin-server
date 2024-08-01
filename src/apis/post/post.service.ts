@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from '../../common/entities/post.entity';
@@ -15,8 +19,10 @@ export class PostService {
   ) {}
 
   private async getSchoolIdForUser(userId: number): Promise<number> {
-    const schoolAdmin = await this.schoolAdminRepository.findOne({ where: { user_id: userId } });
-    
+    const schoolAdmin = await this.schoolAdminRepository.findOne({
+      where: { user_id: userId },
+    });
+
     if (!schoolAdmin) {
       throw new NotFoundException('School not found for this user');
     }
@@ -26,7 +32,7 @@ export class PostService {
 
   async createDraft(createPostDto: CreatePostDto, userId: number) {
     const { title, content } = createPostDto;
-    
+
     const schoolId = await this.getSchoolIdForUser(userId);
 
     const newPost = this.postRepository.create({
@@ -50,14 +56,18 @@ export class PostService {
     }
 
     if (post.status === 'published' && status === 'draft') {
-      throw new ForbiddenException('Published posts cannot be reverted to drafts');
+      throw new ForbiddenException(
+        'Published posts cannot be reverted to drafts',
+      );
     }
 
     if (title !== undefined) post.title = title;
     if (content !== undefined) post.content = content;
     if (status !== undefined) {
       if (post.status === 'published') {
-        throw new ForbiddenException('Published posts cannot have their status changed');
+        throw new ForbiddenException(
+          'Published posts cannot have their status changed',
+        );
       }
       post.status = status;
       if (status === 'published') {

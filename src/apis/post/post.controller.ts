@@ -61,7 +61,10 @@ export class PostController {
     }
 
     try {
-      const updatedPost = await this.postService.updatePost(postId, updatePostDto);
+      const updatedPost = await this.postService.updatePost(
+        postId,
+        updatePostDto,
+      );
       return updatedPost;
     } catch (error) {
       if (error instanceof ForbiddenException) {
