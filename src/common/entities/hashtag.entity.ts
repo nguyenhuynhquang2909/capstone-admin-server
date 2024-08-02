@@ -4,19 +4,24 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { PostHashtag } from './post-hashtag.entity';
 
-@Entity('hashtags')
+@Entity({ name: 'hashtags' })
 export class Hashtag {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 255, unique: true, nullable: false })
+  @Column({ type: 'varchar', length: 50, nullable: false, unique: true })
   tag: string;
 
-  @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
+
+  @OneToMany(() => PostHashtag, (postHashtag) => postHashtag.hashtag)
+  posts_hashtags: PostHashtag[];
 }

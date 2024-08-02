@@ -9,17 +9,19 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { School } from './school.entity';
-import { Image } from './image.entity';
-import { Comment } from './comment.entity';
 import { User } from './user.entity';
+import { PostMedia } from './post-media.entity';
+import { PostHashtag } from './post-hashtag.entity';
+import { Comment } from './comment.entity';
 import { ToggleLike } from './toggle-like.entity';
+import { PostClass } from './post-class.entity';
 
-@Entity('posts')
+@Entity({ name: 'posts' })
 export class Post {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: false })
   title: string;
 
   @Column({ type: 'text', nullable: false })
@@ -28,35 +30,41 @@ export class Post {
   @Column({ nullable: false })
   school_id: number;
 
-  @ManyToOne(() => School, (school) => school.posts)
+  @ManyToOne(() => School, (school) => school.posts, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'school_id' })
   school: School;
 
   @Column({ nullable: false })
   created_by: number;
 
-  @ManyToOne(() => User, (user) => user.posts)
+  @ManyToOne(() => User, (user) => user.posts, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'created_by' })
   user: User;
 
-  @OneToMany(() => Image, (image) => image.post)
-  images: Image[];
+  @Column({ type: 'varchar', length: 50, nullable: false })
+  status: string;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  published_at: Date;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updated_at: Date;
+
+  @OneToMany(() => PostMedia, (postMedia) => postMedia.post)
+  post_media: PostMedia[];
+
+  @OneToMany(() => PostHashtag, (postHashtag) => postHashtag.post)
+  post_hashtags: PostHashtag[];
 
   @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];
 
   @OneToMany(() => ToggleLike, (toggleLike) => toggleLike.post)
-  likes: ToggleLike[];
+  toggle_likes: ToggleLike[];
 
-  @Column({ nullable: false })
-  status: string;
-
-  @CreateDateColumn({ type: 'timestamptz' })
-  published_at: Date;
-
-  @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
-
-  @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  updated_at: Date;
+  @OneToMany(() => PostClass, (postClass) => postClass.class)
+  post_classes: PostClass[];
 }

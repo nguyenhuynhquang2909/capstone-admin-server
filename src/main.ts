@@ -1,39 +1,36 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as dotenv from 'dotenv';
-import { NestExpressApplication } from '@nestjs/platform-express';
-
-// Config env file
-dotenv.config();
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create(AppModule);
 
-  const configService = app.get(ConfigService);
-  const PORT = configService.get<string>('LOCALHOST_PORT');
-  console.log('PORT', PORT);
-  // Set global prefix
-  app.setGlobalPrefix('api');
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: ['1'],
-  });
-  // Config cors
+  // Set global prefix for versioning
+  app.setGlobalPrefix('api/v1');
+
+  // Enable validation globally
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
+  // Enable CORS
   app.enableCors({
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204,
   });
-  // Validation Pipe
-  app.useGlobalPipes(new ValidationPipe());
 
-  await app.listen(PORT);
+  // Get the port from the environment variables
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('LOCALHOST_PORT') || 3000;
 
-  // await app.listen(3200);
-  // const logger = new Logger('Bootstrap');
-  // logger.log(`Server is running on: http://localhost:3100`);
+  await app.listen(port);
+  console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();

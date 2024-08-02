@@ -1,8 +1,8 @@
-import { Entity, PrimaryColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Comment } from './comment.entity';
 import { User } from './user.entity';
 
-@Entity('user_tags')
+@Entity({ name: 'user_tags' })
 export class UserTag {
   @PrimaryColumn()
   comment_id: number;
@@ -10,14 +10,13 @@ export class UserTag {
   @PrimaryColumn()
   user_id: number;
 
-  @PrimaryColumn()
-  placeholder_number: number;
-
-  @OneToOne(() => Comment, (comment) => comment.id)
+  @ManyToOne(() => Comment, (comment) => comment.user_tags, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'comment_id' })
   comment: Comment;
 
-  @OneToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.user_tags, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }

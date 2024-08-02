@@ -8,20 +8,20 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 
-@Entity('roles')
+@Entity({ name: 'roles' })
 export class Role {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, nullable: false, length: 50 })
+  @Column({ type: 'varchar', length: 50, unique: true })
   name: string;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updated_at: Date;
 
   @OneToMany(() => User, (user) => user.role)
   users: User[];
-
-  @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
-
-  @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  updated_at: Date;
 }
