@@ -1,10 +1,11 @@
 import {
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-// import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 // Common
 import { JwtService } from '../../common/jwt/jwt.service';
@@ -31,10 +32,10 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    // const isPasswordValid = await bcrypt.compare(password, user.password);
-    // if (!isPasswordValid) {
-    //   throw new UnauthorizedException('Invalid credentials');
-    // }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
     const token = this.jwtService.generateToken({
       userId: user.id,

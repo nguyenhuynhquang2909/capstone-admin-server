@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsIn } from 'class-validator';
+import { IsString, IsNotEmpty, IsIn, IsOptional } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()
@@ -13,4 +13,13 @@ export class CreatePostDto {
   @IsIn(['draft', 'published'])
   @IsNotEmpty()
   status: string;
+
+  @IsString()
+  @IsOptional()
+  url: string;
+
+  @IsString()
+  @IsOptional()
+  media_type: string;
+
 }

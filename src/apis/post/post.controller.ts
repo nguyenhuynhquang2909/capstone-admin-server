@@ -7,16 +7,19 @@ import {
   Headers,
   UnauthorizedException,
   ForbiddenException,
+  UploadedFiles,
 } from '@nestjs/common';
 import { JwtService } from '../../common/jwt/jwt.service';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
+import { MediaService } from '../media/media.service';
 
 @Controller('post')
 export class PostController {
   constructor(
     private readonly postService: PostService,
     private readonly jwtService: JwtService,
+    private readonly mediaService: MediaService 
   ) {}
 
   // Create a post with status "draft"
@@ -24,6 +27,7 @@ export class PostController {
   async createDraft(
     @Body() createPostDto: CreatePostDto,
     @Headers('authorization') authHeader: string,
+    @UploadedFiles() files: Express.Multer.File[],
   ) {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
@@ -36,9 +40,13 @@ export class PostController {
     if (!userId) {
       throw new UnauthorizedException('Invalid token');
     }
+    const media= await this.mediaService.uploadMedia(files, userId);
 
     const newDraft = await this.postService.createDraft(createPostDto, userId);
-    return newDraft;
+    for (const mediaItem of media) {
+      await this.postService.associateMediaWithPost(newDraft.id, mediaItem.id);
+    }
+    return {...newDraft, media};
   }
 
   // Update post (both draft and published)

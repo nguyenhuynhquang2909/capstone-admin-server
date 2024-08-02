@@ -39,6 +39,7 @@ export class MediaService {
         Body: file.buffer,
         ContentType: file.mimetype,
       });
+      console
 
       await s3.send(command);
 

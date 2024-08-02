@@ -4,6 +4,10 @@ import { Repository } from 'typeorm';
 import { Post } from '../../common/entities/post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { SchoolAdmin } from '../../common/entities/school-admin.entity';
+import { Media } from 'src/common/entities/media.entity';
+import { v4 as uuidv4 } from 'uuid';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { s3 } from 'src/configs/aws.config';
 
 @Injectable()
 export class PostService {
@@ -12,6 +16,8 @@ export class PostService {
     private readonly postRepository: Repository<Post>,
     @InjectRepository(SchoolAdmin)
     private readonly schoolAdminRepository: Repository<SchoolAdmin>,
+    @InjectRepository(Media)
+    private readonly mediaRepository: Repository<Media>,
   ) {}
 
   private async getSchoolIdForUser(userId: number): Promise<number> {
@@ -87,4 +93,42 @@ export class PostService {
     await this.postRepository.save(post);
     return post;
   }
+  async associateMediaWithPost(postId: number, mediaId: number) {
+    await this.mediaRepository.query(
+      "INSERT INTO post_media (post_id, media_id) VALUES ($1, $2)",
+      [postId, mediaId]
+    )
+  }
+
+  async uploadMedia(files: Express.Multer.File[], userId: number): Promise<Media[]> {
+    const schoolId = await this.getSchoolIdForUser(userId);
+    
+    const mediaList: Media[] = [];
+    
+    for (const file of files) {
+      const fileName = `${uuidv4()}-${file.originalname}`;
+      const filePath = `schools/${schoolId}/${fileName}`;
+
+      const command = new PutObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: filePath,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+      });
+
+      await s3.send(command);
+
+      const newMedia = this.mediaRepository.create({
+        url: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${filePath}`,
+        media_type: file.mimetype,
+        school_id: schoolId,
+      });
+
+      await this.mediaRepository.save(newMedia);
+      mediaList.push(newMedia);
+    }
+
+    return mediaList;
+  }
 }
+
