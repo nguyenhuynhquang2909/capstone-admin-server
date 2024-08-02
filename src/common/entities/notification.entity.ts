@@ -3,33 +3,29 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
-@Entity({ name: 'user_sessions' })
-export class UserSession {
+@Entity({ name: 'notifications' })
+export class Notification {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({ type: 'text' })
-  access_token: string;
 
   @Column({ nullable: false })
   user_id: number;
 
-  @ManyToOne(() => User, (user) => user.user_sessions)
+  @ManyToOne(() => User, (user) => user.notifications, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column({ type: 'timestamptz' })
-  access_token_expiration_time: Date;
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  title: string;
+
+  @Column({ type: 'text', nullable: false })
+  message: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
-
-  @UpdateDateColumn({ type: 'timestamptz' })
-  updated_at: Date;
 }

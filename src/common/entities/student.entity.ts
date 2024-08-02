@@ -1,44 +1,53 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
-import { User } from './user.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 import { School } from './school.entity';
+import { User } from './user.entity';
 import { ClassStudent } from './class-student.entity';
-import { Absence } from './absence.entity';
-import { StudentImage } from './student-image.entity';  // Add this import
+import { Request } from './request.entity';
+import { StudentMedia } from './student-media.entity';
 
-@Entity('students')
+@Entity({ name: 'students' })
 export class Student {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: false })
   name: string;
 
   @Column({ nullable: false })
   school_id: number;
 
-  @ManyToOne(() => School, (school) => school.students)
-  @JoinColumn({ name: 'school_id' })
-  school: School;
-
   @Column({ nullable: false })
   parent_id: number;
 
-  @ManyToOne(() => User, (user) => user.students)
+  @ManyToOne(() => School, (school) => school.students, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'school_id' })
+  school: School;
+
+  @ManyToOne(() => User, (user) => user.students, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'parent_id' })
-  user: User;
+  parent: User;
 
-  @OneToMany(() => ClassStudent, (classStudent) => classStudent.student)
-  classStudents: ClassStudent[];
-
-  @OneToMany(() => Absence, (absence) => absence.student)
-  absences: Absence[];
-
-  @OneToMany(() => StudentImage, (studentImage) => studentImage.student)  // Add this relation
-  studentImages: StudentImage[];
-
-  @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
+
+  @OneToMany(() => ClassStudent, (classStudent) => classStudent.student)
+  class_students: ClassStudent[];
+
+  @OneToMany(() => Request, (request) => request.student)
+  requests: Request[];
+
+  @OneToMany(() => StudentMedia, (studentMedia) => studentMedia.student)
+  student_media: StudentMedia[];
 }

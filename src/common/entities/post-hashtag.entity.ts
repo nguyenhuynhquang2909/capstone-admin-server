@@ -1,23 +1,22 @@
-import { Entity, PrimaryColumn, JoinColumn, OneToOne } from 'typeorm';
+import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Post } from './post.entity';
 import { Hashtag } from './hashtag.entity';
 
-@Entity('posts_hashtags')
+@Entity({ name: 'posts_hashtags' })
 export class PostHashtag {
   @PrimaryColumn()
   post_id: number;
 
-  @OneToOne(() => Post, (post) => post.id)
+  @PrimaryColumn()
+  hashtag_id: number;
+
+  @ManyToOne(() => Post, (post) => post.post_hashtags, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'post_id' })
   post: Post;
 
-  @PrimaryColumn()
-  hash_tag_id: number;
-
-  @OneToOne(() => Hashtag, (hashtag) => hashtag.id)
-  @JoinColumn({ name: 'hash_tag_id' })
+  @ManyToOne(() => Hashtag, (hashtag) => hashtag.posts_hashtags, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'hashtag_id' })
   hashtag: Hashtag;
-
-  @PrimaryColumn()
-  placeholderNumber: number;
 }
