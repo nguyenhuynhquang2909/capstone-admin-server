@@ -7,20 +7,30 @@ import {
   Headers,
   UnauthorizedException,
   ForbiddenException,
+  UseGuards,
 } from '@nestjs/common';
-import { JwtService } from '../../common/jwt/jwt.service';
+
+// Common
+import { JwtGuard } from '../../common/guards/jwt.guard';
+import { RoleGuard } from '../../common/guards/role.guard';
+
+// Decorators
+import { Role } from '../../common/decorators/role.decorator';
+
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 
 @Controller('post')
+@UseGuards(JwtGuard, RoleGuard)
 export class PostController {
   constructor(
     private readonly postService: PostService,
-    private readonly jwtService: JwtService,
+    private readonly jwtGuard: JwtGuard,
   ) {}
 
   // Create a post with status "draft"
   @Post('draft')
+  @Role('schoolAdmin')
   async createDraft(
     @Body() createPostDto: CreatePostDto,
     @Headers('authorization') authHeader: string,
@@ -30,7 +40,7 @@ export class PostController {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const decodedToken = this.jwtService.verifyToken(token);
+    const decodedToken = this.jwtGuard.verifyToken(token);
 
     const { userId } = decodedToken;
     if (!userId) {
@@ -43,6 +53,7 @@ export class PostController {
 
   // Update post (both draft and published)
   @Put(':id')
+  @Role('schoolAdmin')
   async updatePost(
     @Param('id') postId: number,
     @Body() updatePostDto: Partial<CreatePostDto>,
@@ -53,7 +64,7 @@ export class PostController {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const decodedToken = this.jwtService.verifyToken(token);
+    const decodedToken = this.jwtGuard.verifyToken(token);
 
     const { userId } = decodedToken;
     if (!userId) {
@@ -76,6 +87,7 @@ export class PostController {
 
   // Publish post
   @Put(':id/publish')
+  @Role('schoolAdmin')
   async publishPost(
     @Param('id') postId: number,
     @Headers('authorization') authHeader: string,
@@ -85,7 +97,7 @@ export class PostController {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const decodedToken = this.jwtService.verifyToken(token);
+    const decodedToken = this.jwtGuard.verifyToken(token);
 
     const { userId } = decodedToken;
     if (!userId) {
