@@ -27,6 +27,9 @@ export class UserSession {
   @Column({ type: 'timestamptz' })
   access_token_expiration_time: Date;
 
+  @Column({ type: 'text', nullable: true })
+  device_info: string;
+
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
 

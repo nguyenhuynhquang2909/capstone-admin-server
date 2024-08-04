@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryColumn, JoinColumn } from 'typeorm';
+import { Entity, ManyToOne, PrimaryColumn, JoinColumn, Column } from 'typeorm';
 import { Class } from './class.entity';
 import { Student } from './student.entity';
 
@@ -21,4 +21,7 @@ export class ClassStudent {
   })
   @JoinColumn({ name: 'student_id' })
   student: Student;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  enrollment_date: Date;
 }
