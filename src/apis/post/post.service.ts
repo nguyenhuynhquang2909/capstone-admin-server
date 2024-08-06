@@ -20,7 +20,7 @@ export class PostService {
     private readonly mediaRepository: Repository<Media>,
   ) {}
 
-  private async getSchoolIdForUser(userId: number): Promise<number> {
+  public async getSchoolIdForUser(userId: number): Promise<number> {
     const schoolAdmin = await this.schoolAdminRepository.findOne({ where: { user_id: userId } });
     
     if (!schoolAdmin) {
@@ -28,6 +28,32 @@ export class PostService {
     }
 
     return schoolAdmin.school_id;
+  }
+
+  async getPostsBySchoolId(schoolId: number): Promise<any[]> {
+    const posts = await this.postRepository.find({
+      where: { school_id: schoolId },
+      relations: ['post_media', 'post_media.media'],  // Load related media
+    });
+
+    // Transform the response to a cleaner format
+    return posts.map(post => ({
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      school_id: post.school_id,
+      created_by: post.created_by,
+      status: post.status,
+      published_at: post.published_at,
+      created_at: post.created_at,
+      updated_at: post.updated_at,
+      media: post.post_media.map(pm => ({
+        id: pm.media.id,
+        url: pm.media.url,
+        media_type: pm.media.media_type,
+        created_at: pm.media.created_at,
+      })),
+    }));
   }
 
   async createDraft(createPostDto: CreatePostDto, userId: number) {

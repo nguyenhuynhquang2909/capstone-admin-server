@@ -9,6 +9,7 @@ import {
   ForbiddenException,
   UploadedFiles,
   UseInterceptors,
+  Get,
 } from '@nestjs/common';
 import { JwtService } from '../../common/jwt/jwt.service';
 import { PostService } from './post.service';
@@ -55,6 +56,24 @@ export class PostController {
     return {...newDraft, media};
   }
 
+  // Fetch posts by school ID derived from user ID
+  @Get('all-posts')
+  async getPostsBySchoolId(
+    @Headers('authorization') authHeader: string
+  ) {
+    if (!authHeader) {
+      throw new UnauthorizedException('Authorization header is missing');
+    }
+    const token = authHeader.replace('Bearer ', '');
+    const decodedToken = this.jwtService.verifyToken(token);
+    const {userId} = decodedToken;
+    if (!userId) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    const schoolId = await this.postService.getSchoolIdForUser(userId);
+    const posts = await this.postService.getPostsBySchoolId(schoolId);
+    return posts;
+  }
   // Update post (both draft and published)
   @Put(':id')
   async updatePost(
