@@ -18,6 +18,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { MediaService } from '../media/media.service';
 import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { error } from 'console';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Controller('post')
 export class PostController {
@@ -78,10 +79,12 @@ export class PostController {
   }
   // Update post (both draft and published)
   @Put(':id')
+  @UseInterceptors(FilesInterceptor('newFiles', 10))
   async updatePost(
     @Param('id') postId: number,
-    @Body() updatePostDto: Partial<CreatePostDto>,
+    @Body() updatePostDto: CreatePostDto,
     @Headers('authorization') authHeader: string,
+    @UploadedFiles() newFiles?: Express.Multer.File[],
   ) {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
@@ -96,7 +99,7 @@ export class PostController {
     }
 
     try {
-      const updatedPost = await this.postService.updatePost(postId, updatePostDto);
+      const updatedPost = await this.postService.updatePost(postId, updatePostDto, newFiles, userId);
       return updatedPost;
     } catch (error) {
       if (error instanceof ForbiddenException) {
@@ -105,7 +108,6 @@ export class PostController {
       throw error;
     }
   }
-
   // Publish post
   @Put(':id/publish')
   async publishPost(

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Media } from '../../common/entities/media.entity';
 import { s3 } from '../../configs/aws.config';
-import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 import { SchoolAdmin } from '../../common/entities/school-admin.entity';
 
@@ -53,5 +53,21 @@ export class MediaService {
     }
 
     return mediaList;
+  }
+  async deleteMedia(mediaId: number): Promise<void> {
+    const media = await this.mediaRepository.findOne({where: {id: mediaId}});
+    if (!media) {
+      throw new NotFoundException('Media not found');
+    }
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: this.getS3KeyFromUrl(media.url),
+    });
+    await s3.send(deleteCommand);
+    await this.mediaRepository.delete(media.id);
+  }
+  private getS3KeyFromUrl(url: string): string {
+    const urlParts = url.split('/');
+    return urlParts.slice(3).join('/');
   }
 }

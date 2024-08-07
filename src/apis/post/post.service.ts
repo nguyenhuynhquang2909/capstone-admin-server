@@ -12,6 +12,8 @@ import { Comment } from 'src/common/entities/comment.entity';
 import { ToggleLike } from 'src/common/entities/toggle-like.entity';
 import { PostHashtag } from 'src/common/entities/post-hashtag.entity';
 import { PostClass } from 'src/common/entities/post-class.entity';
+import { UpdatePostDto } from './dto/update-post.dto';
+import { MediaService } from '../media/media.service';
 
 @Injectable()
 export class PostService {
@@ -29,7 +31,8 @@ export class PostService {
     @InjectRepository(PostHashtag)
     private readonly postHashtagRepository: Repository<PostHashtag>,
     @InjectRepository(PostClass)
-    private readonly postClassRepository: Repository<PostClass>
+    private readonly postClassRepository: Repository<PostClass>,
+    private readonly mediaService: MediaService
 
   ) {}
 
@@ -96,10 +99,13 @@ export class PostService {
     return newPost;
   }
 
-  async updatePost(postId: number, updatePostDto: Partial<CreatePostDto>) {
+  async updatePost(postId: number, updatePostDto: CreatePostDto, newFiles: Express.Multer.File[], userId: number) {
     const { title, content, status } = updatePostDto;
 
-    const post = await this.postRepository.findOne({ where: { id: postId } });
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['post_media', 'post_media.media'],
+    });
     if (!post) {
       throw new NotFoundException('Post not found');
     }
@@ -119,6 +125,22 @@ export class PostService {
         post.published_at = new Date();
       } else if (status === 'draft') {
         post.published_at = null;
+      }
+    }
+
+    if (newFiles && newFiles.length > 0) {
+      // Delete old media from S3 and database
+      for (const postMedia of post.post_media) {
+        const media = postMedia.media;
+        if (media) {
+          await this.mediaService.deleteMedia(media.id);  // Use mediaService to delete media
+        }
+      }
+
+      // Upload new media to S3 and save to database
+      const mediaList = await this.mediaService.uploadMedia(newFiles, userId);
+      for (const newMedia of mediaList) {
+        await this.associateMediaWithPost(post.id, newMedia.id);
       }
     }
 
@@ -162,12 +184,7 @@ export class PostService {
     for (const postMedia of post.post_media) {
       const media = postMedia.media;
       if (media) {
-        const deleteCommand = new DeleteObjectCommand({
-          Bucket: process.env.AWS_S3_BUCKET_NAME,
-          Key: this.getS3KeyFromUrl(media.url),
-        });
-        await s3.send(deleteCommand);
-        await this.mediaRepository.delete(media.id);
+        await this.mediaService.deleteMedia(media.id);
       }
     }
 
@@ -181,9 +198,6 @@ export class PostService {
     await this.postRepository.delete(post.id);
   }
 
-  private getS3KeyFromUrl(url: string): string {
-      const urlParts = url.split('/');
-      return urlParts.slice(3).join('/');
-}
+
 
 }
