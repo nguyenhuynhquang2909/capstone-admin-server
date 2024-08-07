@@ -10,12 +10,14 @@ import {
   UploadedFiles,
   UseInterceptors,
   Get,
+  Delete,
 } from '@nestjs/common';
 import { JwtService } from '../../common/jwt/jwt.service';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { MediaService } from '../media/media.service';
 import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { error } from 'console';
 
 @Controller('post')
 export class PostController {
@@ -126,6 +128,32 @@ export class PostController {
       const publishedPost = await this.postService.publishPost(postId);
       return publishedPost;
     } catch (error) {
+      if (error instanceof ForbiddenException) {
+        throw new ForbiddenException(error.message);
+      }
+      throw error;
+    }
+  }
+
+  @Delete(':id')
+  async deletePost(
+    @Param('id') postId: number,
+    @Headers('authorization') authHeader: string,
+  ) {
+    if (!authHeader) {
+      throw new UnauthorizedException('Authorization header is missing');
+    }
+    const token = authHeader.replace('Bearer ', '');
+    const decodedToken = this.jwtService.verifyToken(token);
+
+    const { userId } = decodedToken;
+    if (!userId) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    try {
+      await this.postService.deletePost(postId);
+      return { message: 'Post, related media, comments, likes, hashtags, and classes deleted successfully' };
+    } catch (err) {
       if (error instanceof ForbiddenException) {
         throw new ForbiddenException(error.message);
       }

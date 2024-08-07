@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from '../../common/entities/post.entity';
@@ -6,8 +6,12 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { SchoolAdmin } from '../../common/entities/school-admin.entity';
 import { Media } from 'src/common/entities/media.entity';
 import { v4 as uuidv4 } from 'uuid';
-import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { s3 } from 'src/configs/aws.config';
+import { Comment } from 'src/common/entities/comment.entity';
+import { ToggleLike } from 'src/common/entities/toggle-like.entity';
+import { PostHashtag } from 'src/common/entities/post-hashtag.entity';
+import { PostClass } from 'src/common/entities/post-class.entity';
 
 @Injectable()
 export class PostService {
@@ -18,6 +22,15 @@ export class PostService {
     private readonly schoolAdminRepository: Repository<SchoolAdmin>,
     @InjectRepository(Media)
     private readonly mediaRepository: Repository<Media>,
+    @InjectRepository(Comment)
+    private readonly commentRepository: Repository<Comment>,
+    @InjectRepository(ToggleLike)
+    private readonly toggleLikeRepository: Repository<ToggleLike>,
+    @InjectRepository(PostHashtag)
+    private readonly postHashtagRepository: Repository<PostHashtag>,
+    @InjectRepository(PostClass)
+    private readonly postClassRepository: Repository<PostClass>
+
   ) {}
 
   public async getSchoolIdForUser(userId: number): Promise<number> {
@@ -126,37 +139,41 @@ export class PostService {
     )
   }
 
-//   async uploadMedia(files: Express.Multer.File[], userId: number): Promise<Media[]> {
-//     const schoolId = await this.getSchoolIdForUser(userId);
-    
-//     const mediaList: Media[] = [];
-    
-//     for (const file of files) {
-//       const fileName = `${uuidv4()}-${file.originalname}`;
-//       const filePath = `schools/${schoolId}/${fileName}`;
+  async deletePost(postId: number): Promise<void> {
+    const post = await this.postRepository.findOneOrFail({
+      where: { id: postId },
+      relations: ['post_media', 'post_media.media', 'comments', 'toggle_likes', 'post_hashtags', 'post_classes'],
+    });
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
 
-//       const command = new PutObjectCommand({
-//         Bucket: 'testing-mykids-bucket',
-//         Key: filePath,
-//         Body: file.buffer,
-//         ContentType: file.mimetype,
-//       });
+    // Delete related media from S3 and database
+    for (const postMedia of post.post_media) {
+      const media = postMedia.media;
+      if (media) {
+        const deleteCommand = new DeleteObjectCommand({
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: this.getS3KeyFromUrl(media.url),
+        });
+        await s3.send(deleteCommand);
+        await this.mediaRepository.delete(media.id);
+      }
+    }
 
-//       await s3.send(command);
+    // Delete comments, likes, hashtags, and classes
+    await this.commentRepository.delete({ post });
+    await this.toggleLikeRepository.delete({ post });
+    await this.postHashtagRepository.delete({ post });
+    await this.postClassRepository.delete({ post });
 
-//       const newMedia = this.mediaRepository.create({
-//         url: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${filePath}`,
-//         media_type: file.mimetype,
-//         school_id: schoolId,
-//       });
+    // Delete post
+    await this.postRepository.delete(post.id);
+  }
 
-//       await this.mediaRepository.save(newMedia);
-//       mediaList.push(newMedia);
-//     }
-
-//     return mediaList;
-//   }
-// }
+  private getS3KeyFromUrl(url: string): string {
+      const urlParts = url.split('/');
+      return urlParts.slice(3).join('/');
 }
 
-
+}
