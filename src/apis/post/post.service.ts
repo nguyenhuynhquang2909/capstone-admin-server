@@ -44,10 +44,17 @@ export class PostService {
   }
 
   async getPostsBySchoolId(schoolId: number): Promise<any[]> {
-    const posts = await this.postRepository.find({
-      where: { school_id: schoolId },
-      relations: ['post_media', 'post_media.media'],  // Load related media
-    });
+    const posts = await this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.post_media', 'post_media')
+      .leftJoinAndSelect('post_media.media', 'media')
+      .leftJoinAndSelect('post.post_hashtags', 'post_hashtags')
+      .leftJoinAndMapMany('post.comments', 'post.comments', 'comments')
+      .leftJoinAndMapMany('post.toggle_likes', 'post.toggle_likes', 'toggle_likes')
+      .where('post.school_id = :schoolId', { schoolId })
+      .loadRelationCountAndMap('post.numComments', 'post.comments')
+      .loadRelationCountAndMap('post.numLikes', 'post.toggle_likes')
+      .getMany();
 
     // Transform the response to a cleaner format
     return posts.map(post => ({
@@ -66,6 +73,9 @@ export class PostService {
         media_type: pm.media.media_type,
         created_at: pm.media.created_at,
       })),
+      hashtags: post.post_hashtags.map(ph => ph.hashtag),
+      numComments: post['numComments'],
+      numLikes: post['numLikes'],
     }));
   }
 
