@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { Post } from '../../common/entities/post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { SchoolAdmin } from '../../common/entities/school-admin.entity';
@@ -14,6 +14,8 @@ import { PostHashtag } from 'src/common/entities/post-hashtag.entity';
 import { PostClass } from 'src/common/entities/post-class.entity';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { MediaService } from '../media/media.service';
+import { PostMedia } from 'src/common/entities/post-media.entity';
+import {getConnection} from 'typeorm';
 
 @Injectable()
 export class PostService {
@@ -30,9 +32,12 @@ export class PostService {
     private readonly toggleLikeRepository: Repository<ToggleLike>,
     @InjectRepository(PostHashtag)
     private readonly postHashtagRepository: Repository<PostHashtag>,
+    @InjectRepository(PostMedia)
+    private readonly postMediaRepository: Repository<PostMedia>,
     @InjectRepository(PostClass)
     private readonly postClassRepository: Repository<PostClass>,
-    private readonly mediaService: MediaService
+    private readonly mediaService: MediaService,
+    private readonly dataSource: DataSource
 
   ) {}
 
@@ -129,18 +134,30 @@ export class PostService {
     }
 
     if (newFiles && newFiles.length > 0) {
-      // Delete old media from S3 and database
+      // Delete old media from S3
       for (const postMedia of post.post_media) {
         const media = postMedia.media;
         if (media) {
-          await this.mediaService.deleteMedia(media.id);  // Use mediaService to delete media
+          await this.mediaService.deleteMedia(media.id);  // Use mediaService to delete media from S3
         }
       }
+
+      // Delete old media records from media and post_media tables using raw SQL
+      const mediaIds = post.post_media.map(pm => pm.media.id);
+      await this.dataSource.query(
+        `DELETE FROM post_media WHERE post_id = $1`, [post.id]
+      );
+      await this.dataSource.query(
+        `DELETE FROM media WHERE id = ANY($1::int[])`, [mediaIds]
+      );
 
       // Upload new media to S3 and save to database
       const mediaList = await this.mediaService.uploadMedia(newFiles, userId);
       for (const newMedia of mediaList) {
-        await this.associateMediaWithPost(post.id, newMedia.id);
+        await this.dataSource.query(
+          `INSERT INTO post_media (post_id, media_id, created_at) VALUES ($1, $2, CURRENT_TIMESTAMP)`,
+          [post.id, newMedia.id]
+        );
       }
     }
 
@@ -165,6 +182,10 @@ export class PostService {
     return post;
   }
   async associateMediaWithPost(postId: number, mediaId: number) {
+    const mediaExists = await this.mediaRepository.findOne({where: {id: mediaId}});
+    if (!mediaExists) {
+      throw new NotFoundException('Media not found');
+    }
     await this.mediaRepository.query(
       "INSERT INTO post_media (post_id, media_id) VALUES ($1, $2)",
       [postId, mediaId]

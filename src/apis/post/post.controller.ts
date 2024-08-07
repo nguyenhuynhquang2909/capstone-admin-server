@@ -98,15 +98,8 @@ export class PostController {
       throw new UnauthorizedException('Invalid token');
     }
 
-    try {
-      const updatedPost = await this.postService.updatePost(postId, updatePostDto, newFiles, userId);
-      return updatedPost;
-    } catch (error) {
-      if (error instanceof ForbiddenException) {
-        throw new ForbiddenException(error.message);
-      }
-      throw error;
-    }
+    const updatedPost = await this.postService.updatePost(postId, updatePostDto, newFiles, userId);
+    return updatedPost;
   }
   // Publish post
   @Put(':id/publish')

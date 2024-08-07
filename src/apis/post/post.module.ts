@@ -11,9 +11,10 @@ import { ToggleLike } from 'src/common/entities/toggle-like.entity';
 import { PostClass } from 'src/common/entities/post-class.entity';
 import { PostHashtag } from 'src/common/entities/post-hashtag.entity';
 import { Comment } from 'src/common/entities/comment.entity';
+import { PostMedia } from 'src/common/entities/post-media.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Post, SchoolAdmin, Media, Comment,ToggleLike, PostClass, PostHashtag])],
+  imports: [TypeOrmModule.forFeature([Post, SchoolAdmin, Media, Comment,ToggleLike, PostClass, PostHashtag, PostMedia])],
   controllers: [PostController],
   providers: [PostService, JwtService, MediaService],
 })
