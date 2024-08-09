@@ -9,6 +9,7 @@ import { MediaModule } from './apis/media/media.module';
 // Configs
 import { PostgresModule } from './configs/postgres.module';
 import { DailyScheduleModule } from './apis/daily-schedule/daily-schedule.module';
+import { ClassModule } from './apis/class/class.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { DailyScheduleModule } from './apis/daily-schedule/daily-schedule.module
     PostModule,
     MediaModule,
     DailyScheduleModule,
+    ClassModule,
   ],
 })
 export class AppModule {}

@@ -1,4 +1,4 @@
-import { IsDate, IsDateString, IsNotEmpty, IsNumber } from "class-validator";
+import { IsDate, IsDateString, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateDailyScheduleDto {
     @IsNumber()
@@ -13,15 +13,7 @@ export class CreateDailyScheduleDto {
     @IsNotEmpty()
     end_time: Date;
 
-    @IsNumber()
     @IsNotEmpty()
-    subject_id: number;
-
-    @IsNumber()
-    @IsNotEmpty()
-    teacher_id: number;
-
-    @IsNumber()
-    @IsNotEmpty()
-    location_id: number;
+    @IsString()
+    subject: string;
 }

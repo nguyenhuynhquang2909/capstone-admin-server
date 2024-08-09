@@ -3,7 +3,7 @@ import { DailyScheduleService } from './daily-schedule.service';
 import { JwtService } from 'src/common/jwt/jwt.service';
 import { Role } from 'src/common/decorators/role.decorator';
 
-@Controller('daily-schedule')
+@Controller('schedule')
 export class DailyScheduleController {
     constructor(
         private readonly scheduleService: DailyScheduleService,
