@@ -10,7 +10,7 @@ import {
   UploadedFiles,
   UseInterceptors,
   Get,
-  Delete,
+  Delete
 } from '@nestjs/common';
 import { JwtService } from '../../common/jwt/jwt.service';
 import { PostService } from './post.service';
