@@ -20,8 +20,11 @@ import { MediaService } from '../media/media.service';
 import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { error } from 'console';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { JwtGuard } from 'src/common/guards/jwt.guard';
+import { RoleGuard } from 'src/common/guards/role.guard';
 
 @Controller('post')
+@UseGuards(JwtGuard, RoleGuard)
 export class PostController {
   constructor(
     private readonly postService: PostService,
