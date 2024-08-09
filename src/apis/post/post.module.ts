@@ -13,9 +13,14 @@ import { PostHashtag } from 'src/common/entities/post-hashtag.entity';
 import { Comment } from 'src/common/entities/comment.entity';
 import { PostMedia } from 'src/common/entities/post-media.entity';
 
+// Common
+import { JwtGuard } from '../../common/guards/jwt.guard';
+import { RoleGuard } from '../../common/guards/role.guard';
+import { RoleConfigService } from '../../common/services/role-config.service';
+
 @Module({
   imports: [TypeOrmModule.forFeature([Post, SchoolAdmin, Media, Comment,ToggleLike, PostClass, PostHashtag, PostMedia])],
   controllers: [PostController],
-  providers: [PostService, JwtService, MediaService],
+  providers: [PostService, JwtService, MediaService, JwtGuard, RoleGuard, RoleConfigService],
 })
 export class PostModule {}

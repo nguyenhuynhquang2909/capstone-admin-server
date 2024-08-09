@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Class } from './class.entity';
+import { Location } from './location.entity';
 
 @Entity({ name: 'eating_schedules' })
 export class EatingSchedule {
@@ -34,6 +35,15 @@ export class EatingSchedule {
 
   @Column({ type: 'text', nullable: false })
   menu: string;
+
+  @Column({ nullable: false })
+  location_id: number;
+
+  @ManyToOne(() => Location, (location) => location.eating_schedules, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'class_id' })
+  location: Location;
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;

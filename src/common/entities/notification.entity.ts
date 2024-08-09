@@ -26,6 +26,12 @@ export class Notification {
   @Column({ type: 'text', nullable: false })
   message: string;
 
+  @Column({ type: 'varchar', length: 50, nullable: false })
+  status: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: false })
+  notification_type: string;
+
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
 }

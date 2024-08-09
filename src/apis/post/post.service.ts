@@ -41,9 +41,11 @@ export class PostService {
 
   ) {}
 
+
   public async getSchoolIdForUser(userId: number): Promise<number> {
     const schoolAdmin = await this.schoolAdminRepository.findOne({ where: { user_id: userId } });
     
+
     if (!schoolAdmin) {
       throw new NotFoundException('School not found for this user');
     }
@@ -89,7 +91,7 @@ export class PostService {
 
   async createDraft(createPostDto: CreatePostDto, userId: number) {
     const { title, content } = createPostDto;
-    
+
     const schoolId = await this.getSchoolIdForUser(userId);
 
     const newPost = this.postRepository.create({
@@ -116,8 +118,11 @@ export class PostService {
     }
 
     if (post.status === 'published' && status === 'draft') {
-      throw new ForbiddenException('Published posts cannot be reverted to drafts');
+      throw new ForbiddenException(
+        'Published posts cannot be reverted to drafts',
+      );
     }
+
 
     // Use raw SQL to update the post, keeping the status unchanged if not provided
     const updatedTitle = title !== undefined ? title : post.title;
@@ -139,6 +144,7 @@ export class PostService {
         `UPDATE posts SET published_at = NULL WHERE id = $1`,
         [postId]
       );
+
     }
 
     if (newFiles && newFiles.length > 0) {
