@@ -1,32 +1,17 @@
-import {
-  Controller,
-  Post,
-  UseInterceptors,
-  UploadedFiles,
-  Headers,
-  UnauthorizedException,
-  UseGuards,
-} from '@nestjs/common';
+// src/apis/media/media.controller.ts
+import { Controller, Post, UseInterceptors, UploadedFiles, Headers, UnauthorizedException } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { MediaService } from './media.service';
+import { JwtService } from '../../common/jwt/jwt.service';
 
-// Common
-import { JwtGuard } from '../../common/guards/jwt.guard';
-import { RoleGuard } from '../../common/guards/role.guard';
-
-// Decorators
-import { Role } from '../../common/decorators/role.decorator';
-
-@UseGuards(JwtGuard, RoleGuard)
 @Controller('media')
 export class MediaController {
   constructor(
     private readonly mediaService: MediaService,
-    private readonly jwtGuard: JwtGuard,
+    private readonly jwtService: JwtService,
   ) {}
 
   @Post('upload')
-  @Role('schoolAdmin')
   @UseInterceptors(FilesInterceptor('files'))
   async uploadMedia(
     @UploadedFiles() files: Express.Multer.File[],
@@ -37,7 +22,7 @@ export class MediaController {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const decodedToken = this.jwtGuard.verifyToken(token);
+    const decodedToken = this.jwtService.verifyToken(token);
 
     const { userId } = decodedToken;
     if (!userId) {

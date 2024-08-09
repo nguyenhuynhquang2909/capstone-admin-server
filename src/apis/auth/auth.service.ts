@@ -1,10 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 // import * as bcrypt from 'bcrypt';
 
 // Common
-import { JwtGuard } from '../../common/guards/jwt.guard';
+import { JwtService } from '../../common/jwt/jwt.service';
 
 // DTO
 import { LoginDto } from './dto/login.dto';
@@ -17,15 +20,12 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly jwtGuard: JwtGuard,
+    private readonly jwtService: JwtService,
   ) {}
 
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
-    const user = await this.userRepository.findOne({
-      where: { email },
-      relations: ['role'],
-    });
+    const user = await this.userRepository.findOne({ where: { email } });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -36,10 +36,9 @@ export class AuthService {
     //   throw new UnauthorizedException('Invalid credentials');
     // }
 
-    const token = this.jwtGuard.generateToken({
+    const token = this.jwtService.generateToken({
       userId: user.id,
       email: user.email,
-      role: user.role.name,
     });
 
     return {

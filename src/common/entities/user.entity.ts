@@ -36,18 +36,12 @@ export class User {
   @Column({ type: 'varchar', length: 255, nullable: true })
   password: string;
 
-  @Column({ nullable: false })
+  @Column()
   role_id: number;
 
   @ManyToOne(() => Role, (role) => role.users)
   @JoinColumn({ name: 'role_id' })
   role: Role;
-
-  @Column({ type: 'boolean', default: false })
-  is_active: boolean;
-
-  @Column({ type: 'timestamptz', nullable: true })
-  last_login: Date;
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;

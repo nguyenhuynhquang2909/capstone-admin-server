@@ -26,12 +26,6 @@ export class DeviceToken {
   @Column({ type: 'text' })
   token: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  platform: string;
-
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
-
-  @Column({ type: 'timestamptz', nullable: true })
-  expires_at: Date;
 }

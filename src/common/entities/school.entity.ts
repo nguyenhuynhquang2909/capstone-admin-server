@@ -12,24 +12,14 @@ import { Teacher } from './teacher.entity';
 import { Post } from './post.entity';
 import { Media } from './media.entity';
 import { SchoolAdmin } from './school-admin.entity';
-import { Location } from './location.entity';
 
 @Entity({ name: 'schools' })
 export class School {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: false })
   name: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: false })
-  address: string;
-
-  @Column({ type: 'varchar', length: 20, nullable: false })
-  contact_number: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: false })
-  email: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
@@ -39,9 +29,6 @@ export class School {
 
   @OneToMany(() => Class, (classEntity) => classEntity.school)
   classes: Class[];
-
-  @OneToMany(() => Location, (location) => location.school)
-  locations: Location[];
 
   @OneToMany(() => Student, (student) => student.school)
   students: Student[];

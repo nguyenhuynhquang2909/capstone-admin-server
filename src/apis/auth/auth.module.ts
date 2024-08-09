@@ -4,7 +4,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 // Common
-import { JwtGuard } from '../../common/guards/jwt.guard';
+import { JwtService } from '../../common/jwt/jwt.service';
 
 // Configs
 import { RedisModule } from '../../configs/redis.module';
@@ -16,6 +16,6 @@ import { Student } from '../../common/entities/student.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([User, Student]), RedisModule],
   controllers: [AuthController],
-  providers: [AuthService, JwtGuard],
+  providers: [AuthService, JwtService],
 })
 export class AuthModule {}

@@ -28,12 +28,6 @@ export class Student {
   @Column({ nullable: false })
   parent_id: number;
 
-  @Column({ type: 'varchar', length: 10, nullable: false })
-  gender: string;
-
-  @Column({ type: 'text', nullable: false })
-  date_of_birth: string;
-
   @ManyToOne(() => School, (school) => school.students, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'school_id' })
   school: School;

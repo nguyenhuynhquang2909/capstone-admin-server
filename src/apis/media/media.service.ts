@@ -17,23 +17,18 @@ export class MediaService {
   ) {}
 
   private async getSchoolIdForUser(userId: number): Promise<number> {
-    const schoolAdmin = await this.schoolAdminRepository.findOne({
-      where: { user_id: userId },
-    });
+    const schoolAdmin = await this.schoolAdminRepository.findOne({ where: { user_id: userId } });
     if (!schoolAdmin) {
       throw new NotFoundException('School not found for this user');
     }
     return schoolAdmin.school_id;
   }
 
-  async uploadMedia(
-    files: Express.Multer.File[],
-    userId: number,
-  ): Promise<Media[]> {
+  async uploadMedia(files: Express.Multer.File[], userId: number): Promise<Media[]> {
     const schoolId = await this.getSchoolIdForUser(userId);
-
+    
     const mediaList: Media[] = [];
-
+    
     for (const file of files) {
       const fileName = `${uuidv4()}-${file.originalname}`;
       const filePath = `schools/${schoolId}/${fileName}`;

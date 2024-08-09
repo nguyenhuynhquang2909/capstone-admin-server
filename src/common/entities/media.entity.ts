@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   OneToMany,
   ManyToOne,
-  JoinColumn,
+  JoinColumn
 } from 'typeorm';
 import { PostMedia } from './post-media.entity';
 import { StudentMedia } from './student-media.entity';
@@ -31,9 +31,6 @@ export class Media {
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
-
-  @Column({ type: 'text', nullable: true })
-  description: string;
 
   @OneToMany(() => PostMedia, (postMedia) => postMedia.media)
   post_media: PostMedia[];

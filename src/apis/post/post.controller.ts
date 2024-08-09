@@ -13,14 +13,7 @@ import {
   Delete,
   UseGuards
 } from '@nestjs/common';
-
-// Common
-import { JwtGuard } from '../../common/guards/jwt.guard';
-import { RoleGuard } from '../../common/guards/role.guard';
-
-// Decorators
-import { Role } from '../../common/decorators/role.decorator';
-
+import { JwtService } from '../../common/jwt/jwt.service';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { MediaService } from '../media/media.service';
@@ -29,19 +22,16 @@ import { error } from 'console';
 import { UpdatePostDto } from './dto/update-post.dto';
 
 @Controller('post')
-@UseGuards(JwtGuard, RoleGuard)
 export class PostController {
   constructor(
     private readonly postService: PostService,
     private readonly jwtService: JwtService,
-    private readonly mediaService: MediaService,
-    private readonly jwtGuard: JwtGuard,
+    private readonly mediaService: MediaService 
   ) {}
 
   // Create a post with status "draft"
   @Post('draft')
   @UseInterceptors(FilesInterceptor('files', 10))
-  @Role('schoolAdmin')
   async createDraft(
     @Body() createPostDto: CreatePostDto,
     @Headers('authorization') authHeader: string,
@@ -52,7 +42,7 @@ export class PostController {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const decodedToken = this.jwtGuard.verifyToken(token);
+    const decodedToken = this.jwtService.verifyToken(token);
 
     const { userId } = decodedToken;
     if (!userId) {
@@ -91,7 +81,6 @@ export class PostController {
   // Update post (both draft and published)
   @Put(':id')
   @UseInterceptors(FilesInterceptor('newFiles', 10))
-  @Role('schoolAdmin')
   async updatePost(
     @Param('id') postId: number,
     @Body() updatePostDto: CreatePostDto,
@@ -103,18 +92,18 @@ export class PostController {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const decodedToken = this.jwtGuard.verifyToken(token);
+    const decodedToken = this.jwtService.verifyToken(token);
 
     const { userId } = decodedToken;
     if (!userId) {
       throw new UnauthorizedException('Invalid token');
     }
+
     const updatedPost = await this.postService.updatePost(postId, updatePostDto, newFiles, userId);
     return updatedPost;
   }
   // Publish post
   @Put(':id/publish')
-  @Role('schoolAdmin')
   async publishPost(
     @Param('id') postId: number,
     @Headers('authorization') authHeader: string,
@@ -124,7 +113,7 @@ export class PostController {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const decodedToken = this.jwtGuard.verifyToken(token);
+    const decodedToken = this.jwtService.verifyToken(token);
 
     const { userId } = decodedToken;
     if (!userId) {
