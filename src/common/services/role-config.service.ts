@@ -9,6 +9,7 @@ export class RoleConfigService {
   };
 
   getRole(role: string): string {
+    console.log(`getRole called with: ${role}`);
     if (!role) {
       throw new Error('Role is undefined');
     }

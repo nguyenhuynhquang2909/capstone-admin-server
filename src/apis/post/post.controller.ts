@@ -22,6 +22,7 @@ import { error } from 'console';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { JwtGuard } from 'src/common/guards/jwt.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
+import { Role } from 'src/common/decorators/role.decorator';
 
 @Controller('post')
 @UseGuards(JwtGuard, RoleGuard)
@@ -35,6 +36,7 @@ export class PostController {
   // Create a post with status "draft"
   @Post('draft')
   @UseInterceptors(FilesInterceptor('files', 10))
+  @Role('schoolAdmin')
   async createDraft(
     @Body() createPostDto: CreatePostDto,
     @Headers('authorization') authHeader: string,
@@ -65,6 +67,7 @@ export class PostController {
 
   // Fetch posts by school ID derived from user ID
   @Get('all-posts')
+  @Role('schoolAdmin')
   async getPostsBySchoolId(
     @Headers('authorization') authHeader: string
   ) {
@@ -84,6 +87,7 @@ export class PostController {
   // Update post (both draft and published)
   @Put(':id')
   @UseInterceptors(FilesInterceptor('newFiles', 10))
+  @Role('schoolAdmin')
   async updatePost(
     @Param('id') postId: number,
     @Body() updatePostDto: CreatePostDto,
@@ -107,6 +111,7 @@ export class PostController {
   }
   // Publish post
   @Put(':id/publish')
+  @Role('schoolAdmin')
   async publishPost(
     @Param('id') postId: number,
     @Headers('authorization') authHeader: string,
@@ -135,6 +140,7 @@ export class PostController {
   }
 
   @Delete(':id')
+  @Role('schoolAdmin')
   async deletePost(
     @Param('id') postId: number,
     @Headers('authorization') authHeader: string,
