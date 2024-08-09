@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { School } from './school.entity';
 import { Class } from './class.entity';
+import { DailySchedule } from './daily-schedule.entity';
 
 @Entity({ name: 'teachers' })
 export class Teacher {
@@ -21,6 +22,9 @@ export class Teacher {
 
   @Column({ nullable: false })
   school_id: number;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  contact_number: string;
 
   @ManyToOne(() => School, (school) => school.teachers, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'school_id' })
@@ -34,4 +38,7 @@ export class Teacher {
 
   @OneToMany(() => Class, (classEntity) => classEntity.teacher)
   classes: Class[];
+
+  @OneToMany(() => DailySchedule, (dailySchedule) => dailySchedule.teacher)
+  daily_schedules: DailySchedule[];
 }
