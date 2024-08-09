@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, Inject, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import { Post } from '../../common/entities/post.entity';
@@ -119,50 +119,77 @@ export class PostService {
       throw new ForbiddenException('Published posts cannot be reverted to drafts');
     }
 
-    if (title !== undefined) post.title = title;
-    if (content !== undefined) post.content = content;
-    if (status !== undefined) {
-      if (post.status === 'published') {
-        throw new ForbiddenException('Published posts cannot have their status changed');
-      }
-      post.status = status;
-      if (status === 'published') {
-        post.published_at = new Date();
-      } else if (status === 'draft') {
-        post.published_at = null;
-      }
+    // Use raw SQL to update the post, keeping the status unchanged if not provided
+    const updatedTitle = title !== undefined ? title : post.title;
+    const updatedContent = content !== undefined ? content : post.content;
+    const updatedStatus = status !== undefined ? status : post.status;
+
+    await this.dataSource.query(
+      `UPDATE posts SET title = $1, content = $2, status = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4`,
+      [updatedTitle, updatedContent, updatedStatus, postId]
+    );
+
+    if (updatedStatus === 'published') {
+      await this.dataSource.query(
+        `UPDATE posts SET published_at = CURRENT_TIMESTAMP WHERE id = $1`,
+        [postId]
+      );
+    } else if (updatedStatus === 'draft') {
+      await this.dataSource.query(
+        `UPDATE posts SET published_at = NULL WHERE id = $1`,
+        [postId]
+      );
     }
 
     if (newFiles && newFiles.length > 0) {
-      // Delete old media from S3
-      for (const postMedia of post.post_media) {
-        const media = postMedia.media;
-        if (media) {
-          await this.mediaService.deleteMedia(media.id);  // Use mediaService to delete media from S3
+      await this.dataSource.transaction(async (manager) => {
+        // Delete old media associations and update media records
+        const mediaIds = post.post_media.map(pm => pm.media.id);
+        if (mediaIds.length > 0) {
+          await manager.query(
+            `DELETE FROM post_media WHERE post_id = $1`,
+            [postId]
+          );
+          await manager.query(
+            `DELETE FROM media WHERE id = ANY($1::int[])`,
+            [mediaIds]
+          );
         }
-      }
 
-      // Delete old media records from media and post_media tables using raw SQL
-      const mediaIds = post.post_media.map(pm => pm.media.id);
-      await this.dataSource.query(
-        `DELETE FROM post_media WHERE post_id = $1`, [post.id]
-      );
-      await this.dataSource.query(
-        `DELETE FROM media WHERE id = ANY($1::int[])`, [mediaIds]
-      );
+        for (const file of newFiles) {
+          const fileName = `${uuidv4()}-${file.originalname}`;
+          const filePath = `schools/${userId}/${fileName}`;
+          const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${filePath}`;
 
-      // Upload new media to S3 and save to database
-      const mediaList = await this.mediaService.uploadMedia(newFiles, userId);
-      for (const newMedia of mediaList) {
-        await this.dataSource.query(
-          `INSERT INTO post_media (post_id, media_id, created_at) VALUES ($1, $2, CURRENT_TIMESTAMP)`,
-          [post.id, newMedia.id]
-        );
-      }
+          // Upload file to S3
+          const command = new PutObjectCommand({
+            Bucket: process.env.AWS_S3_BUCKET_NAME,
+            Key: filePath,
+            Body: file.buffer,
+            ContentType: file.mimetype,
+          });
+          await s3.send(command);
+
+          // Insert new media record
+          const mediaInsertResult = await manager.query(
+            `INSERT INTO media (url, media_type, school_id, created_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP) RETURNING id`,
+            [fileUrl, file.mimetype, userId]
+          );
+          const newMediaId = mediaInsertResult[0].id;
+
+          // Associate the new media with the post
+          await manager.query(
+            `INSERT INTO post_media (post_id, media_id, created_at) VALUES ($1, $2, CURRENT_TIMESTAMP)`,
+            [postId, newMediaId]
+          );
+        }
+      });
     }
 
-    await this.postRepository.save(post);
-    return post;
+    return await this.dataSource.query(
+      `SELECT * FROM posts WHERE id = $1`,
+      [postId]
+    );
   }
 
   async publishPost(postId: number) {
