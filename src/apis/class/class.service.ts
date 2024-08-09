@@ -20,8 +20,37 @@ export class ClassService {
         }
         return schoolAdmin.school_id;
       }
-    async getAllClasses(userId: number): Promise<Class[]> {
-        const schoolId = await this.getSchoolIdForUser(userId);
-        return await this.classRepository.find({where: {school_id: schoolId}});
+    
+      async getAllClasses(userId: number): Promise<any[]> {
+        const school_id = await this.getSchoolIdForUser(userId);
+    
+        const classes = await this.classRepository
+          .createQueryBuilder('class')
+          .leftJoinAndSelect('class.teacher', 'teacher')
+          .where('class.school_id = :school_id', { school_id })
+          .select(['class.id', 'class.name', 'class.teacher_id', 'teacher.name AS teacher_name'])
+          .getRawMany();
+    
+        return classes.map(classEntity => ({
+          id: classEntity.class_id,            // Ensure correct field names
+          name: classEntity.class_name,        // Ensure correct field names
+          teacher_id: classEntity.teacher_id,
+          teacher_name: classEntity.teacher_name,
+        }));
     }
+    async getClassStudents(classId: number): Promise<string[]> {
+
+        const classEntity = await this.classRepository.findOne({
+            where: { id: classId },
+            relations: ['class_students', 'class_students.student'],
+          });
+        if (!classEntity) {
+            throw new NotFoundException('Class not found for this school');
+        }
+        const studentNames = classEntity.class_students.map((cs) => cs.student.name);
+        return studentNames;
+    }
+
+    
+    
 }

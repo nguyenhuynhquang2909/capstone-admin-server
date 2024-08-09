@@ -1,4 +1,4 @@
-import { Controller, Get, Header, Headers, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Header, Headers, NotFoundException, Param, UnauthorizedException } from '@nestjs/common';
 import { ClassService } from './class.service';
 import { JwtService } from 'src/common/jwt/jwt.service';
 import { Role } from 'src/common/decorators/role.decorator';
@@ -28,6 +28,19 @@ export class ClassController {
           }
       
           return await this.classService.getAllClasses(userId);
+    }
+
+    @Get(':id')
+    @Role('schoolAdmin')
+    async getClassStudents(@Param('id') classId: number) {
+        try {
+            return await this.classService.getClassStudents(classId);
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw new NotFoundException('Class not found');
+            }
+            throw error;
+        }
     }
 
 }
