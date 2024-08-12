@@ -64,6 +64,7 @@ export class ClassService {
       }
     
       return classEntity.class_students.map((cs) => ({
+        id: cs.student.id,
         name: cs.student.name,
         date_of_birth: cs.student.date_of_birth,
         gender: cs.student.gender,
@@ -142,6 +143,23 @@ export class ClassService {
       }
       return await this.classRepository.save(classEntity);
 
+    }
+
+    async removeClass(classId: number): Promise<void> {
+      const classEntity = await this.classRepository.findOne({where: {id: classId}});
+      if (!classEntity) {
+        throw new NotFoundException('Class not found');
+      }
+      await this.classRepository.remove(classEntity);
+    }
+    async removeStudentFromClass(classId: number, studentId: number): Promise<void> {
+      const classStudent = await this.classStudentRepository.findOne({
+        where: {class: {id: classId}, student: {id: studentId}},
+      });
+      if (!classStudent) {
+        throw new NotFoundException('Student not found in this class');
+      }
+      await this.classStudentRepository.remove(classStudent);
     }
     
     

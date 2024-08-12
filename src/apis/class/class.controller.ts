@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Header, Headers, NotFoundException, Param, Post, Put, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Headers, NotFoundException, Param, Post, Put, UnauthorizedException } from '@nestjs/common';
 import { ClassService } from './class.service';
 import { JwtService } from 'src/common/jwt/jwt.service';
 import { Role } from 'src/common/decorators/role.decorator';
@@ -34,9 +34,9 @@ export class ClassController {
           return await this.classService.getAllClasses(userId);
     }
 
-    @Get(':id')
+    @Get(':classId/student')
     @Role('schoolAdmin')
-    async getClassStudents(@Param('id') classId: number) {
+    async getClassStudents(@Param('classId') classId: number) {
         try {
             return await this.classService.getClassStudents(classId);
         } catch (error) {
@@ -68,6 +68,21 @@ export class ClassController {
     ) {
         await this.classService.addStudentToClass(classId, addStudentToClassDto);
         return {message: 'Student added to class successfully'}
+    }
+
+    @Delete(':id')
+    async removeClass(@Param('id') classId: number): Promise<{ message: string }> {
+        await this.classService.removeClass(classId);
+        return { message: 'Class removed successfully' };
+    }
+
+    @Delete(':classId/student/:studentId')
+    async removeStudentFromClass(
+        @Param('classId') classId: number,
+        @Param('studentId') studentId: number
+    ): Promise<{ message: string }> {
+        await this.classService.removeStudentFromClass(classId, studentId);
+        return { message: 'Student removed from class successfully' };
     }
 
     
