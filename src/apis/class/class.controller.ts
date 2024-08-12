@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Header, Headers, NotFoundException, Param, Post, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Get, Header, Headers, NotFoundException, Param, Post, Put, UnauthorizedException } from '@nestjs/common';
 import { ClassService } from './class.service';
 import { JwtService } from 'src/common/jwt/jwt.service';
 import { Role } from 'src/common/decorators/role.decorator';
 import { CreateClassDto } from './dto/create-class.dto';
 import { AddStudentToClassDto } from './dto/add-student-to-class.dto';
+import { Class } from 'src/common/entities/class.entity';
+import { UpdateClassDto } from './dto/update-class.dto';
 
 @Controller('class')
 export class ClassController {
@@ -49,7 +51,15 @@ export class ClassController {
     async createClass(@Body() createClassDto: CreateClassDto) {
         return this.classService.createClass(createClassDto);
     }   
-    
+    @Put(':id')
+    @Role('schoolAdmin')
+    async updateClass(
+        @Param('id') classId: number,
+        @Body() updateClassDto: UpdateClassDto
+    ): Promise<Class> {
+        return await this.classService.updateClass(classId, updateClassDto);
+    }
+
     @Post(':classId')
     @Role('schoolAdmin')
     async addStudentToClass(

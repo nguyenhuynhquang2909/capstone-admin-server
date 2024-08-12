@@ -9,6 +9,7 @@ import { create } from 'domain';
 import { AddStudentToClassDto } from './dto/add-student-to-class.dto';
 import { Student } from 'src/common/entities/student.entity';
 import { ClassStudent } from 'src/common/entities/class-student.entity';
+import { UpdateClassDto } from './dto/update-class.dto';
 
 @Injectable()
 export class ClassService {
@@ -116,6 +117,31 @@ export class ClassService {
         student
       });
       await this.classStudentRepository.save(classStudent);
+    }
+
+    async updateClass(classId: number, updateClassDto: UpdateClassDto): Promise<Class> {
+      const {name, teacherId, classRoom} = updateClassDto;
+      const classEntity = await this.classRepository.findOne({where: {id: classId}});
+      if (!classEntity) {
+        throw new NotFoundException('Class not found');
+      }
+      let teacher;
+      if (teacher != undefined) {
+        teacher = await this.teacherRepository.findOne({where: {id: teacherId}});
+        if (!teacher) {
+          throw new NotFoundException('Teacher not found');
+        }
+        classEntity.teacher_id = teacherId;
+        classEntity.school_id = teacher.school_id;
+      }
+      if (name != undefined) {
+        classEntity.name = name;
+      }
+      if (classRoom != undefined) {
+        classEntity.class_room = classRoom;
+      }
+      return await this.classRepository.save(classEntity);
+
     }
     
     
