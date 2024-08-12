@@ -2,7 +2,13 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Class } from 'src/common/entities/class.entity';
 import { SchoolAdmin } from 'src/common/entities/school-admin.entity';
+import { Teacher } from 'src/common/entities/teacher.entity';
 import { Repository } from 'typeorm';
+import { CreateClassDto } from './dto/create-class.dto';
+import { create } from 'domain';
+import { AddStudentToClassDto } from './dto/add-student-to-class.dto';
+import { Student } from 'src/common/entities/student.entity';
+import { ClassStudent } from 'src/common/entities/class-student.entity';
 
 @Injectable()
 export class ClassService {
@@ -10,7 +16,14 @@ export class ClassService {
         @InjectRepository(Class)
         private readonly classRepository: Repository<Class>,
         @InjectRepository(SchoolAdmin)
-        private readonly schoolAdminRepository: Repository<SchoolAdmin>
+        private readonly schoolAdminRepository: Repository<SchoolAdmin>,
+        @InjectRepository(Teacher)
+        private readonly teacherRepository: Repository<Teacher>,
+        @InjectRepository(Student)
+        private readonly studentRepository: Repository<Student>,
+        @InjectRepository(ClassStudent)
+        private readonly classStudentRepository: Repository<ClassStudent>
+
     ) {}
 
     async getSchoolIdForUser(userId: number): Promise<number> {
@@ -55,8 +68,56 @@ export class ClassService {
         gender: cs.student.gender,
       }));
     }
-    
 
+    async createClass(createClassDto: CreateClassDto): Promise<Class> {
+      const {name, teacherId, classRoom} = createClassDto;
+      const teacher = await this.teacherRepository.findOne({ where: { id: teacherId } });
+
+      if (!teacher) {
+        throw new NotFoundException('Teacher not found')
+      }
+      const newClass = this.classRepository.create({
+        name,
+        teacher_id: teacherId,
+        school_id: teacher.school_id, 
+        class_room: classRoom,
+      });
+    
+      return await this.classRepository.save(newClass);
+    }
+    
+    async addStudentToClass(
+      classId: number,
+      addStudentToClassDto: AddStudentToClassDto,
+    ): Promise<void> {
+      const {studentId} = addStudentToClassDto;
+      
+      const classEntity = await this.classRepository.findOne({
+        where: { id: classId },
+        relations: ['class_students']
+      });
+      if (!classEntity) {
+        throw new NotFoundException('Class not found');
+      }
+      const student = await this.studentRepository.findOne({
+        where: { id: studentId }
+      });
+      if (!student) {
+        throw new NotFoundException('Student not found');
+      }
+      const existingClassStudent = await this.classStudentRepository.create({
+        class: classEntity,
+        student
+      });
+      if (existingClassStudent) {
+        throw new Error('Student is already in this class')
+      }
+      const classStudent = this.classStudentRepository.create({
+        class: classEntity,
+        student
+      });
+      await this.classStudentRepository.save(classStudent);
+    }
     
     
 }
