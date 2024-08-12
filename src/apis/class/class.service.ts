@@ -105,10 +105,9 @@ export class ClassService {
       if (!student) {
         throw new NotFoundException('Student not found');
       }
-      const existingClassStudent = await this.classStudentRepository.create({
-        class: classEntity,
-        student
-      });
+      const existingClassStudent = classEntity.class_students.find(
+        (cs) => cs.student_id === studentId,
+      );
       if (existingClassStudent) {
         throw new Error('Student is already in this class')
       }

@@ -12,7 +12,7 @@ export class ClassController {
         private readonly jwtService: JwtService
     ) {}
 
-    @Get('all-classes')
+    @Get()
     @Role('schoolAdmin')
     async getAllClasses(
         @Headers('authorization') authHeader: string
@@ -44,11 +44,14 @@ export class ClassController {
             throw error;
         }
     }
-    @Post()
+    @Post('create')
+    @Role('schoolAdmin')
     async createClass(@Body() createClassDto: CreateClassDto) {
         return this.classService.createClass(createClassDto);
     }   
+    
     @Post(':classId')
+    @Role('schoolAdmin')
     async addStudentToClass(
         @Param('classId') classId: number,
         @Body() addStudentToClassDto: AddStudentToClassDto,
