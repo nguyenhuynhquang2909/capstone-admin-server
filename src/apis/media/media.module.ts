@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Media } from '../../common/entities/media.entity';
 import { MediaService } from './media.service';
 import { MediaController } from './media.controller';
-import { SchoolAdmin } from '../../common/entities/school-admin.entity';
+
+// Common
 import { JwtService } from '../../common/jwt/jwt.service';
+
+// Entities
+import { Media } from '../../common/entities/media.entity';
+import { SchoolAdmin } from '../../common/entities/school-admin.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Media, SchoolAdmin])],

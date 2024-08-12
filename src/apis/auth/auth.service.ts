@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 // import * as bcrypt from 'bcrypt';
@@ -9,7 +6,7 @@ import { Repository } from 'typeorm';
 // Common
 import { JwtService } from '../../common/jwt/jwt.service';
 
-// DTO
+// DTOs
 import { LoginDto } from './dto/login.dto';
 
 // Enttities
@@ -39,7 +36,7 @@ export class AuthService {
     const token = this.jwtService.generateToken({
       userId: user.id,
       email: user.email,
-      role: user.role.name
+      role: user.role.name,
     });
 
     return {

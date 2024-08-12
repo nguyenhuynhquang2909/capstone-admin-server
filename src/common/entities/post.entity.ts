@@ -56,13 +56,17 @@ export class Post {
   @OneToMany(() => PostMedia, (postMedia) => postMedia.post, { cascade: true })
   post_media: PostMedia[];
 
-  @OneToMany(() => PostHashtag, (postHashtag) => postHashtag.post, { cascade: true })
+  @OneToMany(() => PostHashtag, (postHashtag) => postHashtag.post, {
+    cascade: true,
+  })
   post_hashtags: PostHashtag[];
 
   @OneToMany(() => Comment, (comment) => comment.post, { cascade: true })
   comments: Comment[];
 
-  @OneToMany(() => ToggleLike, (toggleLike) => toggleLike.post, { cascade: true })
+  @OneToMany(() => ToggleLike, (toggleLike) => toggleLike.post, {
+    cascade: true,
+  })
   toggle_likes: ToggleLike[];
 
   @OneToMany(() => PostClass, (postClass) => postClass.post, { cascade: true })

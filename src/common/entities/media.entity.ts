@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   OneToMany,
   ManyToOne,
-  JoinColumn
+  JoinColumn,
 } from 'typeorm';
 import { PostMedia } from './post-media.entity';
 import { StudentMedia } from './student-media.entity';

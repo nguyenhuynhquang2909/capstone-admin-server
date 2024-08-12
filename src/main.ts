@@ -1,11 +1,14 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
+import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  dotenv.config()
+  
+  dotenv.config();
+  
   // Set global prefix for versioning
   app.setGlobalPrefix('api/v1');
 
