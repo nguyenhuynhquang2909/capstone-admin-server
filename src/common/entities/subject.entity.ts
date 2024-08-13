@@ -6,14 +6,14 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { User } from './user.entity';
+import { DailySchedule } from './daily-schedule.entity';
 
-@Entity({ name: 'roles' })
-export class Role {
+@Entity({ name: 'subjects' })
+export class Subject {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 50, unique: true })
+  @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
   name: string;
 
   @Column({ type: 'text', nullable: true })
@@ -25,6 +25,6 @@ export class Role {
   @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
 
-  @OneToMany(() => User, (user) => user.role)
-  users: User[];
+  @OneToMany(() => DailySchedule, (dailySchedule) => dailySchedule.subject)
+  daily_schedules: DailySchedule[];
 }

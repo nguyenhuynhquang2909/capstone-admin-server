@@ -32,6 +32,9 @@ export class Media {
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
 
+  @Column({ type: 'text', nullable: true })
+  description: string;
+
   @OneToMany(() => PostMedia, (postMedia) => postMedia.media)
   post_media: PostMedia[];
 
