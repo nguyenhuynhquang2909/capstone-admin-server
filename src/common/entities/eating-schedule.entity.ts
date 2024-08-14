@@ -50,7 +50,7 @@ export class EatingSchedule {
   @JoinColumn({ name: 'location_id' })
   location: Location;
 
-  @OneToMany(() => MealMedia, (mealMedia) => mealMedia.post)
+  @OneToMany(() => MealMedia, (mealMedia) => mealMedia.media)
   meal_media: MealMedia[];
 
   @CreateDateColumn({ type: 'timestamptz' })
