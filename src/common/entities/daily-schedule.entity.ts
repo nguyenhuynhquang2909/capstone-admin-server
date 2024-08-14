@@ -38,7 +38,7 @@ export class DailySchedule {
   @ManyToOne(() => Location, (location) => location.daily_schedules, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'class_id' })
+  @JoinColumn({ name: 'location_id' })
   location: Location;
 
   @Column({ type: 'timestamptz', nullable: false })

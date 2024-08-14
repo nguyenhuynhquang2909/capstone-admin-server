@@ -4,6 +4,18 @@ export class CreateDailyScheduleDto {
     @IsNumber()
     @IsNotEmpty()
     class_id: number;
+    
+    @IsNumber()
+    @IsNotEmpty()
+    teacher_id: number;
+    
+    @IsNumber()
+    @IsNotEmpty()
+    subject_id: number;
+
+    @IsNumber()
+    @IsNotEmpty()
+    location_id: number;
 
     @IsDateString()
     @IsNotEmpty()
@@ -12,8 +24,4 @@ export class CreateDailyScheduleDto {
     @IsDateString()
     @IsNotEmpty()
     end_time: Date;
-
-    @IsNotEmpty()
-    @IsString()
-    subject: string;
 }
