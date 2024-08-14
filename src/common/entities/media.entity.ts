@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { PostMedia } from './post-media.entity';
 import { StudentMedia } from './student-media.entity';
+import { MealMedia } from './meal-media.entity';
 import { School } from './school.entity';
 
 @Entity({ name: 'media' })
@@ -40,4 +41,7 @@ export class Media {
 
   @OneToMany(() => StudentMedia, (studentMedia) => studentMedia.media)
   student_media: StudentMedia[];
+
+  @OneToMany(() => MealMedia, (mealMedia) => mealMedia.media)
+  meal_media: MealMedia[];
 }
