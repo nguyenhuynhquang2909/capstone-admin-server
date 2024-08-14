@@ -8,48 +8,61 @@ import { Class } from 'src/common/entities/class.entity';
 
 @Injectable()
 export class DailyScheduleService {
-    constructor(
-        @InjectRepository(DailySchedule)
-        private readonly scheduleRepository: Repository<DailySchedule>,
-        @InjectRepository(SchoolAdmin)
-        private readonly schoolAdminRepository: Repository<SchoolAdmin>,
-        @InjectRepository(Class)
-        private readonly classRepository: Repository<Class>
-    ) {}
-    
-    async getSchoolIdForUser(userId: number): Promise<number> {
-        const schoolAdmin = await this.schoolAdminRepository.findOne({where: {user_id: userId}});
-        if (!schoolAdmin) {
-            throw new NotFoundException('School not found for this user');
-        }
-        return schoolAdmin.school_id;
+  constructor(
+    @InjectRepository(DailySchedule)
+    private readonly scheduleRepository: Repository<DailySchedule>,
+    @InjectRepository(SchoolAdmin)
+    private readonly schoolAdminRepository: Repository<SchoolAdmin>,
+    @InjectRepository(Class)
+    private readonly classRepository: Repository<Class>,
+  ) {}
+
+  async getSchoolIdForUser(userId: number): Promise<number> {
+    const schoolAdmin = await this.schoolAdminRepository.findOne({
+      where: { user_id: userId },
+    });
+    if (!schoolAdmin) {
+      throw new NotFoundException('School not found for this user');
     }
-    
-    async getAllSchedules(userId): Promise<DailySchedule[]> {
-        const schoolId = await this.getSchoolIdForUser(userId);
-        return await this.scheduleRepository.find({
-            where: {class: {school_id: schoolId}},
-            relations: ['class']
-        })
+    return schoolAdmin.school_id;
+  }
+
+  async getAllSchedules(userId: number): Promise<DailySchedule[]> {
+    const schoolId = await this.getSchoolIdForUser(userId);
+    return await this.scheduleRepository.find({
+      where: { class: { school_id: schoolId } },
+      relations: ['class'],
+    });
+  }
+
+  async createDailySchedule(
+    CreateDailyScheduleDto: CreateDailyScheduleDto,
+    userId: number,
+  ): Promise<DailySchedule> {
+    const {
+      class_id,
+      start_time,
+      end_time,
+      subject_id,
+      teacher_id,
+      location_id,
+    } = CreateDailyScheduleDto;
+    const schoolId = await this.getSchoolIdForUser(userId);
+    const classEntity = await this.classRepository.findOne({
+      where: { id: class_id, school_id: schoolId },
+    });
+    if (!classEntity) {
+      throw new NotFoundException('Class not found for this school');
     }
-    
-    async createDailySchedule(CreateDailyScheduleDto: CreateDailyScheduleDto, userId: number): Promise<DailySchedule> {
-        const {class_id, start_time, end_time, subject_id, teacher_id, location_id} = CreateDailyScheduleDto;
-        const schoolId = await this.getSchoolIdForUser(userId);
-        const classEntity = await this.classRepository.findOne({ where: { id: class_id, school_id: schoolId } });
-        if(!classEntity) {
-            throw new NotFoundException("Class not found for this school");
-        }
-        
-        const newSchedule = this.scheduleRepository.create({
-            class_id,
-            start_time,
-            end_time,
-            subject_id,
-            teacher_id,
-            location_id
-        });
-        return await this.scheduleRepository.save(newSchedule);
-    };
-    
+
+    const newSchedule = this.scheduleRepository.create({
+      class_id,
+      start_time,
+      end_time,
+      subject_id,
+      teacher_id,
+      location_id,
+    });
+    return await this.scheduleRepository.save(newSchedule);
+  }
 }

@@ -8,10 +8,8 @@ import { SchoolAdmin } from 'src/common/entities/school-admin.entity';
 import { JwtService } from 'src/common/jwt/jwt.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([DailySchedule, Class, SchoolAdmin])
-  ],
+  imports: [TypeOrmModule.forFeature([DailySchedule, Class, SchoolAdmin])],
   providers: [DailyScheduleService, JwtService],
-  controllers: [DailyScheduleController]
+  controllers: [DailyScheduleController],
 })
 export class DailyScheduleModule {}

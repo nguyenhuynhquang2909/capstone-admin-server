@@ -11,9 +11,15 @@ import { ClassStudent } from 'src/common/entities/class-student.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Class, SchoolAdmin, Teacher, Student, ClassStudent])
+    TypeOrmModule.forFeature([
+      Class,
+      SchoolAdmin,
+      Teacher,
+      Student,
+      ClassStudent,
+    ]),
   ],
   providers: [ClassService, JwtService],
-  controllers: [ClassController]
+  controllers: [ClassController],
 })
 export class ClassModule {}
