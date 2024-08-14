@@ -37,10 +37,14 @@ export class DailyScheduleService {
         if(!classEntity) {
             throw new NotFoundException("Class not found for this school");
         }
+        
+        // wrong input
         const newSchedule = this.scheduleRepository.create({
             class_id,
             start_time,
             end_time,
+            
+            // Not including subject
             subject
         });
         return await this.scheduleRepository.save(newSchedule);

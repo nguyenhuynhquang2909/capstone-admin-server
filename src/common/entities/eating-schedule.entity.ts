@@ -6,11 +6,11 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-  OneToMany
+  OneToMany,
 } from 'typeorm';
 import { Class } from './class.entity';
 import { Location } from './location.entity';
-import { MealMedia } from './meal-media.entity'
+import { MealMedia } from './meal-media.entity';
 
 @Entity({ name: 'eating_schedules' })
 export class EatingSchedule {

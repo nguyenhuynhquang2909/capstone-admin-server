@@ -6,9 +6,9 @@ import * as dotenv from 'dotenv';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   dotenv.config();
-  
+
   // Set global prefix for versioning
   app.setGlobalPrefix('api/v1');
 

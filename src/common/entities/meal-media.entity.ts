@@ -16,7 +16,9 @@ export class MealMedia {
   @PrimaryColumn()
   media_id: number;
 
-  @ManyToOne(() => EatingSchedule, (meal) => meal.meal_media, { onDelete: 'CASCADE' })
+  @ManyToOne(() => EatingSchedule, (meal) => meal.meal_media, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'meal_id' })
   meal: EatingSchedule;
 
