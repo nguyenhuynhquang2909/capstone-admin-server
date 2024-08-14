@@ -33,6 +33,9 @@ export class Class {
   @Column({ nullable: false })
   school_id: number;
 
+  @Column({nullable: false})
+  class_room: string;
+
   @ManyToOne(() => Teacher, (teacher) => teacher.classes, {
     onDelete: 'CASCADE',
   })

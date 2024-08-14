@@ -22,7 +22,10 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.userRepository.findOne({ 
+      where: { email },
+      relations: ['role']
+     });
 
     if (!user) {
       throw new NotFoundException('User not found');
