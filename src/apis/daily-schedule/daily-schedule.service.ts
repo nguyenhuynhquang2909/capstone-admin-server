@@ -136,5 +136,22 @@ import { UpdateDailyScheduleDto } from './dto/update-daily-schedule.dto';
       }
       return await this.scheduleRepository.save(schedule);
     }
+
+    async deleteSchedule(scheduleId:number, userId: number): Promise<void> {
+      const schedule = await this.scheduleRepository.findOne({where: {id: scheduleId}});
+      if (!schedule) {
+        throw new NotFoundException('Schedule not found');
+      }
+      const schoolId = await this.getSchoolIdForUser(userId);
+      const classEntity = await this.classRepository.findOne({
+        where: {id: schedule.class_id, school_id: schoolId}
+      });
+
+      if (!classEntity) {
+        throw new NotFoundException('Class not found for this school');
+      }
+      await this.scheduleRepository.remove(schedule);
+
+    }
   }
   
