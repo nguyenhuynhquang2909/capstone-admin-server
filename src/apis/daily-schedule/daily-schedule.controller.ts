@@ -5,7 +5,6 @@ import {
   Get,
   Headers,
   Param,
-  ParseIntPipe,
   Post,
   Put,
   UnauthorizedException,
@@ -47,30 +46,30 @@ export class DailyScheduleController {
   ) {
     const token = authHeader.replace('Bearer ', '');
     const decodedToken = this.jwtService.verifyToken(token);
-    const {userId} = decodedToken;
+    const { userId } = decodedToken;
 
     if (!userId) {
       throw new UnauthorizedException('Invalid token');
     }
     return await this.scheduleService.createDailySchedule(
       CreateDailyScheduleDto,
-      userId
+      userId,
     );
   }
-  
+
   @Put(':id')
   @Role('schoolAdmin')
   async updateSchedule(
     @Param('id') id: number,
     @Body() updateDailyScheduleDto: UpdateDailyScheduleDto,
-    @Headers('authorization') authHeader: string
+    @Headers('authorization') authHeader: string,
   ) {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
     }
     const token = authHeader.replace('Bearer ', '');
     const decodedToken = this.jwtService.verifyToken(token);
-    const {userId} = decodedToken;
+    const { userId } = decodedToken;
 
     if (!userId) {
       throw new UnauthorizedException('Invalid token');
@@ -78,30 +77,29 @@ export class DailyScheduleController {
     return this.scheduleService.updateDailySchedule(
       id,
       updateDailyScheduleDto,
-      userId
-    )
+      userId,
+    );
   }
 
   @Delete(':id')
   @Role('schoolAdmin')
   async deleteSchedule(
     @Param('id') id: number,
-    @Headers('authorization') authHeader: string
+    @Headers('authorization') authHeader: string,
   ) {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
     }
     const token = authHeader.replace('Bearer ', '');
     const decodedToken = this.jwtService.verifyToken(token);
-    const {userId} = decodedToken;
+    const { userId } = decodedToken;
 
     if (!userId) {
       throw new UnauthorizedException('Invalid token');
     }
-    console.log('UserId:', userId);  // Log the userId
-    console.log('Schedule ID:', id);  // Log the schedule ID
-    await this.scheduleService.deleteSchedule(id,userId);                                                                                           
-    return {message: 'Schedule deleted successfully'}
+    console.log('UserId:', userId); // Log the userId
+    console.log('Schedule ID:', id); // Log the schedule ID
+    await this.scheduleService.deleteSchedule(id, userId);
+    return { message: 'Schedule deleted successfully' };
   }
-
 }

@@ -3,7 +3,6 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
 import { DailySchedule } from './daily-schedule.entity';
@@ -21,7 +20,6 @@ export class Subject {
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
-
 
   @OneToMany(() => DailySchedule, (dailySchedule) => dailySchedule.subject)
   daily_schedules: DailySchedule[];

@@ -1,6 +1,6 @@
 # Created by https://www.toptal.com/developers/gitignore/api/node,macos,android,terraform,nextjs,yarn,windows,powershell,helm,dotenv,gradle,intellij,visualstudiocode,firebase,database,reactnative,flutter,microsoftoffice,laravel,fastlane,vue,nativescript,ansible
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,macos,android,terraform,nextjs,yarn,windows,powershell,helm,dotenv,gradle,intellij,visualstudiocode,firebase,database,reactnative,flutter,microsoftoffice,laravel,fastlane,vue,nativescript,ansible
-
+cloud-messaging-key.json
 scripts/
 
 ### Android ###
