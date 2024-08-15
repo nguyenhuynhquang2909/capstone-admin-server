@@ -11,15 +11,20 @@ import {
   UseInterceptors,
   Get,
   Delete,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { error } from 'console';
+
+// Services
 import { JwtService } from '../../common/jwt/jwt.service';
 import { PostService } from './post.service';
-import { CreatePostDto } from './dto/create-post.dto';
 import { MediaService } from '../media/media.service';
-import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { error } from 'console';
-import { UpdatePostDto } from './dto/update-post.dto';
+
+// DTOs
+import { CreatePostDto } from './dto/create-post.dto';
+
+// Guard
 import { JwtGuard } from 'src/common/guards/jwt.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Role } from 'src/common/decorators/role.decorator';
@@ -30,7 +35,7 @@ export class PostController {
   constructor(
     private readonly postService: PostService,
     private readonly jwtService: JwtService,
-    private readonly mediaService: MediaService 
+    private readonly mediaService: MediaService,
   ) {}
 
   // Create a post with status "draft"
@@ -62,21 +67,19 @@ export class PostController {
     for (const mediaItem of media) {
       await this.postService.associateMediaWithPost(newDraft.id, mediaItem.id);
     }
-    return {...newDraft, media};
+    return { ...newDraft, media };
   }
 
   // Fetch posts by school ID derived from user ID
   @Get('all-posts')
   @Role('schoolAdmin')
-  async getPostsBySchoolId(
-    @Headers('authorization') authHeader: string
-  ) {
+  async getPostsBySchoolId(@Headers('authorization') authHeader: string) {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
     }
     const token = authHeader.replace('Bearer ', '');
     const decodedToken = this.jwtService.verifyToken(token);
-    const {userId} = decodedToken;
+    const { userId } = decodedToken;
     if (!userId) {
       throw new UnauthorizedException('Invalid token');
     }
@@ -84,6 +87,7 @@ export class PostController {
     const posts = await this.postService.getPostsBySchoolId(schoolId);
     return posts;
   }
+
   // Update post (both draft and published)
   @Put(':id')
   @UseInterceptors(FilesInterceptor('newFiles', 10))
@@ -106,9 +110,15 @@ export class PostController {
       throw new UnauthorizedException('Invalid token');
     }
 
-    const updatedPost = await this.postService.updatePost(postId, updatePostDto, newFiles, userId);
+    const updatedPost = await this.postService.updatePost(
+      postId,
+      updatePostDto,
+      newFiles,
+      userId,
+    );
     return updatedPost;
   }
+
   // Publish post
   @Put(':id/publish')
   @Role('schoolAdmin')
@@ -157,7 +167,10 @@ export class PostController {
     }
     try {
       await this.postService.deletePost(postId);
-      return { message: 'Post, related media, comments, likes, hashtags, and classes deleted successfully' };
+      return {
+        message:
+          'Post, related media, comments, likes, hashtags, and classes deleted successfully',
+      };
     } catch (err) {
       if (error instanceof ForbiddenException) {
         throw new ForbiddenException(error.message);
@@ -166,4 +179,3 @@ export class PostController {
     }
   }
 }
-

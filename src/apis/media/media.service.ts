@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Media } from '../../common/entities/media.entity';
+
+// Services
 import { s3 } from '../../configs/aws.config';
 import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
+
+// Entities
 import { SchoolAdmin } from '../../common/entities/school-admin.entity';
+import { Media } from '../../common/entities/media.entity';
 
 @Injectable()
 export class MediaService {
@@ -17,18 +21,23 @@ export class MediaService {
   ) {}
 
   private async getSchoolIdForUser(userId: number): Promise<number> {
-    const schoolAdmin = await this.schoolAdminRepository.findOne({ where: { user_id: userId } });
+    const schoolAdmin = await this.schoolAdminRepository.findOne({
+      where: { user_id: userId },
+    });
     if (!schoolAdmin) {
       throw new NotFoundException('School not found for this user');
     }
     return schoolAdmin.school_id;
   }
 
-  async uploadMedia(files: Express.Multer.File[], userId: number): Promise<Media[]> {
+  async uploadMedia(
+    files: Express.Multer.File[],
+    userId: number,
+  ): Promise<Media[]> {
     const schoolId = await this.getSchoolIdForUser(userId);
-    
+
     const mediaList: Media[] = [];
-    
+
     for (const file of files) {
       const fileName = `${uuidv4()}-${file.originalname}`;
       const filePath = `schools/${schoolId}/${fileName}`;
@@ -54,8 +63,11 @@ export class MediaService {
 
     return mediaList;
   }
+
   async deleteMedia(mediaId: number): Promise<void> {
-    const media = await this.mediaRepository.findOne({where: {id: mediaId}});
+    const media = await this.mediaRepository.findOne({
+      where: { id: mediaId },
+    });
     if (!media) {
       throw new NotFoundException('Media not found');
     }

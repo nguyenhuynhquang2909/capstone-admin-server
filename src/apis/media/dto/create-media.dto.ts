@@ -1,4 +1,3 @@
-// src/apis/media/dto/create-media.dto.ts
 import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateMediaDto {

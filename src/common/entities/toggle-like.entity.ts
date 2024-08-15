@@ -1,4 +1,10 @@
-import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+} from 'typeorm';
 import { User } from './user.entity';
 import { Post } from './post.entity';
 
@@ -17,4 +23,7 @@ export class ToggleLike {
   @ManyToOne(() => Post, (post) => post.toggle_likes, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'post_id' })
   post: Post;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  liked_at: Date;
 }

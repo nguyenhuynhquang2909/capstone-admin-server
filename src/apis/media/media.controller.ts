@@ -1,5 +1,11 @@
-// src/apis/media/media.controller.ts
-import { Controller, Post, UseInterceptors, UploadedFiles, Headers, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseInterceptors,
+  UploadedFiles,
+  Headers,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { MediaService } from './media.service';
 import { JwtService } from '../../common/jwt/jwt.service';

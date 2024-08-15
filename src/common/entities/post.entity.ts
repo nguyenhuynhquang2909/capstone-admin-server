@@ -53,18 +53,18 @@ export class Post {
   @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
 
-  @OneToMany(() => PostMedia, (postMedia) => postMedia.post, { cascade: true })
+  @OneToMany(() => PostMedia, (postMedia) => postMedia.post)
   post_media: PostMedia[];
 
-  @OneToMany(() => PostHashtag, (postHashtag) => postHashtag.post, { cascade: true })
+  @OneToMany(() => PostHashtag, (postHashtag) => postHashtag.post)
   post_hashtags: PostHashtag[];
 
-  @OneToMany(() => Comment, (comment) => comment.post, { cascade: true })
+  @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];
 
-  @OneToMany(() => ToggleLike, (toggleLike) => toggleLike.post, { cascade: true })
+  @OneToMany(() => ToggleLike, (toggleLike) => toggleLike.post)
   toggle_likes: ToggleLike[];
 
-  @OneToMany(() => PostClass, (postClass) => postClass.post, { cascade: true })
+  @OneToMany(() => PostClass, (postClass) => postClass.class)
   post_classes: PostClass[];
 }

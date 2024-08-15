@@ -24,14 +24,14 @@ export class Class {
   @Column({ type: 'varchar', length: 255, nullable: false })
   name: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  class_room: string;
+
   @Column({ nullable: false })
   teacher_id: number;
 
   @Column({ nullable: false })
   school_id: number;
-
-  @Column({nullable: false})
-  class_room: string;
 
   @ManyToOne(() => Teacher, (teacher) => teacher.classes, {
     onDelete: 'CASCADE',

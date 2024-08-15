@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsNumber } from "class-validator";
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class AddStudentToClassDto {
-    @IsNotEmpty()
-    @IsNumber()
-    studentId: number;
+  @IsNotEmpty()
+  @IsNumber()
+  studentId: number;
 }

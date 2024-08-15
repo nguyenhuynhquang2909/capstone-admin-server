@@ -5,10 +5,11 @@ import {
   CreateDateColumn,
   OneToMany,
   ManyToOne,
-  JoinColumn
+  JoinColumn,
 } from 'typeorm';
 import { PostMedia } from './post-media.entity';
 import { StudentMedia } from './student-media.entity';
+import { MealMedia } from './meal-media.entity';
 import { School } from './school.entity';
 
 @Entity({ name: 'media' })
@@ -32,9 +33,15 @@ export class Media {
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
 
+  @Column({ type: 'text', nullable: true })
+  description: string;
+
   @OneToMany(() => PostMedia, (postMedia) => postMedia.media)
   post_media: PostMedia[];
 
   @OneToMany(() => StudentMedia, (studentMedia) => studentMedia.media)
   student_media: StudentMedia[];
+
+  @OneToMany(() => MealMedia, (mealMedia) => mealMedia.media)
+  meal_media: MealMedia[];
 }
