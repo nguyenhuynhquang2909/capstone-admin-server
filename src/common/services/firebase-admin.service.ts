@@ -21,7 +21,21 @@ export class FirebaseAdminService {
       const response = await admin
         .messaging()
         .sendToDevice(deviceTokens, message);
-      this.logger.log(`Successfully sent message: ${response}`);
+
+      // Log the response in a readable format
+      this.logger.log(`Successfully sent message.`);
+
+      // Check if there are any results to report
+      if (response.failureCount > 0) {
+        this.logger.warn('Some messages failed to send.');
+        response.results.forEach((result, index) => {
+          if (result.error) {
+            this.logger.error(
+              `Error sending message to token ${deviceTokens[index]}: ${result.error.message}`,
+            );
+          }
+        });
+      }
     } catch (error) {
       this.logger.error('Error sending message:', error);
     }
