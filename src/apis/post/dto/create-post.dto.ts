@@ -1,4 +1,4 @@
-import { IsString, IsIn, IsOptional } from 'class-validator';
+import { IsString, IsIn, IsOptional, IsArray } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()
@@ -13,4 +13,8 @@ export class CreatePostDto {
   @IsIn(['draft', 'published'])
   @IsOptional()
   status: string;
+  
+  @IsArray()
+  @IsOptional()
+  classIds?: number[];
 }
