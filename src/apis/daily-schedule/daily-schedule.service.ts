@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DailySchedule } from 'src/common/entities/daily-schedule.entity';
 import { SchoolAdmin } from 'src/common/entities/school-admin.entity';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateDailyScheduleDto } from './dto/create-daily-schedule.dto';
 import { Class } from 'src/common/entities/class.entity';
 
@@ -54,6 +54,14 @@ export class DailyScheduleService {
     if (!classEntity) {
       throw new NotFoundException('Class not found for this school');
     }
+
+    const overlappingSchedule = await this.scheduleRepository.findOne({
+      where: {
+        class_id: class_id,
+        start_time: LessThanOrEqual(end_time),
+        end_time: MoreThanOrEqual(start_time)
+      }
+    })
 
     const newSchedule = this.scheduleRepository.create({
       class_id,
