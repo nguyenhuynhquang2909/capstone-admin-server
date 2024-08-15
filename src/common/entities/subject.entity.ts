@@ -22,8 +22,6 @@ export class Subject {
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
-  updated_at: Date;
 
   @OneToMany(() => DailySchedule, (dailySchedule) => dailySchedule.subject)
   daily_schedules: DailySchedule[];

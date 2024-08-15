@@ -27,13 +27,40 @@ export class DailyScheduleService {
     return schoolAdmin.school_id;
   }
 
-  async getAllSchedules(userId: number): Promise<DailySchedule[]> {
+  async getAllSchedules(userId: number): Promise<any> {
     const schoolId = await this.getSchoolIdForUser(userId);
-    return await this.scheduleRepository.find({
+    const schedules = await this.scheduleRepository.find({
       where: { class: { school_id: schoolId } },
-      relations: ['class'],
+      relations: ['class', 'subject'],
     });
+  
+    // Initialize a structure to hold schedules organized by day and time slots
+    const weekSchedule = {};
+  
+    schedules.forEach(schedule => {
+      const day = schedule.start_time.toISOString().split('T')[0]; // Get the day (e.g., "2024-08-21")
+      const startTime = schedule.start_time.toISOString().split('T')[1].slice(0, 5); // Get the start time (e.g., "08:00")
+      const endTime = schedule.end_time.toISOString().split('T')[1].slice(0, 5); // Get the end time (e.g., "09:00")
+  
+      // Create an entry for the day if it doesn't exist
+      if (!weekSchedule[day]) {
+        weekSchedule[day] = [];
+      }
+  
+      // Add the schedule to the corresponding day and time slot
+      weekSchedule[day].push({
+        startTime: startTime,
+        endTime: endTime,
+        subjectName: schedule.subject.name,
+        classId: schedule.class_id,
+        teacherId: schedule.teacher_id,
+        locationId: schedule.location_id,
+      });
+    });
+  
+    return weekSchedule;
   }
+  
 
   async createDailySchedule(
     CreateDailyScheduleDto: CreateDailyScheduleDto,
@@ -62,6 +89,10 @@ export class DailyScheduleService {
         end_time: MoreThanOrEqual(start_time)
       }
     })
+
+    if (overlappingSchedule) {
+      throw new Error('Schedule overlaps with an existing schedule');
+    }
 
     const newSchedule = this.scheduleRepository.create({
       class_id,
