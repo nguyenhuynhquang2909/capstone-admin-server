@@ -13,7 +13,7 @@ export class CreatePostDto {
   @IsIn(['draft', 'published'])
   @IsOptional()
   status: string;
-  
+
   @IsArray()
   @IsOptional()
   classIds?: number[];

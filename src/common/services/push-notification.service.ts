@@ -22,20 +22,23 @@ export class PushNotificationService {
     },
   ): Promise<void> {
     const deviceTokens = await this.getDeviceTokensForUsers(userIds);
-  
+
     if (deviceTokens.length === 0) return;
-  
+
     const dataPayload = {
       navigationId: notificationData.navigationId,
-      ...Object.keys(notificationData.additionalData || {}).reduce((acc, key) => {
-        acc[key] = String(notificationData.additionalData[key]);
-        return acc;
-      }, {}),
+      ...Object.keys(notificationData.additionalData || {}).reduce(
+        (acc, key) => {
+          acc[key] = String(notificationData.additionalData[key]);
+          return acc;
+        },
+        {},
+      ),
     };
-  
+
     console.log('Notification Data:', notificationData);
     console.log('Data Payload:', dataPayload);
-  
+
     const message = {
       notification: {
         title: notificationData.title,
@@ -43,7 +46,7 @@ export class PushNotificationService {
       },
       data: dataPayload,
     };
-  
+
     await this.firebaseAdminService.sendPushNotification(deviceTokens, message);
   }
 

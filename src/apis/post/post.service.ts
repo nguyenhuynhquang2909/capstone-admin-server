@@ -103,9 +103,9 @@ export class PostService {
 
   async createDraft(createPostDto: CreatePostDto, userId: number) {
     const { title, content, classIds } = createPostDto;
-  
+
     const schoolId = await this.getSchoolIdForUser(userId);
-  
+
     const newPost = this.postRepository.create({
       title,
       content,
@@ -113,9 +113,9 @@ export class PostService {
       created_by: userId,
       school_id: schoolId,
     });
-  
+
     await this.postRepository.save(newPost);
-  
+
     if (classIds && classIds.length > 0) {
       for (const classId of classIds) {
         await this.postClassRepository.save({
@@ -124,7 +124,7 @@ export class PostService {
         });
       }
     }
-  
+
     return newPost;
   }
 
@@ -135,31 +135,31 @@ export class PostService {
     userId: number,
   ) {
     const { title, content, status, classIds } = updatePostDto;
-  
+
     const post = await this.postRepository.findOne({
       where: { id: postId },
       relations: ['post_media', 'post_media.media', 'post_classes'],
     });
-  
+
     if (!post) {
       throw new NotFoundException('Post not found');
     }
-  
+
     if (post.status === 'published' && status === 'draft') {
       throw new ForbiddenException(
         'Published posts cannot be reverted to drafts',
       );
     }
-  
+
     const updatedTitle = title !== undefined ? title : post.title;
     const updatedContent = content !== undefined ? content : post.content;
     const updatedStatus = status !== undefined ? status : post.status;
-  
+
     await this.dataSource.query(
       `UPDATE posts SET title = $1, content = $2, status = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4`,
       [updatedTitle, updatedContent, updatedStatus, postId],
     );
-  
+
     if (updatedStatus === 'published') {
       await this.dataSource.query(
         `UPDATE posts SET published_at = CURRENT_TIMESTAMP WHERE id = $1`,
@@ -171,7 +171,7 @@ export class PostService {
         [postId],
       );
     }
-  
+
     if (newFiles && newFiles.length > 0) {
       await this.dataSource.transaction(async (manager) => {
         const mediaIds = post.post_media.map((pm) => pm.media.id);
@@ -183,12 +183,12 @@ export class PostService {
             mediaIds,
           ]);
         }
-  
+
         for (const file of newFiles) {
           const fileName = `${uuidv4()}-${file.originalname}`;
           const filePath = `schools/${userId}/${fileName}`;
           const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${filePath}`;
-  
+
           const command = new PutObjectCommand({
             Bucket: process.env.AWS_S3_BUCKET_NAME,
             Key: filePath,
@@ -196,13 +196,13 @@ export class PostService {
             ContentType: file.mimetype,
           });
           await s3.send(command);
-  
+
           const mediaInsertResult = await manager.query(
             `INSERT INTO media (url, media_type, school_id, created_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP) RETURNING id`,
             [fileUrl, file.mimetype, userId],
           );
           const newMediaId = mediaInsertResult[0].id;
-  
+
           await manager.query(
             `INSERT INTO post_media (post_id, media_id, created_at) VALUES ($1, $2, CURRENT_TIMESTAMP)`,
             [postId, newMediaId],
@@ -210,11 +210,11 @@ export class PostService {
         }
       });
     }
-  
+
     if (classIds && classIds.length > 0) {
       // Clear existing class associations
       await this.postClassRepository.delete({ post_id: postId });
-  
+
       // Insert new class associations
       for (const classId of classIds) {
         await this.postClassRepository.save({
@@ -223,7 +223,7 @@ export class PostService {
         });
       }
     }
-  
+
     return await this.dataSource.query(`SELECT * FROM posts WHERE id = $1`, [
       postId,
     ]);
@@ -236,16 +236,16 @@ export class PostService {
       .select('postClass.class_id')
       .where('postClass.post_id = :postId', { postId: post.id })
       .getMany();
-  
+
     if (postClasses.length === 0) {
       console.log(
         `No classes associated with post (ID: ${post.id}). Skipping notification.`,
       );
       return;
     }
-  
+
     const classIds = postClasses.map((pc) => pc.class_id);
-  
+
     // Fetch students associated with the class IDs
     const studentRecords = await this.dataSource
       .createQueryBuilder()
@@ -253,16 +253,20 @@ export class PostService {
       .from(ClassStudent, 'classStudent')
       .where('classStudent.class_id IN (:...classIds)', { classIds })
       .getRawMany();
-  
-    const studentIds = studentRecords.map(record => record.classStudent_student_id);
-  
+
+    const studentIds = studentRecords.map(
+      (record) => record.classStudent_student_id,
+    );
+
     if (studentIds.length === 0) {
-      console.log(`No students found for classes (IDs: ${classIds.join(', ')}). Skipping notification.`);
+      console.log(
+        `No students found for classes (IDs: ${classIds.join(', ')}). Skipping notification.`,
+      );
       return;
     }
-  
+
     const uniqueStudentIds = Array.from(new Set(studentIds));
-  
+
     // Fetch parent IDs associated with the student IDs
     const parentRecords = await this.dataSource
       .createQueryBuilder()
@@ -270,12 +274,12 @@ export class PostService {
       .from(Student, 'student')
       .where('student.id IN (:...studentIds)', { studentIds: uniqueStudentIds })
       .getRawMany();
-  
+
     // Correctly map parent IDs
-    const parentIds = parentRecords.map(record => record.student_parent_id);
-  
+    const parentIds = parentRecords.map((record) => record.student_parent_id);
+
     const uniqueParentIdsArray = Array.from(new Set(parentIds));
-  
+
     if (uniqueParentIdsArray.length > 0) {
       await this.pushNotificationService.sendNotification(
         uniqueParentIdsArray,

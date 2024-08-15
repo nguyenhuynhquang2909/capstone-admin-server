@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './apis/auth/auth.module';
 import { PostModule } from './apis/post/post.module';
 import { MediaModule } from './apis/media/media.module';
+import { NeonDBModule } from './configs/neondb.module';
 import { PostgresModule } from './configs/postgres.module';
 import { DailyScheduleModule } from './apis/daily-schedule/daily-schedule.module';
 import { ClassModule } from './apis/class/class.module';
@@ -20,6 +21,7 @@ import { DeviceToken } from './common/entities/device-token.entity';
     AuthModule,
     PostModule,
     MediaModule,
+    NeonDBModule,
     DailyScheduleModule,
     ClassModule,
     TypeOrmModule.forFeature([DeviceToken]),
