@@ -3,13 +3,16 @@ import {
   Controller,
   Get,
   Headers,
+  Param,
   Post,
+  Put,
   UnauthorizedException,
 } from '@nestjs/common';
 import { DailyScheduleService } from './daily-schedule.service';
 import { JwtService } from 'src/common/jwt/jwt.service';
 import { Role } from 'src/common/decorators/role.decorator';
 import { CreateDailyScheduleDto } from './dto/create-daily-schedule.dto';
+import { UpdateDailyScheduleDto } from './dto/update-daily-schedule.dto';
 
 @Controller('schedule')
 export class DailyScheduleController {
@@ -51,6 +54,30 @@ export class DailyScheduleController {
       CreateDailyScheduleDto,
       userId
     );
+  }
+  
+  @Put(':id')
+  @Role('schoolAdmin')
+  async updateSchedule(
+    @Param('id') id: number,
+    @Body() updateDailyScheduleDto: UpdateDailyScheduleDto,
+    @Headers('authorization') authHeader: string
+  ) {
+    if (!authHeader) {
+      throw new UnauthorizedException('Authorization header is missing');
+    }
+    const token = authHeader.replace('Bearer ', '');
+    const decodedToken = this.jwtService.verifyToken(token);
+    const {userId} = decodedToken;
+
+    if (!userId) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    return this.scheduleService.updateDailySchedule(
+      id,
+      updateDailyScheduleDto,
+      userId
+    )
   }
 
 }
