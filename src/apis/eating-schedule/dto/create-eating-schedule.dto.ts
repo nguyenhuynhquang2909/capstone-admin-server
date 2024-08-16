@@ -1,7 +1,8 @@
 import { IsArray, IsDate, IsDateString, IsNotEmpty, IsNumber, IsString } from "class-validator";
-
+import { Type } from 'class-transformer';
 export class CreateEatingScheduleDto {
     @IsNumber()
+    @Type(() => Number)
     @IsNotEmpty()
     class_id: number;
 
@@ -27,6 +28,7 @@ export class CreateEatingScheduleDto {
 
     @IsNumber()
     @IsNotEmpty()
+    @Type(() => Number)
     location_id: number;
 
 

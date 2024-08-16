@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EatingSchedule } from 'src/common/entities/eating-schedule.entity';
 import { MealMedia } from 'src/common/entities/meal-media.entity';
@@ -21,8 +21,7 @@ export class EatingScheduleService {
     ) {}
     async createEatingSchedule(
         createEatingScheduleDto: CreateEatingScheduleDto,
-        files: Express.Multer.File[],
-        userId: number
+        userId: number,
     ): Promise<EatingSchedule> {
         const {class_id,start_time, end_time, meal, menu, nutrition,location_id} = createEatingScheduleDto;
         const eatingSchedule = this.eatingScheduleRepository.create({
@@ -34,16 +33,20 @@ export class EatingScheduleService {
             nutrition,
             location_id
         });
-        const savedEatingSchedule = await this.eatingScheduleRepository.save(eatingSchedule);
-        const uploadMedia: Media[] = await this.mediaService.uploadMedia(files, userId);
-        for (const media of uploadMedia) {
-            const mealMedia = this.mealMediaRepository.create({
-                meal: savedEatingSchedule,
-                media,
-            });
-            await this.mediaRepository.save(mealMedia);
+        return await this.eatingScheduleRepository.save(eatingSchedule);
+    }
+    async associateMediaWithEatingSchedule(eatingScheduleId: number, mediaId: number) {
+        const mediaExists = await this.mediaRepository.findOne({
+            where: {id: mediaId},
+        });
+        if (!mediaExists) {
+            throw new NotFoundException('Media not found');
         }
-        return savedEatingSchedule;
+        await this.mediaRepository.query(
+            'INSERT INTO meal_media (meal_id, media_id) VALUES ($1, $2)',
+            [eatingScheduleId, mediaId]
+        );
+        
     }
 
 }
