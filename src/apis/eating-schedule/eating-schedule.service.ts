@@ -86,9 +86,10 @@ export class EatingScheduleService {
           if (!grouped[day][meal]) {
             grouped[day][meal] = [];
           }
-    
+          const { media_url, ...restOfSchedule } = schedule;
+
           grouped[day][meal].push({
-            ...schedule,
+            ...restOfSchedule,
             menu: schedule.menu,
             nutrition: schedule.nutrition,
             media: schedule.media_url ? [schedule.media_url] : [],
@@ -97,4 +98,37 @@ export class EatingScheduleService {
     
         return grouped;
     }
+
+    async deleteEatingSchedule(eatingScheduleId: number): Promise<void> {
+        const sql = `
+            SELECT 
+                es.id as eating_schedule_id,
+                mm.media_id,
+                m.url as media_url
+            FROM 
+                eating_schedules es
+            LEFT JOIN 
+                meal_media mm ON mm.meal_id = es.id
+            LEFT JOIN 
+                media m ON m.id = mm.media_id
+            WHERE 
+                es.id = $1
+        `;
+    
+        const eatingScheduleRecords = await this.eatingScheduleRepository.query(sql, [eatingScheduleId]);
+    
+        if (eatingScheduleRecords.length === 0) {
+            throw new NotFoundException('Eating schedule not found');
+        }
+    
+        for (const record of eatingScheduleRecords) {
+            if (record.media_id) {
+                await this.mediaService.deleteMedia(record.media_id);
+            }
+        }
+    
+        // Finally, delete the eating schedule
+        await this.eatingScheduleRepository.delete(eatingScheduleId);
+    }
+    
 }

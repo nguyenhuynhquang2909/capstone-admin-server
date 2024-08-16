@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Logger, Param, Post, Req, UnauthorizedException, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, Logger, Param, Post, Req, UnauthorizedException, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { EatingScheduleService } from './eating-schedule.service';
 import { JwtService } from 'src/common/jwt/jwt.service';
 import { Role } from 'src/common/decorators/role.decorator';
@@ -21,9 +21,8 @@ export class EatingScheduleController {
     async createEatingSchedule(
         @UploadedFiles() files: { files?: Express.Multer.File[] },
         @Body() createEatingScheduleDto: CreateEatingScheduleDto,
-        @Req() req: Request
+        @Headers('authorization') authHeader: string
     ) {
-        const authHeader = req.headers['authorization'];
         if (!authHeader) {
             throw new UnauthorizedException('Authorization header is missing');
         }
@@ -60,5 +59,22 @@ export class EatingScheduleController {
 
         const weeklySchedules = await this.eatingScheduleService.getEatingSchedulesForWeek(classId);
         return weeklySchedules;
+    }
+
+    @Delete(':id')
+    @Role('schoolAdmin')
+    async deleteEatingSchedule(
+        @Param('id') id: number,
+        @Headers('authorization') authHeader: string
+    ) {
+        if (!authHeader) {
+            throw new UnauthorizedException('Authorization header is missing');
+        }
+        const token = authHeader.replace('Bearer ', '');
+        const decodedToken = this.jwtService.verifyToken(token);
+        const {userId} = decodedToken;
+
+        await this.eatingScheduleService.deleteEatingSchedule(id);
+        return {message: 'Eating schedule deleted successfully'};
     }
 }
