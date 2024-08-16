@@ -49,4 +49,52 @@ export class EatingScheduleService {
         
     }
 
+    async getEatingSchedulesForWeek(classId: number): Promise<any> {
+        const sql = `
+            SELECT 
+                es.*, 
+                mm.media_id, 
+                m.url as media_url
+            FROM 
+                eating_schedules es
+            LEFT JOIN 
+                meal_media mm ON mm.meal_id = es.id
+            LEFT JOIN 
+                media m ON m.id = mm.media_id
+            WHERE 
+                es.class_id = $1
+            ORDER BY 
+                es.start_time ASC
+        `;
+
+        const schedules = await this.eatingScheduleRepository.query(sql, [classId]);
+
+        return this.groupSchedulesByDayAndMeal(schedules);
+    }
+
+    private groupSchedulesByDayAndMeal(schedules: any[]) {
+        const grouped = {};
+    
+        schedules.forEach(schedule => {
+          const day = new Date(schedule.start_time).toISOString().slice(0, 10); // Get date part only
+          const meal = schedule.meal; // Breakfast, Lunch, Afternoon
+    
+          if (!grouped[day]) {
+            grouped[day] = {};
+          }
+    
+          if (!grouped[day][meal]) {
+            grouped[day][meal] = [];
+          }
+    
+          grouped[day][meal].push({
+            ...schedule,
+            menu: schedule.menu,
+            nutrition: schedule.nutrition,
+            media: schedule.media_url ? [schedule.media_url] : [],
+          });
+        });
+    
+        return grouped;
+    }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Logger, Post, Req, UnauthorizedException, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Logger, Param, Post, Req, UnauthorizedException, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { EatingScheduleService } from './eating-schedule.service';
 import { JwtService } from 'src/common/jwt/jwt.service';
 import { Role } from 'src/common/decorators/role.decorator';
@@ -43,5 +43,22 @@ export class EatingScheduleController {
         }
 
         return { ...newEatingSchedule, media };
+    }
+
+    @Get('weekly/:classId')
+    @Role('schoolAdmin')
+    async getWeeklyEatingSchedule(
+        @Param('classId') classId: number,
+        @Headers('authorization') autHeader: string
+    ) {
+        if (!autHeader) {
+            throw new UnauthorizedException('Authorization header is missing');
+        }
+        const token = autHeader.replace('Bearer ', '');
+        const decodedToken = this.jwtService.verifyToken(token);
+        const {userId} = decodedToken;
+
+        const weeklySchedules = await this.eatingScheduleService.getEatingSchedulesForWeek(classId);
+        return weeklySchedules;
     }
 }
