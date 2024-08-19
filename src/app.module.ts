@@ -13,6 +13,7 @@ import { ClassModule } from './apis/class/class.module';
 import { FirebaseAdminService } from './common/services/firebase-admin.service';
 import { PushNotificationService } from './common/services/push-notification.service';
 import { DeviceToken } from './common/entities/device-token.entity';
+import { EatingScheduleModule } from './apis/eating-schedule/eating-schedule.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { DeviceToken } from './common/entities/device-token.entity';
     DailyScheduleModule,
     ClassModule,
     TypeOrmModule.forFeature([DeviceToken]),
+    EatingScheduleModule,
   ],
   providers: [FirebaseAdminService, PushNotificationService],
 })
