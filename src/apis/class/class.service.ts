@@ -9,6 +9,7 @@ import { AddStudentToClassDto } from './dto/add-student-to-class.dto';
 import { Student } from 'src/common/entities/student.entity';
 import { ClassStudent } from 'src/common/entities/class-student.entity';
 import { UpdateClassDto } from './dto/update-class.dto';
+import { StudentService } from '../student/student.service';
 
 @Injectable()
 export class ClassService {
@@ -23,6 +24,7 @@ export class ClassService {
     private readonly studentRepository: Repository<Student>,
     @InjectRepository(ClassStudent)
     private readonly classStudentRepository: Repository<ClassStudent>,
+    private readonly studentService: StudentService
   ) {}
 
   async getSchoolIdForUser(userId: number): Promise<number> {
@@ -178,5 +180,19 @@ export class ClassService {
       throw new NotFoundException('Student not found in this class');
     }
     await this.classStudentRepository.remove(classStudent);
+  }
+  async getClassStudentProfile(classId: number, studentId: number): Promise<any> {
+    const classEntity = await this.classRepository.findOne({
+      where: {id: classId},
+      relations: ['class_students']
+    });
+    if (!classEntity) {
+      throw new NotFoundException('Class not found');
+    }
+    const studentProfile = await this.studentService.getStudentProfile(studentId);
+    return {
+      className: classEntity.name,
+      studentProfile  
+    }
   }
 }

@@ -8,6 +8,7 @@ import { JwtService } from 'src/common/jwt/jwt.service';
 import { Teacher } from 'src/common/entities/teacher.entity';
 import { Student } from 'src/common/entities/student.entity';
 import { ClassStudent } from 'src/common/entities/class-student.entity';
+import { StudentService } from '../student/student.service';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { ClassStudent } from 'src/common/entities/class-student.entity';
       ClassStudent,
     ]),
   ],
-  providers: [ClassService, JwtService],
+  providers: [ClassService, JwtService, StudentService],
   controllers: [ClassController],
 })
 export class ClassModule {}
