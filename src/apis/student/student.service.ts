@@ -4,6 +4,7 @@ import { Student } from 'src/common/entities/student.entity';
 import { Repository } from 'typeorm';
 import { StudentProfileDto } from './dto/student-profile.dto';
 import { SchoolAdmin } from 'src/common/entities/school-admin.entity';
+import { Gender } from 'src/common/enums/gender.enum';
 
 @Injectable()
 export class StudentService {
@@ -47,7 +48,8 @@ export class StudentService {
         const studentProfile: StudentProfileDto = {
             studentName: student.name,
             schoolName: student.school.name,
-            gender: student.gender,
+            gender: student.gender as Gender,
+            dateOfBirth: student.date_of_birth,
             parentName: student.parent.name,
             parentPhoneNumber: student.parent.phone,
             classes: student.class_students.map((classStudent) => ({
