@@ -1,10 +1,11 @@
-import { Controller, Get, UnauthorizedException, Headers, Post, UploadedFiles, Body } from '@nestjs/common';
+import { Controller, Get, UnauthorizedException, Headers, Post, UploadedFiles, Body, UseInterceptors } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { JwtService } from 'src/common/jwt/jwt.service';
 import { Role } from 'src/common/decorators/role.decorator';
 import { auth } from 'firebase-admin';
 import { EnrollStudentDto } from './dto/enroll-student.dto';
 import { MediaService } from '../media/media.service';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('students')
 export class StudentController {
@@ -53,6 +54,9 @@ export class StudentController {
 
     @Post('enroll')
     @Role('schoolAdmin')
+    @UseInterceptors(FileFieldsInterceptor([
+        {name: 'files', maxCount: 10}
+    ]))
     async enrollNewStudent(
         @Headers('authorization') authHeader: string,
         @UploadedFiles() files: {files?: Express.Multer.File[]},
