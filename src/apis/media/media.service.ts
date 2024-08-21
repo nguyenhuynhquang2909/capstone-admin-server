@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 
 // Services
 import { s3 } from '../../configs/aws.config';
@@ -10,6 +10,9 @@ import { v4 as uuidv4 } from 'uuid';
 // Entities
 import { SchoolAdmin } from '../../common/entities/school-admin.entity';
 import { Media } from '../../common/entities/media.entity';
+import { PostMedia } from '../../common/entities/post-media.entity';
+import { StudentMedia } from '../../common/entities/student-media.entity';
+import { MealMedia } from '../../common/entities/meal-media.entity';
 
 @Injectable()
 export class MediaService {
@@ -18,6 +21,12 @@ export class MediaService {
     private readonly mediaRepository: Repository<Media>,
     @InjectRepository(SchoolAdmin)
     private readonly schoolAdminRepository: Repository<SchoolAdmin>,
+    @InjectRepository(PostMedia)
+    private readonly postMediaRepository: Repository<PostMedia>,
+    @InjectRepository(StudentMedia)
+    private readonly studentMediaRepository: Repository<StudentMedia>,
+    @InjectRepository(MealMedia)
+    private readonly mealMediaRepository: Repository<MealMedia>,
   ) {}
 
   private async getSchoolIdForUser(userId: number): Promise<number> {
@@ -89,5 +98,49 @@ export class MediaService {
   private getS3KeyFromUrl(url: string): string {
     const urlParts = url.split('/');
     return urlParts.slice(3).join('/');
+  }
+
+  async getFilteredMediaByUser(
+    userId: number,
+  ): Promise<{ post: Media[]; student: Media[]; meal: Media[] }> {
+    const schoolId = await this.getSchoolIdForUser(userId);
+
+    // Fetch all media for the school
+    const allMedia = await this.mediaRepository.find({
+      where: { school_id: schoolId },
+    });
+
+    // Initialize results
+    const result = {
+      post: [] as Media[],
+      student: [] as Media[],
+      meal: [] as Media[],
+    };
+
+    // Fetch media related to posts
+    const postMediaRecords = await this.postMediaRepository.find({
+      where: { media_id: In(allMedia.map((media) => media.id)) },
+    });
+    result.post = allMedia.filter((media) =>
+      postMediaRecords.some((record) => record.media_id === media.id),
+    );
+
+    // Fetch media related to students
+    const studentMediaRecords = await this.studentMediaRepository.find({
+      where: { media_id: In(allMedia.map((media) => media.id)) },
+    });
+    result.student = allMedia.filter((media) =>
+      studentMediaRecords.some((record) => record.media_id === media.id),
+    );
+
+    // Fetch media related to meals
+    const mealMediaRecords = await this.mealMediaRepository.find({
+      where: { media_id: In(allMedia.map((media) => media.id)) },
+    });
+    result.meal = allMedia.filter((media) =>
+      mealMediaRecords.some((record) => record.media_id === media.id),
+    );
+
+    return result;
   }
 }

@@ -8,7 +8,7 @@ import {
 import { EatingSchedule } from './eating-schedule.entity';
 import { Media } from './media.entity';
 
-@Entity({ name: 'post_media' })
+@Entity({ name: 'meal_media' })
 export class MealMedia {
   @PrimaryColumn()
   meal_id: number;

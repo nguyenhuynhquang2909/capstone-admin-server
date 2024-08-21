@@ -64,4 +64,23 @@ export class MediaController {
     const media = await this.mediaService.getMediaByUser(userId);
     return media;
   }
+
+  @Get('filtered')
+  @Role('schoolAdmin')
+  async getFilteredMediaByUser(@Headers('authorization') authHeader: string) {
+    if (!authHeader) {
+      throw new UnauthorizedException('Authorization header is missing');
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const decodedToken = this.jwtService.verifyToken(token);
+    const { userId } = decodedToken;
+
+    if (!userId) {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    const media = await this.mediaService.getFilteredMediaByUser(userId);
+    return media;
+  }
 }
