@@ -7,6 +7,7 @@ export class StudentProfileDto {
     parentName: string;
     dateOfBirth: string;
     parentPhoneNumber: string;
+    avatarUrl: string;
     classes: {
         className: string
     }[];

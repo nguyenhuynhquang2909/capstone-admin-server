@@ -9,6 +9,8 @@ import { Teacher } from 'src/common/entities/teacher.entity';
 import { Student } from 'src/common/entities/student.entity';
 import { ClassStudent } from 'src/common/entities/class-student.entity';
 import { StudentService } from '../student/student.service';
+import { User } from 'src/common/entities/user.entity';
+import { Media } from 'src/common/entities/media.entity';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { StudentService } from '../student/student.service';
       Teacher,
       Student,
       ClassStudent,
+      User,
+      Media
     ]),
   ],
   providers: [ClassService, JwtService, StudentService],

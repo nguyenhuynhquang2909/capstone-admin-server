@@ -15,6 +15,7 @@ import { PushNotificationService } from './common/services/push-notification.ser
 import { DeviceToken } from './common/entities/device-token.entity';
 import { EatingScheduleModule } from './apis/eating-schedule/eating-schedule.module';
 import { StudentModule } from './apis/student/student.module';
+import { UserModule } from './apis/user/user.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { StudentModule } from './apis/student/student.module';
     TypeOrmModule.forFeature([DeviceToken]),
     EatingScheduleModule,
     StudentModule,
+    UserModule,
   ],
   providers: [FirebaseAdminService, PushNotificationService],
 })
