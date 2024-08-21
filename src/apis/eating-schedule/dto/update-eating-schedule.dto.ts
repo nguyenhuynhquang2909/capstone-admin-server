@@ -1,33 +1,41 @@
-import { IsArray, IsDate, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import {
+  IsArray,
+  IsDate,
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 export class UpdateEatingScheduleDto {
-    @IsNumber()
-    @Type(() => Number)
-    @IsOptional()
-    class_id: number;
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  class_id: number;
 
-    @IsDateString()
-    @IsOptional()
-    start_time: Date;
+  @IsDateString()
+  @IsOptional()
+  start_time: Date;
 
-    @IsDateString()
-    @IsOptional()
-    end_time: Date;
+  @IsDateString()
+  @IsOptional()
+  end_time: Date;
 
-    @IsString()
-    @IsOptional()
-    meal: string;
-    
-    @IsArray()
-    @IsOptional()
-    menu: string[];
+  @IsString()
+  @IsOptional()
+  meal: string;
 
-    @IsArray()
-    @IsOptional()
-    nutrition: string[];
+  @IsArray()
+  @IsOptional()
+  menu: string[];
 
-    @IsNumber()
-    @IsOptional()
-    @Type(() => Number)
-    location_id: number;
+  @IsArray()
+  @IsOptional()
+  nutrition: string[];
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  location_id: number;
 }

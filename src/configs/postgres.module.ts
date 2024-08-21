@@ -18,7 +18,7 @@ import { ConfigModule } from '@nestjs/config';
       synchronize: false,
       ssl: {
         rejectUnauthorized: false,
-      }
+      },
     }),
   ],
 })
