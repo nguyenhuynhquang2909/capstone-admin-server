@@ -13,7 +13,14 @@ import { SchoolAdmin } from 'src/common/entities/school-admin.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([EatingSchedule, MealMedia, Media, SchoolAdmin, StudentMedia, PostMedia]),
+    TypeOrmModule.forFeature([
+      EatingSchedule,
+      MealMedia,
+      Media,
+      SchoolAdmin,
+      StudentMedia,
+      PostMedia,
+    ]),
   ],
   controllers: [EatingScheduleController],
   providers: [EatingScheduleService, MediaService, JwtService],

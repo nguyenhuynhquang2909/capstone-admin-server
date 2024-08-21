@@ -40,7 +40,7 @@ import { RoleConfigService } from 'src/common/services/role-config.service';
       ClassStudent,
       DeviceToken,
       StudentMedia,
-      MealMedia
+      MealMedia,
     ]),
   ],
   controllers: [PostController],
