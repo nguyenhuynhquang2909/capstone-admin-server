@@ -78,6 +78,14 @@ export class MediaService {
     await s3.send(deleteCommand);
     await this.mediaRepository.delete(media.id);
   }
+
+  async getMediaByUser(userId: number): Promise<Media[]> {
+    const schoolId = await this.getSchoolIdForUser(userId);
+    return this.mediaRepository.find({
+      where: { school_id: schoolId },
+    });
+  }
+
   private getS3KeyFromUrl(url: string): string {
     const urlParts = url.split('/');
     return urlParts.slice(3).join('/');
