@@ -1,4 +1,4 @@
-import { Controller, Get, UnauthorizedException, Headers, Post, UploadedFiles, Body, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, UnauthorizedException, Headers, Post, UploadedFiles, Body, UseInterceptors, Put, Param } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { JwtService } from 'src/common/jwt/jwt.service';
 import { Role } from 'src/common/decorators/role.decorator';
@@ -6,6 +6,7 @@ import { auth } from 'firebase-admin';
 import { EnrollStudentDto } from './dto/enroll-student.dto';
 import { MediaService } from '../media/media.service';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { UpdateStudentDto } from './dto/update-student.dto';
 
 @Controller('students')
 export class StudentController {
@@ -84,4 +85,29 @@ export class StudentController {
           return {...newStudent, media}
      }
 
+     @Put(':studentId')
+     @UseInterceptors(FileFieldsInterceptor([
+        {name: 'avatar', maxCount: 1}
+     ]))
+     @Role('schoolAdmin')
+     async updateStudent(
+        @Param('studentId') studentId: number,
+        @UploadedFiles() files: {avatar?: Express.Multer.File[]},
+        @Body() updateStudentDto: UpdateStudentDto,
+        @Headers('authorization') authHeader: string
+     ) {
+        if (!authHeader) {
+            throw new UnauthorizedException('Authorization header is missing');
+          }
+      
+          const token = authHeader.replace('Bearer ', '');
+          const decodedToken = this.jwtService.verifyToken(token);
+      
+          const { userId } = decodedToken;
+          if (!userId) {
+            throw new UnauthorizedException('Invalid token');
+          }
+          console.log(`Received studentId: ${studentId}`);
+          return await this.studentService.updateStudent(studentId, updateStudentDto, files.avatar || [], userId);
+     }
 }

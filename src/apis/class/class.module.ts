@@ -11,6 +11,7 @@ import { ClassStudent } from 'src/common/entities/class-student.entity';
 import { StudentService } from '../student/student.service';
 import { User } from 'src/common/entities/user.entity';
 import { Media } from 'src/common/entities/media.entity';
+import { StudentModule } from '../student/student.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { Media } from 'src/common/entities/media.entity';
       User,
       Media
     ]),
+    StudentModule
   ],
   providers: [ClassService, JwtService, StudentService],
   controllers: [ClassController],

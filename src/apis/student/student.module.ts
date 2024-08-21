@@ -25,6 +25,7 @@ import { UserModule } from '../user/user.module';
     UserModule
   ],
   controllers: [StudentController],
-  providers: [StudentService, JwtService, MediaService]
+  providers: [StudentService, JwtService, MediaService],
+  exports: [StudentService, MediaService]
 })
 export class StudentModule {}

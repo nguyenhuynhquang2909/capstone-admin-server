@@ -8,6 +8,8 @@ import { Gender } from 'src/common/enums/gender.enum';
 import { EnrollStudentDto } from './dto/enroll-student.dto';
 import { User } from 'src/common/entities/user.entity';
 import { Media } from 'src/common/entities/media.entity';
+import { UpdateStudentDto } from './dto/update-student.dto';
+import { MediaService } from '../media/media.service';
 
 @Injectable()
 export class StudentService {
@@ -19,7 +21,9 @@ export class StudentService {
         @InjectRepository(User) 
         private userRepository: Repository<User>,
         @InjectRepository(Media)
-        private mediaRepository: Repository<Media>
+        private mediaRepository: Repository<Media>,
+        private readonly mediaService: MediaService
+
     ) {}
     async getSchoolIdForUser(userId: number): Promise<number> {
         const schoolAdmin = await this.schoolAdminRepository.findOne({
@@ -101,6 +105,124 @@ export class StudentService {
         return await this.studentRepository.save(newStudent);
         
     }
+        async updateStudent(
+            studentId: number,
+            updateStudentDto: UpdateStudentDto,
+            files: Express.Multer.File[], 
+            userId: number
+        ): Promise<Student> {
+            const studentResult = await this.studentRepository.query(
+                `
+                SELECT s.*, u.name AS parent_name, u.phone AS parent_phone, sm.media_id, m.url AS media_url
+                FROM students s
+                JOIN users u ON s.parent_id = u.id
+                LEFT JOIN student_media sm ON s.id = sm.student_id
+                LEFT JOIN media m ON sm.media_id = m.id
+                WHERE s.id = $1
+                `,
+                [studentId]
+            );
+            if (studentResult.length === 0) {
+                throw new NotFoundException("Student not found");
+            }
+        
+            const student = studentResult[0];
+        
+            if (updateStudentDto.studentName) {
+                student.name = updateStudentDto.studentName;
+            }
+            if (updateStudentDto.parentName || updateStudentDto.parentPhone) {
+                const parentResult = await this.userRepository.query(
+                    `
+                    SELECT *
+                    FROM users
+                    WHERE id = $1
+                    `,
+                    [student.parent_id]
+                );
+                if (parentResult.length === 0) {
+                    throw new NotFoundException("Parent not found");
+                }
+                const parent = parentResult[0];
+                if (!parent) {
+                    throw new NotFoundException("Parent not found");
+                }
+                if (updateStudentDto.parentName) {
+                    parent.name = updateStudentDto.parentName;
+                } else if (updateStudentDto.parentPhone) {
+                    parent.phone = updateStudentDto.parentPhone;
+                }
+                await this.userRepository.query(
+                    `
+                    UPDATE users
+                    SET name = $1, phone = $2
+                    WHERE id = $3
+                    `,
+                    [parent.name, parent.phone, parent.id]
+                )
+            }
+            
+            if (files && files.length > 0) {
+                await this.removeOldAvatar(student.id);
+                const media = await this.mediaService.uploadMedia(files, userId);
+                for (const mediaItem of media) {
+                    if (!studentId) {
+                        console.error('Student ID is null or undefined');
+                        throw new Error('Student ID is null or undefined');
+                    }
+                    await this.associateMediaWithStudent(studentId, mediaItem.id)
+                }
+            }
+
+            await this.studentRepository.query(
+                `
+                UPDATE students
+                SET name = $1
+                WHERE id = $2
+                `,
+                [student.name, student.id]
+            );
+            return student;
+        }
+        async removeOldAvatar(studentId: number): Promise<void> {
+            const studentResult = await this.studentRepository.query(
+                `
+                SELECT s.id AS student_id, sm.media_id, m.url AS media_url
+                FROM students s
+                LEFT JOIN student_media sm ON s.id = sm.student_id
+                LEFT JOIN media m ON sm.media_id = m.id
+                WHERE s.id = $1
+                `,
+                [studentId]
+            );
+        
+            if (studentResult.length === 0) {
+                throw new NotFoundException("Student not found");
+            }
+        
+            const student = studentResult[0];
+        
+            // Check if there's media associated with the student
+            if (!student.media_id) {
+                return;  // No media to remove
+            }
+        
+            // Delete the media from S3 and the database
+            await this.mediaService.deleteMedia(student.media_id);
+        
+            // Remove the association from the student_media table
+            await this.studentRepository.query(
+                'DELETE FROM student_media WHERE student_id = $1 AND media_id = $2',
+                [studentId, student.media_id]
+            );
+        
+            // Remove the media record from the media table
+            await this.mediaRepository.query(
+                'DELETE FROM media WHERE id = $1',
+                [student.media_id]
+            );
+        }
+        
     async associateMediaWithStudent(studentId: number, mediaId: number) {
         const mediaExists = await this.mediaRepository.findOne({
             where: {id: mediaId}
@@ -113,4 +235,5 @@ export class StudentService {
             [studentId, mediaId]
         );
     }
+
 }
