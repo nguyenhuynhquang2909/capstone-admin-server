@@ -50,7 +50,10 @@ export class RequestService {
   }
 
   // Update the status of a request
-  async updateRequestStatus(requestId: number, newStatus: string): Promise<Request> {
+  async updateRequestStatus(
+    requestId: number,
+    newStatus: string,
+  ): Promise<Request> {
     // Fetch the request to ensure it exists
     const request = await this.requestRepository.findOne({
       where: { id: requestId },

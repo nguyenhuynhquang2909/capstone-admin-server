@@ -16,6 +16,12 @@ import { JwtService } from '../../common/jwt/jwt.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Request, SchoolAdmin, Class])],
   controllers: [RequestController],
-  providers: [RequestService, JwtGuard, RoleGuard, RoleConfigService, JwtService],
+  providers: [
+    RequestService,
+    JwtGuard,
+    RoleGuard,
+    RoleConfigService,
+    JwtService,
+  ],
 })
 export class RequestModule {}

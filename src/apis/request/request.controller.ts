@@ -55,7 +55,7 @@ export class RequestController {
   async updateRequestStatus(
     @Param('id', ParseIntPipe) requestId: number,
     @Param('status') status: string,
-    @Headers('authorization') authHeader: string
+    @Headers('authorization') authHeader: string,
   ) {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
@@ -82,7 +82,10 @@ export class RequestController {
     }
 
     // Update the request status
-    const updatedRequest = await this.requestService.updateRequestStatus(requestId, status);
+    const updatedRequest = await this.requestService.updateRequestStatus(
+      requestId,
+      status,
+    );
 
     return updatedRequest;
   }
