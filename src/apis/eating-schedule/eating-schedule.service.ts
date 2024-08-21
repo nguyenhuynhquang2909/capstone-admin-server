@@ -14,14 +14,11 @@ export class EatingScheduleService {
     @InjectRepository(EatingSchedule)
     private readonly eatingScheduleRepository: Repository<EatingSchedule>,
     @InjectRepository(MealMedia)
-    private readonly mealMediaRepository: Repository<MealMedia>,
-    @InjectRepository(Media)
     private readonly mediaRepository: Repository<Media>,
     private readonly mediaService: MediaService,
   ) {}
   async createEatingSchedule(
     createEatingScheduleDto: CreateEatingScheduleDto,
-    userId: number,
   ): Promise<EatingSchedule> {
     const {
       class_id,

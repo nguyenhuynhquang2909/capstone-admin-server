@@ -8,7 +8,6 @@ import {
   Param,
   Post,
   Put,
-  Req,
   UnauthorizedException,
   UploadedFiles,
   UseInterceptors,
@@ -19,7 +18,6 @@ import { Role } from 'src/common/decorators/role.decorator';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateEatingScheduleDto } from './dto/create-eating-schedule.dto';
 import { MediaService } from '../media/media.service';
-import { Request } from 'express';
 import { UpdateEatingScheduleDto } from './dto/update-eating-schedule.dto';
 
 @Controller('eating-schedule')
@@ -50,7 +48,7 @@ export class EatingScheduleController {
     const newEatingSchedule =
       await this.eatingScheduleService.createEatingSchedule(
         createEatingScheduleDto,
-        userId,
+        // userId,
       );
     let media = [];
     if (files && files.files && files.files.length > 0) {
@@ -75,9 +73,6 @@ export class EatingScheduleController {
     if (!autHeader) {
       throw new UnauthorizedException('Authorization header is missing');
     }
-    const token = autHeader.replace('Bearer ', '');
-    const decodedToken = this.jwtService.verifyToken(token);
-    const { userId } = decodedToken;
 
     const weeklySchedules =
       await this.eatingScheduleService.getEatingSchedulesForWeek(classId);
@@ -123,9 +118,6 @@ export class EatingScheduleController {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
     }
-    const token = authHeader.replace('Bearer ', '');
-    const decodedToken = this.jwtService.verifyToken(token);
-    const { userId } = decodedToken;
 
     await this.eatingScheduleService.deleteEatingSchedule(id);
     return { message: 'Eating schedule deleted successfully' };
