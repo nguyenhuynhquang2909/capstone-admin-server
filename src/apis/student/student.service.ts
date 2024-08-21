@@ -184,6 +184,36 @@ export class StudentService {
             );
             return student;
         }
+
+        async deleteStudent(studentId: number): Promise<void> {
+            const studentResult = await this.studentRepository.query(
+                `
+                SELECT s.*, sm.media_id, m.url AS media_url
+                FROM students s
+                LEFT JOIN student_media sm ON s.id = sm.student_id
+                LEFT JOIN media m ON sm.media_id = m.id
+                WHERE s.id = $1
+                `,
+                [studentId]
+            );
+            if (studentResult.length == 0)  {
+                throw new NotFoundException("Student not found");
+            }
+            const student = studentResult[0];
+            if (student.media_id) {
+                await this.mediaService.deleteMedia(student.media_id);
+                await this.studentRepository.query(
+                    'DELETE FROM student_media WHERE student_id = $1 AND media_id = $2',
+                    [studentId, student.media_id]
+                )
+            }
+            await this.studentRepository.query(
+                'DELETE FROM students WHERE id = $1',
+                [studentId]
+            )
+
+           
+        }
         async removeOldAvatar(studentId: number): Promise<void> {
             const studentResult = await this.studentRepository.query(
                 `

@@ -1,4 +1,4 @@
-import { Controller, Get, UnauthorizedException, Headers, Post, UploadedFiles, Body, UseInterceptors, Put, Param } from '@nestjs/common';
+import { Controller, Get, UnauthorizedException, Headers, Post, UploadedFiles, Body, UseInterceptors, Put, Param, Delete } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { JwtService } from 'src/common/jwt/jwt.service';
 import { Role } from 'src/common/decorators/role.decorator';
@@ -107,7 +107,27 @@ export class StudentController {
           if (!userId) {
             throw new UnauthorizedException('Invalid token');
           }
-          console.log(`Received studentId: ${studentId}`);
           return await this.studentService.updateStudent(studentId, updateStudentDto, files.avatar || [], userId);
      }
-}
+     
+     @Delete(':studentId')
+     @Role('schoolAdmin')
+     async deleteStudent(
+        @Param('studentId') studentId: number,
+        @Headers('authorization') authHeader: string
+     ): Promise<{message: string}> {
+        if (!authHeader) {
+            throw new UnauthorizedException('Authorization header is missing');
+          }
+      
+          const token = authHeader.replace('Bearer ', '');
+          const decodedToken = this.jwtService.verifyToken(token);
+      
+          const { userId } = decodedToken;
+          if (!userId) {
+            throw new UnauthorizedException('Invalid token');
+          }
+          await this.studentService.deleteStudent(studentId);
+          return {message: 'Student deleted successfully'};
+     }
+} 
