@@ -16,9 +16,6 @@ import { ConfigModule } from '@nestjs/config';
       database: process.env.POSTGRES_DB,
       entities: [__dirname + '/../**/*.entity{.ts,.js}'],
       synchronize: false,
-      ssl: {
-        rejectUnauthorized: false,
-      }
     }),
   ],
 })

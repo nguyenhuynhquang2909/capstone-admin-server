@@ -10,8 +10,10 @@ import { JwtService } from 'src/common/jwt/jwt.service';
 import { SchoolAdmin } from 'src/common/entities/school-admin.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([EatingSchedule, MealMedia, Media, SchoolAdmin])],
+  imports: [
+    TypeOrmModule.forFeature([EatingSchedule, MealMedia, Media, SchoolAdmin]),
+  ],
   controllers: [EatingScheduleController],
-  providers: [EatingScheduleService, MediaService, JwtService]
+  providers: [EatingScheduleService, MediaService, JwtService],
 })
 export class EatingScheduleModule {}
