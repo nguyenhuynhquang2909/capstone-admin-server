@@ -16,6 +16,8 @@ import { DeviceToken } from './common/entities/device-token.entity';
 import { EatingScheduleModule } from './apis/eating-schedule/eating-schedule.module';
 import { StudentModule } from './apis/student/student.module';
 import { UserModule } from './apis/user/user.module';
+import { RequestModule } from './apis/request/request.module';
+
 
 @Module({
   imports: [
@@ -31,6 +33,7 @@ import { UserModule } from './apis/user/user.module';
     EatingScheduleModule,
     StudentModule,
     UserModule,
+    RequestModule
   ],
   providers: [FirebaseAdminService, PushNotificationService],
 })
