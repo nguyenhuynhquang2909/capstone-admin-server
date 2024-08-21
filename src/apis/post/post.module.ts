@@ -15,7 +15,9 @@ import { ToggleLike } from 'src/common/entities/toggle-like.entity';
 import { PostClass } from 'src/common/entities/post-class.entity';
 import { PostHashtag } from 'src/common/entities/post-hashtag.entity';
 import { Comment } from 'src/common/entities/comment.entity';
-import { PostMedia } from 'src/common/entities/post-media.entity';
+import { PostMedia } from '../../common/entities/post-media.entity';
+import { StudentMedia } from '../../common/entities/student-media.entity';
+import { MealMedia } from '../../common/entities/meal-media.entity';
 import { ClassStudent } from 'src/common/entities/class-student.entity';
 import { DeviceToken } from 'src/common/entities/device-token.entity';
 
@@ -37,6 +39,8 @@ import { RoleConfigService } from 'src/common/services/role-config.service';
       PostMedia,
       ClassStudent,
       DeviceToken,
+      StudentMedia,
+      MealMedia,
     ]),
   ],
   controllers: [PostController],
