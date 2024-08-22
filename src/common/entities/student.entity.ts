@@ -13,6 +13,7 @@ import { User } from './user.entity';
 import { ClassStudent } from './class-student.entity';
 import { Request } from './request.entity';
 import { StudentMedia } from './student-media.entity';
+import { Gender } from '../enums/gender.enum';
 
 @Entity({ name: 'students' })
 export class Student {
@@ -28,7 +29,7 @@ export class Student {
   @Column({ nullable: false })
   parent_id: number;
 
-  @Column({ type: 'varchar', length: 10, nullable: false })
+  @Column({ type: 'enum', enum: Gender, nullable: false })
   gender: string;
 
   @Column({ type: 'text', nullable: false })
