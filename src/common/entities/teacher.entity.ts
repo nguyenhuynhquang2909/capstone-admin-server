@@ -11,6 +11,7 @@ import {
 import { School } from './school.entity';
 import { Class } from './class.entity';
 import { DailySchedule } from './daily-schedule.entity';
+import { TeacherMedia } from './teacher-media.entity';
 
 @Entity({ name: 'teachers' })
 export class Teacher {
@@ -41,4 +42,7 @@ export class Teacher {
 
   @OneToMany(() => DailySchedule, (dailySchedule) => dailySchedule.teacher)
   daily_schedules: DailySchedule[];
+
+  @OneToMany(() => TeacherMedia, (teacherMedia) => teacherMedia.teacher)
+  teacher_media: TeacherMedia[];
 }

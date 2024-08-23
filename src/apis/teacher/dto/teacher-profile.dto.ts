@@ -28,8 +28,13 @@ export class TeacherProfileDto {
     @IsString()
     school_name: string;
 
+    @IsString()
+    profilePictureUrl: string;
+
    @IsArray()
     @ValidateNested({each: true})
     @Type(() => ClassDto)
     classes: ClassDto[];
+
+    
 }

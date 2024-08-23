@@ -16,6 +16,8 @@ import { PostMedia } from '../../common/entities/post-media.entity';
 import { StudentMedia } from '../../common/entities/student-media.entity';
 import { MealMedia } from '../../common/entities/meal-media.entity';
 import { SchoolAdmin } from '../../common/entities/school-admin.entity';
+import { TeacherMedia } from 'src/common/entities/teacher-media.entity';
+import { TeacherModule } from '../teacher/teacher.module';
 
 @Module({
   imports: [
@@ -25,7 +27,8 @@ import { SchoolAdmin } from '../../common/entities/school-admin.entity';
       PostMedia,
       StudentMedia,
       MealMedia,
-    ]),
+      TeacherMedia
+    ])
   ],
   providers: [MediaService, JwtService, JwtGuard, RoleGuard, RoleConfigService],
   controllers: [MediaController],
