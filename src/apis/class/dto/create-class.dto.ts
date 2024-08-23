@@ -12,4 +12,8 @@ export class CreateClassDto {
   @IsNotEmpty()
   @IsString()
   classRoom: string;
+
+  @IsNotEmpty()
+  @IsString()
+  schoolYear: string;
 }
