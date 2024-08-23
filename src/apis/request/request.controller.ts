@@ -69,11 +69,6 @@ export class RequestController {
       throw new UnauthorizedException('Invalid token');
     }
 
-    // Validate the new status
-    if (status !== 'approved') {
-      throw new ForbiddenException('Invalid status value');
-    }
-
     // Check if user is associated with a school
     const schoolId = await this.requestService.getSchoolIdForUser(userId);
 
