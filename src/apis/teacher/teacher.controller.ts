@@ -1,4 +1,4 @@
-import { Controller, Get, UnauthorizedException, Headers, Param, Post, UseInterceptors, UploadedFiles, Body } from '@nestjs/common';
+import { Controller, Get, UnauthorizedException, Headers, Param, Post, UseInterceptors, UploadedFiles, Body, Delete } from '@nestjs/common';
 import { TeacherService } from './teacher.service';
 import { JwtService } from 'src/common/jwt/jwt.service';
 import { Role } from 'src/common/decorators/role.decorator';
@@ -84,6 +84,27 @@ export class TeacherController {
             }
         } 
         return newTeacher;
+     }
+
+     @Delete(':teacherId')
+     @Role('schoolAdmin')
+     async deleteTeacher(
+        @Param('teacherId') teacherId: number,
+        @Headers('authorization') authHeader: string
+     ): Promise<{message: string}>{
+        if (!authHeader) {
+            throw new UnauthorizedException('Authorization header is missing');
+        }
+
+        const token = authHeader.replace('Bearer ', '');
+        const decodedToken = this.jwtService.verifyToken(token);
+      
+        const { userId } = decodedToken;
+        if (!userId) {
+            throw new UnauthorizedException('Invalid token');
+        }
+        await this.teacherService.deleteTeacher(teacherId);
+        return {message: 'Teacher deleted successfully'}
      }
 
 

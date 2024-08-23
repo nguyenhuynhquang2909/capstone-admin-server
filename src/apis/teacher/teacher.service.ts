@@ -7,6 +7,7 @@ import { TeacherProfileDto } from './dto/teacher-profile.dto';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { create } from 'domain';
 import { Media } from 'src/common/entities/media.entity';
+import { MediaService } from '../media/media.service';
 
 @Injectable()
 export class TeacherService {
@@ -17,7 +18,8 @@ export class TeacherService {
         @InjectRepository(SchoolAdmin)
         private readonly schoolAdminRepository: Repository<SchoolAdmin>,
         @InjectRepository(Media)
-        private readonly mediaRepository: Repository<Media>
+        private readonly mediaRepository: Repository<Media>,
+        private readonly mediaService: MediaService
     ) {}
 
     async getSchoolIdForUser(userId: number): Promise<number> {
@@ -81,6 +83,23 @@ export class TeacherService {
         });
         return await this.teacherRepository.save(newTeacher);
     }
+
+    async deleteTeacher(teacherId: number): Promise<void> {
+        const teacher = await this.teacherRepository.findOne({
+            where: {id: teacherId},
+            relations: ['teacher_media']
+        });
+        if (!teacher) {
+            throw new NotFoundException('Teacher not found');
+        }
+        if (teacher.teacher_media && teacher.teacher_media.length > 0) {
+            for (const media of teacher.teacher_media) {
+                await this.mediaService.deleteMedia(media.id);
+            }
+        }
+        await this.teacherRepository.remove(teacher);
+    }
+
     async associateMediaWithTeacher(teacherId: number, mediaId: number) {
         const mediaExists = await this.mediaRepository.findOne({
             where: {id: mediaId}
@@ -93,5 +112,7 @@ export class TeacherService {
             [teacherId, mediaId]
         )
     }
+
+    
 
 }
