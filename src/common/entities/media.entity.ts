@@ -11,6 +11,7 @@ import { PostMedia } from './post-media.entity';
 import { StudentMedia } from './student-media.entity';
 import { MealMedia } from './meal-media.entity';
 import { School } from './school.entity';
+import { TeacherMedia } from './teacher-media.entity';
 
 @Entity({ name: 'media' })
 export class Media {
@@ -44,4 +45,7 @@ export class Media {
 
   @OneToMany(() => MealMedia, (mealMedia) => mealMedia.media)
   meal_media: MealMedia[];
+
+  @OneToMany(() => TeacherMedia, (teacherMedia) => teacherMedia.media)
+  teacher_media: TeacherMedia[];
 }
