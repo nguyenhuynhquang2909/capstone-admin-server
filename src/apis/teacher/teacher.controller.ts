@@ -1,10 +1,11 @@
-import { Controller, Get, UnauthorizedException, Headers, Param, Post, UseInterceptors, UploadedFiles, Body, Delete } from '@nestjs/common';
+import { Controller, Get, UnauthorizedException, Headers, Param, Post, UseInterceptors, UploadedFiles, Body, Delete, Put } from '@nestjs/common';
 import { TeacherService } from './teacher.service';
 import { JwtService } from 'src/common/jwt/jwt.service';
 import { Role } from 'src/common/decorators/role.decorator';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { MediaService } from '../media/media.service';
+import { UpdateTeacherDto } from './dto/update-teacher.dto';
 
 @Controller('teacher')
 export class TeacherController {
@@ -84,6 +85,32 @@ export class TeacherController {
             }
         } 
         return newTeacher;
+     }
+
+     @Put(':teacherId')
+     @Role('schoolAdim')
+     @UseInterceptors(FileFieldsInterceptor([
+        {name: 'profilePicture', maxCount: 1}
+     ]))
+     async updateTeacher(
+        @Param('teacherId') teacherId: number,
+        @UploadedFiles() files: {profilePicture?: Express.Multer.File[]},
+        @Body() updateTeacherDto: UpdateTeacherDto,
+        @Headers('authorization') authHeader: string
+     ) 
+     {
+        if (!authHeader) {
+            throw new UnauthorizedException('Authorization header is missing');
+        }
+
+        const token = authHeader.replace('Bearer ', '');
+        const decodedToken = this.jwtService.verifyToken(token);
+
+        const { userId } = decodedToken;
+        if (!userId) {
+            throw new UnauthorizedException('Invalid token');
+        }
+        return await this.teacherService.updateTeacher(teacherId, updateTeacherDto, files.profilePicture || [], userId);
      }
 
      @Delete(':teacherId')

@@ -8,6 +8,7 @@ import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { create } from 'domain';
 import { Media } from 'src/common/entities/media.entity';
 import { MediaService } from '../media/media.service';
+import { UpdateTeacherDto } from './dto/update-teacher.dto';
 
 @Injectable()
 export class TeacherService {
@@ -82,6 +83,62 @@ export class TeacherService {
 
         });
         return await this.teacherRepository.save(newTeacher);
+    }
+
+    async updateTeacher(teacherId: number,updateTeacherDto: UpdateTeacherDto, files: Express.Multer.File[], userId: number): Promise<Teacher> {
+        const teacherResult = await this.teacherRepository.query(
+            `
+            SELECT * FROM teachers WHERE id = $1
+            `,
+            [teacherId]
+        );
+        if (teacherResult.length === 0) {
+            throw new NotFoundException('Teacher not found');
+        }
+
+        const teacher = teacherResult[0];
+
+        if (updateTeacherDto.name) {
+            teacher.name = updateTeacherDto.name;
+            await this.teacherRepository.query(
+                `UPDATE teachers SET name = $1 WHERE id = $2`,
+                [teacher.name, teacherId]
+            );
+        }
+
+        if (updateTeacherDto.contact_number) {
+            teacher.contact_number = updateTeacherDto.contact_number;
+            await this.teacherRepository.query(
+                `UPDATE teachers SET contact_number = $1 WHERE id = $2`,
+                [teacher.contact_number, teacherId]
+            );
+        }
+
+        if (files && files.length > 0) {
+            const teacherMediaResult = await this.teacherRepository.query(
+                `
+                SELECT m.id AS media_id 
+                FROM teacher_media tm
+                JOIN media m ON tm.media_id = m.id
+                WHERE tm.teacher_id = $1
+                `,
+                [teacherId]
+            );
+
+            if (teacherMediaResult.length > 0) {
+                const oldMediaId = teacherMediaResult[0].media_id;
+                await this.mediaService.deleteMedia(oldMediaId);
+            }
+
+            const media = await this.mediaService.uploadMedia(files, userId);
+            for (const mediaItem of media) {
+                await this.teacherRepository.query(
+                    'INSERT INTO teacher_media (teacher_id, media_id) VALUES ($1, $2)',
+                    [teacherId, mediaItem.id]
+                );
+            }
+        }
+        return await this.teacherRepository.save(teacher);
     }
 
     async deleteTeacher(teacherId: number): Promise<void> {
