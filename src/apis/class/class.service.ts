@@ -24,7 +24,7 @@ export class ClassService {
     private readonly studentRepository: Repository<Student>,
     @InjectRepository(ClassStudent)
     private readonly classStudentRepository: Repository<ClassStudent>,
-    private readonly studentService: StudentService
+    private readonly studentService: StudentService,
   ) {}
 
   async getSchoolIdForUser(userId: number): Promise<number> {
@@ -39,7 +39,7 @@ export class ClassService {
 
   async getAllClasses(userId: number): Promise<any[]> {
     const school_id = await this.getSchoolIdForUser(userId);
-  
+
     const classes = await this.classRepository
       .createQueryBuilder('class')
       .leftJoinAndSelect('class.teacher', 'teacher')
@@ -47,23 +47,23 @@ export class ClassService {
       .select([
         'class.id',
         'class.name',
-        'class.class_room AS class_room',  
-        'class.school_year AS school_year', 
+        'class.class_room AS class_room',
+        'class.school_year AS school_year',
         'class.teacher_id',
         'teacher.name AS teacher_name',
       ])
       .getRawMany();
-  
+
     return classes.map((classEntity) => ({
-      id: classEntity.class_id, 
-      name: classEntity.class_name, 
+      id: classEntity.class_id,
+      name: classEntity.class_name,
       teacher_id: classEntity.teacher_id,
       teacher_name: classEntity.teacher_name,
       class_room: classEntity.class_room,
       school_year: classEntity.school_year,
     }));
   }
-  
+
   async getClassStudents(classId: number): Promise<any[]> {
     const classEntity = await this.classRepository.findOne({
       where: { id: classId },
@@ -96,7 +96,7 @@ export class ClassService {
       teacher_id: teacherId,
       school_id: teacher.school_id,
       class_room: classRoom,
-      school_year: schoolYear
+      school_year: schoolYear,
     });
 
     return await this.classRepository.save(newClass);
@@ -189,18 +189,22 @@ export class ClassService {
     }
     await this.classStudentRepository.remove(classStudent);
   }
-  async getClassStudentProfile(classId: number, studentId: number): Promise<any> {
+  async getClassStudentProfile(
+    classId: number,
+    studentId: number,
+  ): Promise<any> {
     const classEntity = await this.classRepository.findOne({
-      where: {id: classId},
-      relations: ['class_students']
+      where: { id: classId },
+      relations: ['class_students'],
     });
     if (!classEntity) {
       throw new NotFoundException('Class not found');
     }
-    const studentProfile = await this.studentService.getStudentProfile(studentId);
+    const studentProfile =
+      await this.studentService.getStudentProfile(studentId);
     return {
       className: classEntity.name,
-      studentProfile  
-    }
+      studentProfile,
+    };
   }
 }

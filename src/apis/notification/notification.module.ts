@@ -18,6 +18,14 @@ import { Notification } from '../../common/entities/notification.entity';
     TypeOrmModule.forFeature([SchoolAdmin, Student, DeviceToken, Notification]),
   ],
   controllers: [NotificationController],
-  providers: [NotificationService, PushNotificationService, FirebaseAdminService, RoleConfigService, JwtGuard, RoleGuard, JwtService],
+  providers: [
+    NotificationService,
+    PushNotificationService,
+    FirebaseAdminService,
+    RoleConfigService,
+    JwtGuard,
+    RoleGuard,
+    JwtService,
+  ],
 })
 export class NotificationModule {}

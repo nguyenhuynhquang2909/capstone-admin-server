@@ -19,7 +19,6 @@ import { UserModule } from './apis/user/user.module';
 import { RequestModule } from './apis/request/request.module';
 import { NotificationModule } from './apis/notification/notification.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -35,7 +34,7 @@ import { NotificationModule } from './apis/notification/notification.module';
     StudentModule,
     UserModule,
     RequestModule,
-    NotificationModule
+    NotificationModule,
   ],
   providers: [FirebaseAdminService, PushNotificationService],
 })

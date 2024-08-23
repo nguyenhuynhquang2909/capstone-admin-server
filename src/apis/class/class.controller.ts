@@ -47,8 +47,10 @@ export class ClassController {
 
   @Get(':classId/students')
   @Role('schoolAdmin')
-  async getClassStudents(@Param('classId') classId: number, @Headers('authorization') authHeader: string)
-  {
+  async getClassStudents(
+    @Param('classId') classId: number,
+    @Headers('authorization') authHeader: string,
+  ) {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
     }
@@ -76,7 +78,7 @@ export class ClassController {
   async getClassStudentProfile(
     @Param('classId') classId: number,
     @Param('studentId') studentId: number,
-    @Headers('authorization') authHeader: string
+    @Headers('authorization') authHeader: string,
   ) {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
@@ -89,7 +91,10 @@ export class ClassController {
     if (!userId) {
       throw new UnauthorizedException('Invalid token');
     }
-    const classStudentProfile = await this.classService.getClassStudentProfile(classId, studentId);
+    const classStudentProfile = await this.classService.getClassStudentProfile(
+      classId,
+      studentId,
+    );
     if (!classStudentProfile) {
       throw new NotFoundException('Class or student not found');
     }
@@ -98,7 +103,10 @@ export class ClassController {
 
   @Post('create')
   @Role('schoolAdmin')
-  async createClass(@Body() createClassDto: CreateClassDto, @Headers('authorization') authHeader: string) {
+  async createClass(
+    @Body() createClassDto: CreateClassDto,
+    @Headers('authorization') authHeader: string,
+  ) {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
     }
@@ -138,7 +146,7 @@ export class ClassController {
   async addStudentToClass(
     @Param('classId') classId: number,
     @Body() addStudentToClassDto: AddStudentToClassDto,
-    @Headers('authorization') authHeader: string
+    @Headers('authorization') authHeader: string,
   ) {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
@@ -160,7 +168,7 @@ export class ClassController {
   @Role('schoolAdmin')
   async removeClass(
     @Param('id') classId: number,
-    @Headers('authorization') authHeader: string
+    @Headers('authorization') authHeader: string,
   ): Promise<{ message: string }> {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
@@ -183,7 +191,7 @@ export class ClassController {
   async removeStudentFromClass(
     @Param('classId') classId: number,
     @Param('studentId') studentId: number,
-    @Headers('authorization') authHeader: string
+    @Headers('authorization') authHeader: string,
   ): Promise<{ message: string }> {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');

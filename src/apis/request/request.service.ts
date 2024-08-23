@@ -70,7 +70,9 @@ export class RequestService {
 
     // Validate the new status
     if (newStatus !== 'approved' && newStatus !== 'rejected') {
-      throw new Error('Invalid status value. It must be either "approved" or "rejected".');
+      throw new Error(
+        'Invalid status value. It must be either "approved" or "rejected".',
+      );
     }
 
     // Update the request status

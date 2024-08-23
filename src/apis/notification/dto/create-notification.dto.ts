@@ -6,7 +6,7 @@ export class CreateNotificationDto {
 
   @IsString()
   message: string;
-  
+
   @IsOptional()
   additionalData?: string;
 }

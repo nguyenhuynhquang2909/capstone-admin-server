@@ -24,7 +24,9 @@ export class Notification {
   @Column({ nullable: false })
   school_id: number;
 
-  @ManyToOne(() => School, (school) => school.notifications, { onDelete: 'CASCADE' })
+  @ManyToOne(() => School, (school) => school.notifications, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'school_id' })
   school: School;
 

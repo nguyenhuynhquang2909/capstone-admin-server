@@ -19,8 +19,13 @@ export class NotificationService {
     private readonly pushNotificationService: PushNotificationService,
   ) {}
 
-  async sendNotificationToSchoolParents(adminId: number, createNotificationDto: CreateNotificationDto): Promise<void> {
-    const schoolAdmin = await this.schoolAdminRepository.findOne({ where: { user_id: adminId } });
+  async sendNotificationToSchoolParents(
+    adminId: number,
+    createNotificationDto: CreateNotificationDto,
+  ): Promise<void> {
+    const schoolAdmin = await this.schoolAdminRepository.findOne({
+      where: { user_id: adminId },
+    });
 
     if (!schoolAdmin) {
       throw new NotFoundException('Admin is not associated with any school');
@@ -34,25 +39,25 @@ export class NotificationService {
       .where('student.school_id = :schoolId', { schoolId })
       .getRawMany();
 
-    const parentIds = parents.map(parent => parent.parent_id);
+    const parentIds = parents.map((parent) => parent.parent_id);
 
     if (parentIds.length > 0) {
       await this.pushNotificationService.sendNotification(parentIds, {
         title: createNotificationDto.title,
         body: createNotificationDto.message,
-        navigationId: "notification",
+        navigationId: 'notification',
         additionalData: createNotificationDto.additionalData,
       });
 
       // Save notification to the database
-      const notifications = parentIds.map(parentId => {
+      const notifications = parentIds.map((parentId) => {
         const notification = new Notification();
         notification.user_id = parentId; // Assuming parentId corresponds to the user_id
         notification.title = createNotificationDto.title;
         notification.message = createNotificationDto.message;
         notification.status = 'unread'; // Default status
         notification.school_id = schoolAdmin.school_id;
-        notification.notification_type = "notification"; // Ensure type is validated
+        notification.notification_type = 'notification'; // Ensure type is validated
         return notification;
       });
 
@@ -61,8 +66,10 @@ export class NotificationService {
   }
 
   async getNotificationsForUser(adminId: number): Promise<Notification[]> {
-    const schoolAdmin = await this.schoolAdminRepository.findOne({ where: { user_id: adminId } });
-    
+    const schoolAdmin = await this.schoolAdminRepository.findOne({
+      where: { user_id: adminId },
+    });
+
     return this.notificationRepository.find({
       where: { school_id: schoolAdmin.school_id },
       order: { created_at: 'DESC' },

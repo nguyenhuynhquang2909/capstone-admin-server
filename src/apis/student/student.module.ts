@@ -24,12 +24,12 @@ import { UserModule } from '../user/user.module';
       StudentMedia,
       Class,
       PostMedia,
-      MealMedia
+      MealMedia,
     ]),
-    UserModule
+    UserModule,
   ],
   controllers: [StudentController],
   providers: [StudentService, JwtService, MediaService],
-  exports: [StudentService, MediaService]
+  exports: [StudentService, MediaService],
 })
 export class StudentModule {}

@@ -22,9 +22,9 @@ import { StudentModule } from '../student/student.module';
       Student,
       ClassStudent,
       User,
-      Media
+      Media,
     ]),
-    StudentModule
+    StudentModule,
   ],
   providers: [ClassService, JwtService, StudentService],
   controllers: [ClassController],

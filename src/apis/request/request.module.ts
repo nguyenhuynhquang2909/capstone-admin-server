@@ -17,7 +17,9 @@ import { FirebaseAdminService } from '../../common/services/firebase-admin.servi
 import { DeviceToken } from 'src/common/entities/device-token.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Request, SchoolAdmin, Class, DeviceToken])],
+  imports: [
+    TypeOrmModule.forFeature([Request, SchoolAdmin, Class, DeviceToken]),
+  ],
   controllers: [RequestController],
   providers: [
     RequestService,

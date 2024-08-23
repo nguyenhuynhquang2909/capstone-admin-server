@@ -1,24 +1,24 @@
-import { IsEnum, IsNotEmpty, IsString } from "class-validator";
-import { Gender } from "src/common/enums/gender.enum";
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { Gender } from 'src/common/enums/gender.enum';
 
 export class EnrollStudentDto {
-   @IsString()
-    @IsNotEmpty()
-    studentName: string;
+  @IsString()
+  @IsNotEmpty()
+  studentName: string;
 
-    @IsString()
-    @IsNotEmpty()
-    dateOfBirth: string;
+  @IsString()
+  @IsNotEmpty()
+  dateOfBirth: string;
 
-    @IsEnum(Gender)
-    @IsNotEmpty()
-    gender: Gender;
+  @IsEnum(Gender)
+  @IsNotEmpty()
+  gender: Gender;
 
-    @IsString()
-    @IsNotEmpty()
-    parentName: string;
+  @IsString()
+  @IsNotEmpty()
+  parentName: string;
 
-    @IsString()
-    @IsNotEmpty()
-    parentPhone: string;
+  @IsString()
+  @IsNotEmpty()
+  parentPhone: string;
 }

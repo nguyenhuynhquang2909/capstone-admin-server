@@ -1,5 +1,10 @@
-// src/apis/notification/notification.controller.ts
-import { Controller, Post, Body, Headers, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Headers,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { JwtService } from '../../common/jwt/jwt.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
@@ -7,7 +12,7 @@ import { Role } from 'src/common/decorators/role.decorator';
 import { JwtGuard } from 'src/common/guards/jwt.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { UseGuards } from '@nestjs/common';
-import { Get, Param } from '@nestjs/common';
+import { Get } from '@nestjs/common';
 
 @Controller('notification')
 @UseGuards(JwtGuard, RoleGuard)
@@ -32,7 +37,8 @@ export class NotificationController {
       throw new UnauthorizedException('Invalid token');
     }
 
-    const notifications = await this.notificationService.getNotificationsForUser(userId);
+    const notifications =
+      await this.notificationService.getNotificationsForUser(userId);
     return notifications;
   }
 
@@ -54,7 +60,10 @@ export class NotificationController {
       throw new UnauthorizedException('Invalid token');
     }
 
-    await this.notificationService.sendNotificationToSchoolParents(userId, createNotificationDto);
+    await this.notificationService.sendNotificationToSchoolParents(
+      userId,
+      createNotificationDto,
+    );
     return { message: 'Notification sent successfully' };
   }
 }
