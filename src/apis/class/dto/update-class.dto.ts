@@ -12,4 +12,8 @@ export class UpdateClassDto {
   @IsOptional()
   @IsString()
   classRoom?: string;
+
+  @IsOptional()
+  @IsString()
+  schoolYear?: string;
 }

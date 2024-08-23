@@ -27,6 +27,9 @@ export class Class {
   @Column({ type: 'varchar', length: 255, nullable: false })
   class_room: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true})
+  school_year: string;
+
   @Column({ nullable: false })
   teacher_id: number;
 

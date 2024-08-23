@@ -39,7 +39,7 @@ export class ClassService {
 
   async getAllClasses(userId: number): Promise<any[]> {
     const school_id = await this.getSchoolIdForUser(userId);
-
+  
     const classes = await this.classRepository
       .createQueryBuilder('class')
       .leftJoinAndSelect('class.teacher', 'teacher')
@@ -47,19 +47,23 @@ export class ClassService {
       .select([
         'class.id',
         'class.name',
+        'class.class_room AS class_room',  
+        'class.school_year AS school_year', 
         'class.teacher_id',
         'teacher.name AS teacher_name',
       ])
       .getRawMany();
-
+  
     return classes.map((classEntity) => ({
-      id: classEntity.class_id, // Ensure correct field names
-      name: classEntity.class_name, // Ensure correct field names
+      id: classEntity.class_id, 
+      name: classEntity.class_name, 
       teacher_id: classEntity.teacher_id,
       teacher_name: classEntity.teacher_name,
+      class_room: classEntity.class_room,
+      school_year: classEntity.school_year,
     }));
   }
-
+  
   async getClassStudents(classId: number): Promise<any[]> {
     const classEntity = await this.classRepository.findOne({
       where: { id: classId },
@@ -79,7 +83,7 @@ export class ClassService {
   }
 
   async createClass(createClassDto: CreateClassDto): Promise<Class> {
-    const { name, teacherId, classRoom } = createClassDto;
+    const { name, teacherId, classRoom, schoolYear } = createClassDto;
     const teacher = await this.teacherRepository.findOne({
       where: { id: teacherId },
     });
@@ -92,6 +96,7 @@ export class ClassService {
       teacher_id: teacherId,
       school_id: teacher.school_id,
       class_room: classRoom,
+      school_year: schoolYear
     });
 
     return await this.classRepository.save(newClass);
@@ -133,7 +138,7 @@ export class ClassService {
     classId: number,
     updateClassDto: UpdateClassDto,
   ): Promise<Class> {
-    const { name, teacherId, classRoom } = updateClassDto;
+    const { name, teacherId, classRoom, schoolYear } = updateClassDto;
     const classEntity = await this.classRepository.findOne({
       where: { id: classId },
     });
@@ -156,6 +161,9 @@ export class ClassService {
     }
     if (classRoom != undefined) {
       classEntity.class_room = classRoom;
+    }
+    if (schoolYear != undefined) {
+      classEntity.school_year = schoolYear;
     }
     return await this.classRepository.save(classEntity);
   }
