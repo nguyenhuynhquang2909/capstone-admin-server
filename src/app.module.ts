@@ -17,6 +17,7 @@ import { EatingScheduleModule } from './apis/eating-schedule/eating-schedule.mod
 import { StudentModule } from './apis/student/student.module';
 import { UserModule } from './apis/user/user.module';
 import { RequestModule } from './apis/request/request.module';
+import { TeacherModule } from './apis/teacher/teacher.module';
 
 
 @Module({
@@ -33,7 +34,8 @@ import { RequestModule } from './apis/request/request.module';
     EatingScheduleModule,
     StudentModule,
     UserModule,
-    RequestModule
+    RequestModule,
+    TeacherModule
   ],
   providers: [FirebaseAdminService, PushNotificationService],
 })
