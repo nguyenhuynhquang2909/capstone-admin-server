@@ -12,6 +12,7 @@ import { StudentService } from '../student/student.service';
 import { User } from 'src/common/entities/user.entity';
 import { Media } from 'src/common/entities/media.entity';
 import { StudentModule } from '../student/student.module';
+import { Location } from 'src/common/entities/location.entity';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { StudentModule } from '../student/student.module';
       Student,
       ClassStudent,
       User,
-      Media
+      Media,
+      Location
     ]),
     StudentModule
   ],

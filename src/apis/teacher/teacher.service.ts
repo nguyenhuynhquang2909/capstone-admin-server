@@ -43,7 +43,7 @@ export class TeacherService {
     async getTeacherProfile(teacherId: number): Promise<TeacherProfileDto> {
         const teacher = await this.teacherRepository.findOne({
             where: {id: teacherId},
-            relations: ['school', 'classes', 'teacher_media', 'teacher_media.media']
+            relations: ['school', 'classes', 'classes.location','teacher_media', 'teacher_media.media']
         })
 
         if (!teacher) {
@@ -57,7 +57,8 @@ export class TeacherService {
         const classes = teacher.classes.map((classEntity) => ({
             id: classEntity.id,
             name: classEntity.name,
-            class_room: classEntity.class_room,
+            location_id: classEntity.location_id,
+            location_name: classEntity.location.name,
             school_year: classEntity.school_year,
         }));
 

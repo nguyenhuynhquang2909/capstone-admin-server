@@ -9,7 +9,7 @@ class ClassDto {
     name: string;
 
     @IsString()
-    class_room: string;
+    location_name: string;
 
     @IsString()
     school_year: string;

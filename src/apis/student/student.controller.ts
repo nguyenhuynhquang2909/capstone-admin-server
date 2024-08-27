@@ -37,7 +37,8 @@ export class StudentController {
     @Get(':studentId')
     @Role('schoolAdmin')
     async getStudentProfile(
-        @Headers('authorization') authHeader: string
+        @Headers('authorization') authHeader: string,
+        @Param('studentId') studentId: number
     ) {
         if (!authHeader) {
             throw new UnauthorizedException('Authorization header is missing');
@@ -50,7 +51,7 @@ export class StudentController {
           if (!userId) {
             throw new UnauthorizedException('Invalid token');
           }
-        return await this.studentService.getStudentProfile(userId);
+        return await this.studentService.getStudentProfile(studentId);
     }
 
     @Post('enroll')
@@ -95,7 +96,7 @@ export class StudentController {
         @UploadedFiles() files: {avatar?: Express.Multer.File[]},
         @Body() updateStudentDto: UpdateStudentDto,
         @Headers('authorization') authHeader: string
-     ) {
+     ): Promise<{message: string}> {
         if (!authHeader) {
             throw new UnauthorizedException('Authorization header is missing');
           }
@@ -107,7 +108,8 @@ export class StudentController {
           if (!userId) {
             throw new UnauthorizedException('Invalid token');
           }
-          return await this.studentService.updateStudent(studentId, updateStudentDto, files.avatar || [], userId);
+         await this.studentService.updateStudent(studentId, updateStudentDto, files.avatar || [], userId);
+         return {message: 'Student profile updated successfully'};
      }
      
      @Delete(':studentId')

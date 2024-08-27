@@ -11,6 +11,7 @@ import {
 import { School } from './school.entity';
 import { DailySchedule } from './daily-schedule.entity';
 import { EatingSchedule } from './eating-schedule.entity';
+import { Class } from './class.entity';
 
 @Entity({ name: 'locations' })
 export class Location {
@@ -43,6 +44,9 @@ export class Location {
   })
   @JoinColumn({ name: 'school_id' })
   school: School;
+
+  @OneToMany(() => Class, (classEntity) => classEntity.location)
+  classes: Class[];
 
   @OneToMany(() => DailySchedule, (dailySchedule) => dailySchedule.location)
   daily_schedules: DailySchedule[];

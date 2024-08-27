@@ -36,36 +36,34 @@ export class DailyScheduleService {
     });
 
     // Initialize a structure to hold schedules organized by day and time slots
-    const weekSchedule = {};
+    return schedules.map((schedule) => ({
+      id: schedule.id,
+      startTime: schedule.start_time, // e.g., "08:00"
+      endTime: schedule.end_time, // e.g., "09:00"
+      subjectName: schedule.subject.name,
+      classId: schedule.class_id,
+      teacherId: schedule.teacher_id,
+      locationId: schedule.location_id,
+    }));
 
-    schedules.forEach((schedule) => {
-      const day = schedule.start_time.toISOString().split('T')[0]; // Get the day (e.g., "2024-08-21")
-      const startTime = schedule.start_time
-        .toISOString()
-        .split('T')[1]
-        .slice(0, 5); // Get the start time (e.g., "08:00")
-      const endTime = schedule.end_time.toISOString().split('T')[1].slice(0, 5); // Get the end time (e.g., "09:00")
-
-      // Create an entry for the day if it doesn't exist
-      if (!weekSchedule[day]) {
-        weekSchedule[day] = [];
-      }
-
-      // Add the schedule to the corresponding day and time slot
-      weekSchedule[day].push({
-        id: schedule.id,
-        startTime: startTime,
-        endTime: endTime,
-        subjectName: schedule.subject.name,
-        classId: schedule.class_id,
-        teacherId: schedule.teacher_id,
-        locationId: schedule.location_id,
-      });
-    });
-
-    return weekSchedule;
   }
-
+  async getSchedulesForEachClass(classId: number): Promise<any> {
+    const classSchedules = await this.scheduleRepository.find({
+      where: {class_id: classId},
+      relations: ['class', 'subject', 'teacher', 'location'],
+    })
+    return classSchedules.map((schedule) => ({
+      id: schedule.id,
+      startTime: schedule.start_time,
+      endTime: schedule.end_time,
+      subjectName: schedule.subject.name,
+      classId: schedule.class_id,
+      teacherId: schedule.teacher_id,
+      teacherName: schedule.teacher.name,
+      locationId: schedule.location_id,
+      locationName: schedule.location.name,
+    }));
+  }
   private async checkForOverlappingSchedule(schedule: DailySchedule) {
     const overlappingSchedules = await this.scheduleRepository.find({
       where: {

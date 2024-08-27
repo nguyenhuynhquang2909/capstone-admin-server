@@ -10,6 +10,7 @@ import { Student } from 'src/common/entities/student.entity';
 import { ClassStudent } from 'src/common/entities/class-student.entity';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { StudentService } from '../student/student.service';
+import { Location } from 'src/common/entities/location.entity';
 
 @Injectable()
 export class ClassService {
@@ -24,6 +25,8 @@ export class ClassService {
     private readonly studentRepository: Repository<Student>,
     @InjectRepository(ClassStudent)
     private readonly classStudentRepository: Repository<ClassStudent>,
+    @InjectRepository(Location)
+    private readonly locationRepository: Repository<Location>,
     private readonly studentService: StudentService
   ) {}
 
@@ -43,14 +46,16 @@ export class ClassService {
     const classes = await this.classRepository
       .createQueryBuilder('class')
       .leftJoinAndSelect('class.teacher', 'teacher')
+      .leftJoinAndSelect('class.location', 'location')
       .where('class.school_id = :school_id', { school_id })
       .select([
         'class.id',
-        'class.name',
-        'class.class_room AS class_room',  
+        'class.name',  
         'class.school_year AS school_year', 
         'class.teacher_id',
         'teacher.name AS teacher_name',
+        'class.location_id',
+        'location.name AS location_name'
       ])
       .getRawMany();
   
@@ -59,7 +64,8 @@ export class ClassService {
       name: classEntity.class_name, 
       teacher_id: classEntity.teacher_id,
       teacher_name: classEntity.teacher_name,
-      class_room: classEntity.class_room,
+      location_id: classEntity.location_id,
+      location_name: classEntity.location_name,
       school_year: classEntity.school_year,
     }));
   }
@@ -83,7 +89,7 @@ export class ClassService {
   }
 
   async createClass(createClassDto: CreateClassDto): Promise<Class> {
-    const { name, teacherId, classRoom, schoolYear } = createClassDto;
+    const { name, teacherId, locationId, schoolYear } = createClassDto;
     const teacher = await this.teacherRepository.findOne({
       where: { id: teacherId },
     });
@@ -91,11 +97,22 @@ export class ClassService {
     if (!teacher) {
       throw new NotFoundException('Teacher not found');
     }
+
+    const locationResult = await this.locationRepository.query(
+      `
+      SELECT * FROM locations WHERE id = $1
+      `,
+      [locationId]
+    );
+    const location = locationResult[0];
+    if (!location) {
+      throw new NotFoundException('Location not found');
+    }
     const newClass = this.classRepository.create({
       name,
       teacher_id: teacherId,
       school_id: teacher.school_id,
-      class_room: classRoom,
+      location_id: locationId,
       school_year: schoolYear
     });
 
@@ -121,6 +138,7 @@ export class ClassService {
     if (!student) {
       throw new NotFoundException('Student not found');
     }
+
     const existingClassStudent = classEntity.class_students.find(
       (cs) => cs.student_id === studentId,
     );
@@ -138,7 +156,7 @@ export class ClassService {
     classId: number,
     updateClassDto: UpdateClassDto,
   ): Promise<Class> {
-    const { name, teacherId, classRoom, schoolYear } = updateClassDto;
+    const { name, teacherId, locationId, schoolYear } = updateClassDto;
     const classEntity = await this.classRepository.findOne({
       where: { id: classId },
     });
@@ -159,8 +177,18 @@ export class ClassService {
     if (name != undefined) {
       classEntity.name = name;
     }
-    if (classRoom != undefined) {
-      classEntity.class_room = classRoom;
+    if (locationId != undefined) {
+      const locationResult = await this.locationRepository.query(
+        `
+        SELECT * FROM locations WHERE id = $1
+        `,
+        [locationId]
+      );
+      const location = locationResult[0];
+      if (!location) {
+        throw new NotFoundException('Location not found');
+      }
+      classEntity.location_id = locationId;
     }
     if (schoolYear != undefined) {
       classEntity.school_year = schoolYear;

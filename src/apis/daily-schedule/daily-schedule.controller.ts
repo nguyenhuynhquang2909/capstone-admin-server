@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Headers,
   Param,
   Post,
@@ -36,6 +37,25 @@ export class DailyScheduleController {
       throw new UnauthorizedException('Invalid token');
     }
     return await this.scheduleService.getAllSchedules(userId);
+  }
+
+  @Get(':classId')
+  @Role('schoolAdmin')
+  async getScheduleByClass(
+    @Headers('authorization') authHeader: string,
+    @Param('classId') classId: number,
+  ) {
+    if (!authHeader) {
+      throw new UnauthorizedException('Authorization header is missing');
+    }
+    const token = authHeader.replace('Bearer ', '');
+    const decodedToken = this.jwtService.verifyToken(token);
+    const { userId } = decodedToken;
+
+    if (!userId) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    return await this.scheduleService.getSchedulesForEachClass(classId);
   }
 
   @Post('create')

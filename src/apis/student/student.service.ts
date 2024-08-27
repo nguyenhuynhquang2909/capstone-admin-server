@@ -51,7 +51,7 @@ export class StudentService {
     async getStudentProfile(studentId: number): Promise<StudentProfileDto> {
         const student = await this.studentRepository.findOne({
             where: {id: studentId},
-            relations: ['school', 'parent', 'class_students', 'class_students.class', 'student_media', ]
+            relations: ['school', 'parent', 'class_students', 'class_students.class', 'student_media', 'student_media.media']
         });
         if (!student) {
             throw new NotFoundException('Student not found');
@@ -113,15 +113,10 @@ export class StudentService {
         ): Promise<Student> {
             const studentResult = await this.studentRepository.query(
                 `
-                SELECT s.*, u.name AS parent_name, u.phone AS parent_phone, sm.media_id, m.url AS media_url
-                FROM students s
-                JOIN users u ON s.parent_id = u.id
-                LEFT JOIN student_media sm ON s.id = sm.student_id
-                LEFT JOIN media m ON sm.media_id = m.id
-                WHERE s.id = $1
+                SELECT * FROM students WHERE id = $1
                 `,
                 [studentId]
-            );
+            )
             if (studentResult.length === 0) {
                 throw new NotFoundException("Student not found");
             }
@@ -130,6 +125,10 @@ export class StudentService {
         
             if (updateStudentDto.studentName) {
                 student.name = updateStudentDto.studentName;
+                await this.studentRepository.query(
+                    `UPDATE students SET name = $1 WHERE id = $2`,
+                    [student.name, studentId]
+                )
             }
             if (updateStudentDto.parentName || updateStudentDto.parentPhone) {
                 const parentResult = await this.userRepository.query(
@@ -144,45 +143,48 @@ export class StudentService {
                     throw new NotFoundException("Parent not found");
                 }
                 const parent = parentResult[0];
-                if (!parent) {
-                    throw new NotFoundException("Parent not found");
-                }
                 if (updateStudentDto.parentName) {
                     parent.name = updateStudentDto.parentName;
+                    await this.userRepository.query(
+                        `
+                        UPDATE users SET name = $1 WHERE id = $2
+                        `,
+                        [parent.name, parent.id]
+                    )
                 } else if (updateStudentDto.parentPhone) {
                     parent.phone = updateStudentDto.parentPhone;
+                    await this.userRepository.query(
+                        `
+                        UPDATE users SET phone = $1 WHERE id = $2
+                        `,
+                        [parent.phone, parent.id]
+                    )
                 }
-                await this.userRepository.query(
-                    `
-                    UPDATE users
-                    SET name = $1, phone = $2
-                    WHERE id = $3
-                    `,
-                    [parent.name, parent.phone, parent.id]
-                )
             }
-            
             if (files && files.length > 0) {
-                await this.removeOldAvatar(student.id);
+                const studentMediaResult = await this.studentRepository.query(
+                    `
+                    SELECT m.id AS media_id
+                    FROM student_media sm
+                    JOIN media m ON sm.media_id = m.id
+                    WHERE sm.student_id = $1
+                    `,
+                    [studentId]
+                );
+
+                if (studentMediaResult.length > 0) {
+                    const oldMediaId = studentMediaResult[0].media_id;
+                    await this.mediaService.deleteMedia(oldMediaId);
+                }
                 const media = await this.mediaService.uploadMedia(files, userId);
                 for (const mediaItem of media) {
-                    if (!studentId) {
-                        console.error('Student ID is null or undefined');
-                        throw new Error('Student ID is null or undefined');
-                    }
-                    await this.associateMediaWithStudent(studentId, mediaItem.id)
+                    await this.studentRepository.query(
+                        `INSERT INTO student_media (student_id, media_id) VALUES ($1, $2)`,
+                        [studentId, mediaItem.id]
+                    )
                 }
             }
-
-            await this.studentRepository.query(
-                `
-                UPDATE students
-                SET name = $1
-                WHERE id = $2
-                `,
-                [student.name, student.id]
-            );
-            return student;
+            return await this.studentRepository.save(student);
         }
 
         async deleteStudent(studentId: number): Promise<void> {
