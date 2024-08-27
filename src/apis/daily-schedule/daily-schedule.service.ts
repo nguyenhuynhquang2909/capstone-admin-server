@@ -65,7 +65,35 @@ export class DailyScheduleService {
 
     return weekSchedule;
   }
+  async getSchedulesForEachClass(classId: number): Promise<any> {
+    const classSchedules = await this.scheduleRepository.find({
+      where: {class_id: classId},
+      relations: ['class', 'subject'],
+    })
+    const weekSchedule = {};
+    classSchedules.forEach((schedule) => {
+      const day = schedule.start_time.toISOString().split('T')[0];
+      const startTime = schedule.start_time
+        .toISOString()
+        .split('T')[1]
+        .slice(0, 5);
+      const endTime = schedule.end_time.toISOString().split('T')[1].slice(0, 5);
 
+      if (!weekSchedule[day]) {
+        weekSchedule[day] = [];
+      }
+      weekSchedule[day].push({
+        id: schedule.id,
+        startTime: startTime,
+        endTime: endTime,
+        subjectName: schedule.subject.name,
+        classId: schedule.class_id,
+        teacherId: schedule.teacher_id,
+        locationId: schedule.location_id,
+      });
+    });
+    return weekSchedule;
+  }
   private async checkForOverlappingSchedule(schedule: DailySchedule) {
     const overlappingSchedules = await this.scheduleRepository.find({
       where: {
