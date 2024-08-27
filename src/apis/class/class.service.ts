@@ -10,6 +10,7 @@ import { Student } from 'src/common/entities/student.entity';
 import { ClassStudent } from 'src/common/entities/class-student.entity';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { StudentService } from '../student/student.service';
+import { Location } from 'src/common/entities/location.entity';
 
 @Injectable()
 export class ClassService {
@@ -24,6 +25,8 @@ export class ClassService {
     private readonly studentRepository: Repository<Student>,
     @InjectRepository(ClassStudent)
     private readonly classStudentRepository: Repository<ClassStudent>,
+    @InjectRepository(Location)
+    private readonly locationRepository: Repository<Location>,
     private readonly studentService: StudentService
   ) {}
 
@@ -94,6 +97,17 @@ export class ClassService {
     if (!teacher) {
       throw new NotFoundException('Teacher not found');
     }
+
+    const locationResult = await this.locationRepository.query(
+      `
+      SELECT * FROM locations WHERE id = $1
+      `,
+      [locationId]
+    );
+    const location = locationResult[0];
+    if (!location) {
+      throw new NotFoundException('Location not found');
+    }
     const newClass = this.classRepository.create({
       name,
       teacher_id: teacherId,
@@ -124,6 +138,7 @@ export class ClassService {
     if (!student) {
       throw new NotFoundException('Student not found');
     }
+
     const existingClassStudent = classEntity.class_students.find(
       (cs) => cs.student_id === studentId,
     );
@@ -163,6 +178,16 @@ export class ClassService {
       classEntity.name = name;
     }
     if (locationId != undefined) {
+      const locationResult = await this.locationRepository.query(
+        `
+        SELECT * FROM locations WHERE id = $1
+        `,
+        [locationId]
+      );
+      const location = locationResult[0];
+      if (!location) {
+        throw new NotFoundException('Location not found');
+      }
       classEntity.location_id = locationId;
     }
     if (schoolYear != undefined) {
