@@ -1,4 +1,5 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNull } from 'typeorm';
 
 export class UpdateClassDto {
   @IsOptional()
@@ -6,12 +7,12 @@ export class UpdateClassDto {
   name?: string;
 
   @IsOptional()
-  @IsString()
+  @IsNumber()
   teacherId?: number;
 
   @IsOptional()
-  @IsString()
-  classRoom?: string;
+  @IsNumber()
+  locationId?: number;
 
   @IsOptional()
   @IsString()

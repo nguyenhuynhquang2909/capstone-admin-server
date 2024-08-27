@@ -15,6 +15,7 @@ import { EatingSchedule } from './eating-schedule.entity';
 import { ClassStudent } from './class-student.entity';
 import { PostClass } from './post-class.entity';
 import { Request } from './request.entity';
+import { Location } from './location.entity';
 
 @Entity({ name: 'classes' })
 export class Class {
@@ -23,9 +24,6 @@ export class Class {
 
   @Column({ type: 'varchar', length: 255, nullable: false })
   name: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: false })
-  class_room: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true})
   school_year: string;
@@ -36,11 +34,20 @@ export class Class {
   @Column({ nullable: false })
   school_id: number;
 
+  @Column({ nullable: false })
+  location_id: number;
+
   @ManyToOne(() => Teacher, (teacher) => teacher.classes, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'teacher_id' })
   teacher: Teacher;
+
+  @ManyToOne(() => Location, (location) => location.classes, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({name: 'location_id'})
+  location: Location;
 
   @ManyToOne(() => School, (school) => school.classes, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'school_id' })

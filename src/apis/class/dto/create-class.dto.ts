@@ -10,8 +10,8 @@ export class CreateClassDto {
   teacherId: number;
 
   @IsNotEmpty()
-  @IsString()
-  classRoom: string;
+  @IsNumber()
+  locationId: number;
 
   @IsNotEmpty()
   @IsString()

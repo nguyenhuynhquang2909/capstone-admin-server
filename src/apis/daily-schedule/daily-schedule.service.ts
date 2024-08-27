@@ -68,7 +68,7 @@ export class DailyScheduleService {
   async getSchedulesForEachClass(classId: number): Promise<any> {
     const classSchedules = await this.scheduleRepository.find({
       where: {class_id: classId},
-      relations: ['class', 'subject'],
+      relations: ['class', 'subject', 'teacher', 'location'],
     })
     const weekSchedule = {};
     classSchedules.forEach((schedule) => {
@@ -89,7 +89,9 @@ export class DailyScheduleService {
         subjectName: schedule.subject.name,
         classId: schedule.class_id,
         teacherId: schedule.teacher_id,
+        teacherName: schedule.teacher.name,
         locationId: schedule.location_id,
+        locationName: schedule.location.name
       });
     });
     return weekSchedule;
