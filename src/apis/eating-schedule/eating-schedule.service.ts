@@ -44,17 +44,21 @@ export class EatingScheduleService {
     eatingScheduleId: number,
     mediaId: number,
   ) {
-    const mediaExists = await this.mediaRepository.findOne({
-      where: { id: mediaId },
-    });
-    if (!mediaExists) {
+    const mediaResult = await this.eatingScheduleRepository.query(
+      `SELECT * FROM media WHERE id = $1`, 
+      [mediaId]
+    );
+
+    if (mediaResult.length === 0) {
       throw new NotFoundException('Media not found');
     }
+  
     await this.mediaRepository.query(
       'INSERT INTO meal_media (meal_id, media_id) VALUES ($1, $2)',
       [eatingScheduleId, mediaId],
     );
   }
+  
 
   async getEatingSchedulesForWeek(classId: number): Promise<any> {
     const sql = `
