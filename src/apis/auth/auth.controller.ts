@@ -14,6 +14,6 @@ export class AuthController {
     const { message, token } = await this.authService.login(loginDto);
 
     res.setHeader('Authorization', `Bearer ${token}`);
-    return res.json({ message });
+    return res.json({ message, token });
   }
 }
