@@ -6,6 +6,10 @@ import { Repository } from 'typeorm';
 import { CreateDailyScheduleDto } from './dto/create-daily-schedule.dto';
 import { Class } from 'src/common/entities/class.entity';
 import { UpdateDailyScheduleDto } from './dto/update-daily-schedule.dto';
+import { Subject } from 'src/common/entities/subject.entity';
+import { Teacher } from 'src/common/entities/teacher.entity';
+import { Location } from 'src/common/entities/location.entity';
+
 
 @Injectable()
 export class DailyScheduleService {
@@ -16,6 +20,12 @@ export class DailyScheduleService {
     private readonly schoolAdminRepository: Repository<SchoolAdmin>,
     @InjectRepository(Class)
     private readonly classRepository: Repository<Class>,
+    @InjectRepository(Subject)
+    private readonly subjectRepository: Repository<Subject>,
+    @InjectRepository(Teacher)
+    private readonly teacherRepository: Repository<Teacher>,
+
+
   ) {}
 
   async getSchoolIdForUser(userId: number): Promise<number> {
@@ -32,7 +42,7 @@ export class DailyScheduleService {
     const schoolId = await this.getSchoolIdForUser(userId);
     const schedules = await this.scheduleRepository.find({
       where: { class: { school_id: schoolId } },
-      relations: ['class', 'subject'],
+      relations: ['class', 'subject', 'teacher', 'location'],
     });
 
     // Initialize a structure to hold schedules organized by day and time slots
@@ -42,7 +52,9 @@ export class DailyScheduleService {
       endTime: schedule.end_time, // e.g., "09:00"
       subjectName: schedule.subject.name,
       classId: schedule.class_id,
+      className: schedule.class.name,
       teacherId: schedule.teacher_id,
+      teacherName: schedule.teacher.name,
       locationId: schedule.location_id,
     }));
 
@@ -116,9 +128,10 @@ export class DailyScheduleService {
     scheduleId: number,
     updateDailyScheduleDto: UpdateDailyScheduleDto,
     userId: number,
-  ): Promise<DailySchedule> {
+  ): Promise<any> {
     const schedule = await this.scheduleRepository.findOne({
       where: { id: scheduleId },
+      relations: ['teacher', 'subject']
     });
     if (!schedule) {
       throw new NotFoundException('Schedule not found for this school');
@@ -130,14 +143,21 @@ export class DailyScheduleService {
     if (!classEntity) {
       throw new NotFoundException('Class not found');
     }
+    const subject = await this.subjectRepository.findOne({ where: { id: schedule.subject?.id } });
+    const teacher = await this.teacherRepository.findOne({ where: { id: schedule.teacher?.id } });
     Object.assign(schedule, updateDailyScheduleDto);
-
+  
     if (updateDailyScheduleDto.start_time || updateDailyScheduleDto.end_time) {
       await this.checkForOverlappingSchedule(schedule);
     }
-    return await this.scheduleRepository.save(schedule);
+    const updatedSchedule = await this.scheduleRepository.save(schedule);
+    return {
+      ...updatedSchedule,
+      subject_name: subject.name,
+      class_name: classEntity.name,
+      teacher_name: teacher.name
+    };
   }
-
   async deleteSchedule(scheduleId: number, userId: number): Promise<void> {
     const schedule = await this.scheduleRepository.findOne({
       where: { id: scheduleId },
@@ -155,4 +175,8 @@ export class DailyScheduleService {
     }
     await this.scheduleRepository.remove(schedule);
   }
+
+
+
+  
 }

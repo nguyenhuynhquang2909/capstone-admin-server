@@ -13,6 +13,7 @@ import { User } from 'src/common/entities/user.entity';
 import { Media } from 'src/common/entities/media.entity';
 import { StudentModule } from '../student/student.module';
 import { Location } from 'src/common/entities/location.entity';
+import { TeacherService } from '../teacher/teacher.service';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { Location } from 'src/common/entities/location.entity';
     ]),
     StudentModule
   ],
-  providers: [ClassService, JwtService, StudentService],
+  providers: [ClassService, JwtService, StudentService, TeacherService],
   controllers: [ClassController],
 })
 export class ClassModule {}

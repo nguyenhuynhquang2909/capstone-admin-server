@@ -171,6 +171,33 @@ export class TeacherService {
         )
     }
 
+    async getTeacherInfo(teacherId: number): Promise<{ name: string; profilePictureUrl: string; contact_number: string }> {
+        const teacher = await this.teacherRepository.findOne({
+          where: { id: teacherId },
+          relations: ['teacher_media', 'teacher_media.media'],
+        });
+      
+        if (!teacher) {
+          throw new NotFoundException('Teacher not found');
+        }
+      
+        // Set default avatar URL
+        let profilePictureUrl = 'https://static.vecteezy.com/system/resources/previews/009/292/244/original/default-avatar-icon-of-social-media-user-vector.jpg';
+      
+        // If media exists, use the profile picture URL from the media
+        if (teacher.teacher_media && teacher.teacher_media.length > 0) {
+          profilePictureUrl = teacher.teacher_media[0].media.url;
+        }
+      
+        // Return basic teacher info
+        return {
+          name: teacher.name,
+          profilePictureUrl: profilePictureUrl,
+          contact_number: teacher.contact_number,
+        };
+      }
+      
+
     
 
 }

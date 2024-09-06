@@ -65,13 +65,19 @@ export class EatingScheduleService {
             SELECT 
                 es.*, 
                 mm.media_id, 
-                m.url as media_url
+                m.url as media_url,
+                c.name as class_name,
+                l.name as location_name
             FROM 
                 eating_schedules es
             LEFT JOIN 
                 meal_media mm ON mm.meal_id = es.id
             LEFT JOIN 
                 media m ON m.id = mm.media_id
+            LEFT JOIN
+                classes c ON c.id = es.class_id
+            LEFT JOIN
+                locations l ON l.id = es.location_id
             WHERE 
                 es.class_id = $1
             ORDER BY 
@@ -113,7 +119,7 @@ export class EatingScheduleService {
     eatingScheduleId: number,
     updateEatingScheduleDto: UpdateEatingScheduleDto,
     newFiles: Express.Multer.File[],
-    userId: number,
+    userId: number
   ): Promise<any> {
     const sql = `
             SELECT 
@@ -137,7 +143,6 @@ export class EatingScheduleService {
     }
     const existingSchedule = existingSchedules[0];
 
-    // Update only the provided fields, keep the old values for the others
     const updatedClassId =
       updateEatingScheduleDto.class_id ?? existingSchedule.class_id;
     const updatedStartTime =
@@ -145,8 +150,9 @@ export class EatingScheduleService {
     const updatedEndTime =
       updateEatingScheduleDto.end_time ?? existingSchedule.end_time;
     const updatedMeal = updateEatingScheduleDto.meal ?? existingSchedule.meal;
-    const updatedMenu = updateEatingScheduleDto.menu ?? existingSchedule.menu;
-    const updatedNutrition =
+    const updatedMenu = 
+      updateEatingScheduleDto.menu ?? existingSchedule.menu;
+    const updatedNutrition = 
       updateEatingScheduleDto.nutrition ?? existingSchedule.nutrition;
     const updatedLocationId =
       updateEatingScheduleDto.location_id ?? existingSchedule.location_id;
@@ -176,8 +182,10 @@ export class EatingScheduleService {
       updatedLocationId,
     ]);
 
-    // Delete old media if necessary
-    const oldMediaIds = existingSchedules
+
+    // Upload and associate new media
+    if (newFiles && newFiles.length > 0) {
+      const oldMediaIds = existingSchedules
       .map((schedule) => schedule.media_id)
       .filter(Boolean);
     if (oldMediaIds.length > 0) {
@@ -193,8 +201,6 @@ export class EatingScheduleService {
       await this.eatingScheduleRepository.query(deleteMediaSql, [oldMediaIds]);
     }
 
-    // Upload and associate new media
-    if (newFiles && newFiles.length > 0) {
       const uploadedMedia = await this.mediaService.uploadMedia(
         newFiles,
         userId,
@@ -227,13 +233,19 @@ export class EatingScheduleService {
                 es.created_at, 
                 es.updated_at, 
                 mm.media_id, 
-                m.url AS media_url
+                m.url AS media_url,
+                c.name AS class_name,
+                l.name AS location_name
             FROM 
                 eating_schedules es
             LEFT JOIN 
                 meal_media mm ON mm.meal_id = es.id
             LEFT JOIN 
                 media m ON m.id = mm.media_id
+            LEFT JOIN
+                classes c ON c.id = es.class_id
+            LEFT JOIN
+                locations l ON l.id = es.location_id
             WHERE 
                 es.id = $1
             ORDER BY 

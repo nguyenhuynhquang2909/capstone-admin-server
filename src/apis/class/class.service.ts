@@ -11,6 +11,8 @@ import { ClassStudent } from 'src/common/entities/class-student.entity';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { StudentService } from '../student/student.service';
 import { Location } from 'src/common/entities/location.entity';
+import { Subject } from 'src/common/entities/subject.entity';
+import { TeacherService } from '../teacher/teacher.service';
 
 @Injectable()
 export class ClassService {
@@ -21,6 +23,7 @@ export class ClassService {
     private readonly schoolAdminRepository: Repository<SchoolAdmin>,
     @InjectRepository(Teacher)
     private readonly teacherRepository: Repository<Teacher>,
+    private readonly teacherService: TeacherService,
     @InjectRepository(Student)
     private readonly studentRepository: Repository<Student>,
     @InjectRepository(ClassStudent)
@@ -53,6 +56,7 @@ export class ClassService {
         'class.name',  
         'class.school_year AS school_year', 
         'class.teacher_id',
+        'teacher.id AS teacher_id',
         'teacher.name AS teacher_name',
         'class.location_id',
         'location.name AS location_name'
@@ -70,23 +74,64 @@ export class ClassService {
     }));
   }
   
-  async getClassStudents(classId: number): Promise<any[]> {
+  // async getClassStudents(classId: number): Promise<any[]> {
+  //   const classEntity = await this.classRepository.findOne({
+  //     where: { id: classId },
+  //     relations: ['class_students', 'class_students.student'],
+  //   });
+
+  //   if (!classEntity) {
+  //     throw new NotFoundException('Class not found for this school');
+  //   }
+
+  //   return classEntity.class_students.map((cs) => ({
+  //     id: cs.student.id,
+  //     name: cs.student.name,
+  //     date_of_birth: cs.student.date_of_birth,
+  //     gender: cs.student.gender,
+  //   }));
+  // }
+  async getClassProfile(classId: number): Promise<any> {
+    // Fetch the class entity with related teacher and students
     const classEntity = await this.classRepository.findOne({
       where: { id: classId },
-      relations: ['class_students', 'class_students.student'],
+      relations: ['teacher', 'class_students', 'class_students.student', 'location'],
     });
-
+  
+    // Throw an error if the class is not found
     if (!classEntity) {
       throw new NotFoundException('Class not found for this school');
     }
+  
+    // Fetch the teacher profile if a teacher exists for this class
+    let teacherProfile = null;
+    if (classEntity.teacher) {
+      teacherProfile = await this.teacherService.getTeacherInfo(classEntity.teacher.id);
+    }
+  
 
-    return classEntity.class_students.map((cs) => ({
+    const classInfo = {
+      id: classEntity.id,
+      name: classEntity.name,
+      school_year: classEntity.school_year,
+      location_name: classEntity.location.name
+    };
+  
+    const students = classEntity.class_students.map((cs) => ({
       id: cs.student.id,
       name: cs.student.name,
       date_of_birth: cs.student.date_of_birth,
       gender: cs.student.gender,
     }));
+  
+    // Return the class profile with class, teacher, and student info
+    return {
+      class: classInfo,
+      teacher: teacherProfile,
+      students: students,
+    };
   }
+  
 
   async createClass(createClassDto: CreateClassDto): Promise<Class> {
     const { name, teacherId, locationId, schoolYear } = createClassDto;
@@ -231,4 +276,5 @@ export class ClassService {
       studentProfile  
     }
   }
+ 
 }
