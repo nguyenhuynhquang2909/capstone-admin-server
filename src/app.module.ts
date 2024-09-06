@@ -19,6 +19,7 @@ import { UserModule } from './apis/user/user.module';
 import { RequestModule } from './apis/request/request.module';
 import { TeacherModule } from './apis/teacher/teacher.module';
 import { NotificationModule } from './apis/notification/notification.module';
+import { LocationModule } from './apis/location/location.module';
 
 
 
@@ -38,7 +39,8 @@ import { NotificationModule } from './apis/notification/notification.module';
     UserModule,
     RequestModule,
     TeacherModule,
-    NotificationModule
+    NotificationModule,
+    LocationModule
   ],
   providers: [FirebaseAdminService, PushNotificationService],
 })

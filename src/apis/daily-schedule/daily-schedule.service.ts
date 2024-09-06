@@ -8,6 +8,7 @@ import { Class } from 'src/common/entities/class.entity';
 import { UpdateDailyScheduleDto } from './dto/update-daily-schedule.dto';
 import { Subject } from 'src/common/entities/subject.entity';
 import { Teacher } from 'src/common/entities/teacher.entity';
+import { Location } from 'src/common/entities/location.entity';
 
 
 @Injectable()
@@ -22,7 +23,8 @@ export class DailyScheduleService {
     @InjectRepository(Subject)
     private readonly subjectRepository: Repository<Subject>,
     @InjectRepository(Teacher)
-    private readonly teacherRepository: Repository<Teacher>
+    private readonly teacherRepository: Repository<Teacher>,
+
 
   ) {}
 
@@ -173,4 +175,7 @@ export class DailyScheduleService {
     }
     await this.scheduleRepository.remove(schedule);
   }
+
+
+  
 }

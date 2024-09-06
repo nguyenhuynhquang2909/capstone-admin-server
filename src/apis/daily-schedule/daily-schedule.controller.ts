@@ -122,4 +122,6 @@ export class DailyScheduleController {
     await this.scheduleService.deleteSchedule(id, userId);
     return { message: 'Schedule deleted successfully' };
   }
+
+  
 }
