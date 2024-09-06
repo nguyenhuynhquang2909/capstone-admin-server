@@ -65,13 +65,19 @@ export class EatingScheduleService {
             SELECT 
                 es.*, 
                 mm.media_id, 
-                m.url as media_url
+                m.url as media_url,
+                c.name as class_name,
+                l.name as location_name
             FROM 
                 eating_schedules es
             LEFT JOIN 
                 meal_media mm ON mm.meal_id = es.id
             LEFT JOIN 
                 media m ON m.id = mm.media_id
+            LEFT JOIN
+                classes c ON c.id = es.class_id
+            LEFT JOIN
+                locations l ON l.id = es.location_id
             WHERE 
                 es.class_id = $1
             ORDER BY 

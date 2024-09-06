@@ -32,7 +32,7 @@ export class DailyScheduleService {
     const schoolId = await this.getSchoolIdForUser(userId);
     const schedules = await this.scheduleRepository.find({
       where: { class: { school_id: schoolId } },
-      relations: ['class', 'subject'],
+      relations: ['class', 'subject', 'teacher', 'location'],
     });
 
     // Initialize a structure to hold schedules organized by day and time slots
@@ -42,7 +42,9 @@ export class DailyScheduleService {
       endTime: schedule.end_time, // e.g., "09:00"
       subjectName: schedule.subject.name,
       classId: schedule.class_id,
+      className: schedule.class.name,
       teacherId: schedule.teacher_id,
+      teacherName: schedule.teacher.name,
       locationId: schedule.location_id,
     }));
 
