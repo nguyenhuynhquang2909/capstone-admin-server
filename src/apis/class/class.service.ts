@@ -11,6 +11,7 @@ import { ClassStudent } from 'src/common/entities/class-student.entity';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { StudentService } from '../student/student.service';
 import { Location } from 'src/common/entities/location.entity';
+import { Subject } from 'src/common/entities/subject.entity';
 
 @Injectable()
 export class ClassService {
@@ -231,4 +232,5 @@ export class ClassService {
       studentProfile  
     }
   }
+ 
 }
