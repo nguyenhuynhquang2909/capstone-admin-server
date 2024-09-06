@@ -24,6 +24,8 @@ export class DailyScheduleService {
     private readonly subjectRepository: Repository<Subject>,
     @InjectRepository(Teacher)
     private readonly teacherRepository: Repository<Teacher>,
+    @InjectRepository(Location)
+    private readonly locationRepository: Repository<Location>
 
 
   ) {}
@@ -131,7 +133,7 @@ export class DailyScheduleService {
   ): Promise<any> {
     const schedule = await this.scheduleRepository.findOne({
       where: { id: scheduleId },
-      relations: ['teacher', 'subject']
+      relations: ['teacher', 'subject', 'location']
     });
     if (!schedule) {
       throw new NotFoundException('Schedule not found for this school');
@@ -145,6 +147,7 @@ export class DailyScheduleService {
     }
     const subject = await this.subjectRepository.findOne({ where: { id: schedule.subject?.id } });
     const teacher = await this.teacherRepository.findOne({ where: { id: schedule.teacher?.id } });
+    const location = await this.locationRepository.findOne({where: {id: schedule.location?.id} });
     Object.assign(schedule, updateDailyScheduleDto);
   
     if (updateDailyScheduleDto.start_time || updateDailyScheduleDto.end_time) {
@@ -155,6 +158,7 @@ export class DailyScheduleService {
       ...updatedSchedule,
       subject_name: subject.name,
       class_name: classEntity.name,
+      location_name: location.name,
       teacher_name: teacher.name
     };
   }
