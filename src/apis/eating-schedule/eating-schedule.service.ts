@@ -182,8 +182,10 @@ export class EatingScheduleService {
       updatedLocationId,
     ]);
 
-    // Delete old media if necessary
-    const oldMediaIds = existingSchedules
+
+    // Upload and associate new media
+    if (newFiles && newFiles.length > 0) {
+      const oldMediaIds = existingSchedules
       .map((schedule) => schedule.media_id)
       .filter(Boolean);
     if (oldMediaIds.length > 0) {
@@ -198,9 +200,7 @@ export class EatingScheduleService {
             `;
       await this.eatingScheduleRepository.query(deleteMediaSql, [oldMediaIds]);
     }
-
-    // Upload and associate new media
-    if (newFiles && newFiles.length > 0) {
+    
       const uploadedMedia = await this.mediaService.uploadMedia(
         newFiles,
         userId,
@@ -233,13 +233,19 @@ export class EatingScheduleService {
                 es.created_at, 
                 es.updated_at, 
                 mm.media_id, 
-                m.url AS media_url
+                m.url AS media_url,
+                c.name AS class_name,
+                l.name AS location_name
             FROM 
                 eating_schedules es
             LEFT JOIN 
                 meal_media mm ON mm.meal_id = es.id
             LEFT JOIN 
                 media m ON m.id = mm.media_id
+            LEFT JOIN
+                classes c ON c.id = es.class_id
+            LEFT JOIN
+                locations l ON l.id = es.location_id
             WHERE 
                 es.id = $1
             ORDER BY 
