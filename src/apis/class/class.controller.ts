@@ -45,9 +45,9 @@ export class ClassController {
     return await this.classService.getAllClasses(userId);
   }
 
-  @Get(':classId/students')
+  @Get(':classId')
   @Role('schoolAdmin')
-  async getClassStudents(@Param('classId') classId: number, @Headers('authorization') authHeader: string)
+  async getClassProfile(@Param('classId') classId: number, @Headers('authorization') authHeader: string)
   {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
@@ -62,7 +62,7 @@ export class ClassController {
     }
 
     try {
-      return await this.classService.getClassStudents(classId);
+      return await this.classService.getClassProfile(classId);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException('Class not found');
