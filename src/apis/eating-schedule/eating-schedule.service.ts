@@ -119,7 +119,7 @@ export class EatingScheduleService {
     eatingScheduleId: number,
     updateEatingScheduleDto: UpdateEatingScheduleDto,
     newFiles: Express.Multer.File[],
-    userId: number,
+    userId: number
   ): Promise<any> {
     const sql = `
             SELECT 
@@ -142,8 +142,12 @@ export class EatingScheduleService {
       throw new NotFoundException('Eating schedule not found');
     }
     const existingSchedule = existingSchedules[0];
-
-    // Update only the provided fields, keep the old values for the others
+    const updatedMenu = updateEatingScheduleDto.menu
+      ? [...existingSchedule.menu, ...updateEatingScheduleDto.menu]
+      : existingSchedule.menu;
+    const updatedNutrition = updateEatingScheduleDto.nutrition
+      ? [...existingSchedule.nutrition, ...updateEatingScheduleDto.nutrition]
+      : existingSchedule.nutrition;
     const updatedClassId =
       updateEatingScheduleDto.class_id ?? existingSchedule.class_id;
     const updatedStartTime =
@@ -151,9 +155,6 @@ export class EatingScheduleService {
     const updatedEndTime =
       updateEatingScheduleDto.end_time ?? existingSchedule.end_time;
     const updatedMeal = updateEatingScheduleDto.meal ?? existingSchedule.meal;
-    const updatedMenu = updateEatingScheduleDto.menu ?? existingSchedule.menu;
-    const updatedNutrition =
-      updateEatingScheduleDto.nutrition ?? existingSchedule.nutrition;
     const updatedLocationId =
       updateEatingScheduleDto.location_id ?? existingSchedule.location_id;
 
@@ -200,7 +201,7 @@ export class EatingScheduleService {
             `;
       await this.eatingScheduleRepository.query(deleteMediaSql, [oldMediaIds]);
     }
-    
+
       const uploadedMedia = await this.mediaService.uploadMedia(
         newFiles,
         userId,
