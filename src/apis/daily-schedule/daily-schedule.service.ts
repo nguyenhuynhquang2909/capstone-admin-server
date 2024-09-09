@@ -145,21 +145,47 @@ export class DailyScheduleService {
     if (!classEntity) {
       throw new NotFoundException('Class not found');
     }
-    const subject = await this.subjectRepository.findOne({ where: { id: schedule.subject?.id } });
-    const teacher = await this.teacherRepository.findOne({ where: { id: schedule.teacher?.id } });
-    const location = await this.locationRepository.findOne({where: {id: schedule.location?.id} });
-    Object.assign(schedule, updateDailyScheduleDto);
+    if (updateDailyScheduleDto.teacher_id !== undefined) {
+      const teacher = await this.teacherRepository.findOne({
+        where: {id: updateDailyScheduleDto.teacher_id}
+      });
+      if (!teacher) throw new NotFoundException('Teacher not found');
+      schedule.teacher = teacher;
+    }
+
+    if (updateDailyScheduleDto.subject_id !== undefined) {
+      const subject = await this.subjectRepository.findOne({
+        where: {id: updateDailyScheduleDto.subject_id}
+      });
+      if (!subject) throw new NotFoundException('Subject not found');
+      schedule.subject = subject;
+    }
+    if (updateDailyScheduleDto.location_id !== undefined) {
+      const location = await this.locationRepository.findOne({
+        where: { id: updateDailyScheduleDto.location_id },
+      });
+      if (!location) throw new NotFoundException('Location not found');
+      schedule.location = location;
+    }
+    if (updateDailyScheduleDto.start_time !== undefined) {
+      schedule.start_time = updateDailyScheduleDto.start_time;
+    }
+    if (updateDailyScheduleDto.end_time !== undefined) {
+      schedule.end_time = updateDailyScheduleDto.end_time;
+    }
   
     if (updateDailyScheduleDto.start_time || updateDailyScheduleDto.end_time) {
       await this.checkForOverlappingSchedule(schedule);
     }
+
     const updatedSchedule = await this.scheduleRepository.save(schedule);
+
     return {
       ...updatedSchedule,
-      subject_name: subject.name,
+      subject_name: schedule.subject.name,
       class_name: classEntity.name,
-      location_name: location.name,
-      teacher_name: teacher.name
+      location_name: schedule.location.name,
+      teacher_name: schedule.teacher.name,
     };
   }
   async deleteSchedule(scheduleId: number, userId: number): Promise<void> {

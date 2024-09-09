@@ -221,36 +221,36 @@ export class EatingScheduleService {
 
     // Fetch the updated schedule with associated media
     const newSql = `
-            SELECT 
-                es.id, 
-                es.class_id, 
-                es.start_time, 
-                es.end_time, 
-                es.meal, 
-                es.menu, 
-                es.nutrition, 
-                es.location_id, 
-                es.created_at, 
-                es.updated_at, 
-                mm.media_id, 
-                m.url AS media_url,
-                c.name AS class_name,
-                l.name AS location_name
-            FROM 
-                eating_schedules es
-            LEFT JOIN 
-                meal_media mm ON mm.meal_id = es.id
-            LEFT JOIN 
-                media m ON m.id = mm.media_id
-            LEFT JOIN
-                classes c ON c.id = es.class_id
-            LEFT JOIN
-                locations l ON l.id = es.location_id
-            WHERE 
-                es.id = $1
-            ORDER BY 
-                es.start_time ASC
-        `;
+      SELECT 
+        es.id, 
+        es.class_id, 
+        es.start_time, 
+        es.end_time, 
+        es.meal, 
+        es.menu, 
+        es.nutrition, 
+        es.location_id, 
+        es.created_at, 
+        es.updated_at, 
+        mm.media_id, 
+        m.url AS media_url,
+        c.name AS class_name,  -- Re-fetch class name
+        l.name AS location_name  -- Re-fetch location name
+      FROM 
+        eating_schedules es
+      LEFT JOIN 
+        meal_media mm ON mm.meal_id = es.id
+      LEFT JOIN 
+        media m ON m.id = mm.media_id
+      LEFT JOIN
+        classes c ON c.id = es.class_id
+      LEFT JOIN
+        locations l ON l.id = es.location_id
+      WHERE 
+        es.id = $1
+      ORDER BY 
+        es.start_time ASC;
+  `;
 
     const updatedSchedule = await this.eatingScheduleRepository.query(newSql, [
       eatingScheduleId,
