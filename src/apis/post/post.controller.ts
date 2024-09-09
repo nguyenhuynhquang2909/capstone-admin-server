@@ -40,7 +40,9 @@ export class PostController {
 
   // Create a post with status "draft"
   @Post('draft')
-  @UseInterceptors(FilesInterceptor('files', 10))
+  @UseInterceptors(FilesInterceptor('files', 10, {
+    limits: {fileSize: 1 * 1024  * 1024 * 1024}
+  }))
   @Role('schoolAdmin')
   async createDraft(
     @Body() createPostDto: CreatePostDto,
@@ -90,7 +92,9 @@ export class PostController {
 
   // Update post (both draft and published)
   @Put(':id')
-  @UseInterceptors(FilesInterceptor('newFiles', 10))
+  @UseInterceptors(FilesInterceptor('newFiles', 10, {
+    limits: {fileSize: 1 * 1024 * 1024 * 1024}
+  }))
   @Role('schoolAdmin')
   async updatePost(
     @Param('id') postId: number,

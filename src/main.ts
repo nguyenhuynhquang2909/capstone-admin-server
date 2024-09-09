@@ -3,10 +3,12 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  app.use(json({limit: '1gb'}));
+  app.use(urlencoded({extended: true, limit: '1gb'}));
   dotenv.config();
 
   // Set global prefix for versioning
