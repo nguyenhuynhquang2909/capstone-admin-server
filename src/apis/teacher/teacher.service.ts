@@ -143,19 +143,37 @@ export class TeacherService {
     }
 
     async deleteTeacher(teacherId: number): Promise<void> {
-        const teacher = await this.teacherRepository.findOne({
-            where: {id: teacherId},
-            relations: ['teacher_media']
-        });
-        if (!teacher) {
+        const teacher = await this.teacherRepository.query(
+            `
+            SELECT t.id, tm.media_id
+            FROM teachers t
+            LEFT JOIN teacher_media tm ON tm.teacher_id = t.id
+            WHERE t.id = $1
+            `, 
+            [teacherId]
+          );
+
+        if (!teacher || teacher.length === 0) {
             throw new NotFoundException('Teacher not found');
         }
-        if (teacher.teacher_media && teacher.teacher_media.length > 0) {
-            for (const media of teacher.teacher_media) {
-                await this.mediaService.deleteMedia(media.id);
-            }
-        }
-        await this.teacherRepository.remove(teacher);
+        const mediaIds = teacher.map(t => t.media_id).filter(id => id !== null);
+        if (mediaIds.length > 0) {
+            for (const mediaId of mediaIds) {
+                try {
+                    await this,this.mediaService.deleteMedia(mediaId);
+                } catch (error) {
+                    console.error(`Failed to delete media with ID ${mediaId}:`, error.message);
+                }
+                }
+            } 
+        
+            await this.teacherRepository.query(
+                `
+                DELETE FROM teachers
+                WHERE id = $1
+                `,
+                [teacherId]
+              );
     }
 
     async associateMediaWithTeacher(teacherId: number, mediaId: number) {
