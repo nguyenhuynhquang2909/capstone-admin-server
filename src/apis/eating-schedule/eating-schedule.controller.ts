@@ -30,7 +30,9 @@ export class EatingScheduleController {
 
   @Post('create')
   @Role('schoolAdmin')
-  @UseInterceptors(FileFieldsInterceptor([{ name: 'files', maxCount: 10 }]))
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'files', maxCount: 10 }], {
+    limits: {fileSize: 1 * 1024  * 1024 * 1024 },
+  }))
   async createEatingSchedule(
     @UploadedFiles() files: { files?: Express.Multer.File[] },
     @Body() createEatingScheduleDto: CreateEatingScheduleDto,
