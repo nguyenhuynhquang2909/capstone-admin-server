@@ -40,14 +40,14 @@ export class PostController {
 
   // Create a post with status "draft"
   @Post('draft')
-  @UseInterceptors(FilesInterceptor('files', 10, {
+  @UseInterceptors(FilesInterceptor('media', 10, {
     limits: {fileSize: 1 * 1024  * 1024 * 1024}
   }))
   @Role('schoolAdmin')
   async createDraft(
     @Body() createPostDto: CreatePostDto,
     @Headers('authorization') authHeader: string,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles() media: Express.Multer.File[],
   ) {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
@@ -60,16 +60,16 @@ export class PostController {
     if (!userId) {
       throw new UnauthorizedException('Invalid token');
     }
-    let media = [];
-    if (files && files.length > 0) {
-      media = await this.mediaService.uploadMedia(files, userId);
+    let mediaItems = [];
+    if (media && media.length > 0) {
+      mediaItems = await this.mediaService.uploadMedia(media, userId);
     }
 
     const newDraft = await this.postService.createDraft(createPostDto, userId);
-    for (const mediaItem of media) {
+    for (const mediaItem of mediaItems) {
       await this.postService.associateMediaWithPost(newDraft.id, mediaItem.id);
     }
-    return { ...newDraft, media };
+    return { ...newDraft, media: mediaItems };
   }
 
   // Fetch posts by school ID derived from user ID
