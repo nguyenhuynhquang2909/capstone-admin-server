@@ -11,6 +11,7 @@ import { LoginDto } from './dto/login.dto';
 
 // Enttities
 import { User } from '../../common/entities/user.entity';
+import { NotFound } from '@aws-sdk/client-s3';
 
 @Injectable()
 export class AuthService {
@@ -46,5 +47,24 @@ export class AuthService {
       message: 'Login successful',
       token: token,
     };
+  }
+
+  async getUserDetails(userId: number): Promise<any> {
+    const user = await this.userRepository.findOne({
+      where: {id: userId},
+      relations: ['role']
+    });
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role_id: user.role_id,
+      role_name: user.role.name,
+      is_active: user.is_active,
+      last_login: user.last_login
+    }
   }
 }
